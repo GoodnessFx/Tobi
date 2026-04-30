@@ -1,11 +1,11 @@
-"""Tests for JARVIS learning loop module."""
+"""Tests for Tobi learning loop module."""
 import json
 import time
 from pathlib import Path
 
 import pytest
 
-from jarvis.agent.learning import (
+from Tobi.agent.learning import (
     LearningLoop,
     ToolStats,
     PlanPattern,
@@ -285,7 +285,7 @@ class TestRecordPlanOutcome:
     def test_plan_patterns_capped_at_max(self):
         """Plan patterns should be capped at MAX_PLAN_PATTERNS."""
         loop = LearningLoop()
-        from jarvis.agent.learning import MAX_PLAN_PATTERNS
+        from Tobi.agent.learning import MAX_PLAN_PATTERNS
 
         for i in range(MAX_PLAN_PATTERNS + 20):
             plan = {
@@ -468,7 +468,7 @@ class TestBackfillFromPlanFiles:
 
     def test_backfill_with_plan_files(self, tmp_config):
         """Backfill should load existing plan files."""
-        from jarvis.config import settings
+        from Tobi.config import settings
         plans_dir = settings.DATA_DIR / "plans"
         plans_dir.mkdir(parents=True, exist_ok=True)
 
@@ -496,7 +496,7 @@ class TestSavePersistence:
         loop = LearningLoop()
         loop.record_tool_call("test_tool", success=True, duration_s=5.0)
         loop._save_tool_stats()
-        from jarvis.agent.learning import TOOL_STATS_FILE
+        from Tobi.agent.learning import TOOL_STATS_FILE
         assert TOOL_STATS_FILE.exists()
 
     def test_load_tool_stats(self, tmp_config):
@@ -514,5 +514,6 @@ class TestSavePersistence:
         loop = LearningLoop()
         loop.record_tool_call("test_tool", success=True)
         loop.save_all()
-        from jarvis.agent.learning import TOOL_STATS_FILE
+        from Tobi.agent.learning import TOOL_STATS_FILE
         assert TOOL_STATS_FILE.exists()
+

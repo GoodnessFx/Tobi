@@ -1,11 +1,11 @@
-"""Tests for JARVIS cost tracking module."""
+"""Tests for Tobi cost tracking module."""
 from datetime import date, datetime, timedelta
 from pathlib import Path
 import json
 
 import pytest
 
-from jarvis.core.cost_tracker import (
+from Tobi.core.cost_tracker import (
     log_request,
     get_today_summary,
     get_month_summary,
@@ -18,7 +18,7 @@ from jarvis.core.cost_tracker import (
 @pytest.fixture
 def cost_tracker_setup(tmp_path, monkeypatch):
     """Set up cost tracker with temporary directory."""
-    from jarvis.config import settings
+    from Tobi.config import settings
     cost_dir = tmp_path / "cost_logs"
     cost_dir.mkdir()
     monkeypatch.setattr(settings, "COST_LOG_DIR", str(cost_dir))
@@ -434,3 +434,4 @@ class TestCostTrackerIntegration:
         for tier in tiers:
             assert tier in summary["by_tier"]
             assert summary["by_tier"][tier] == 1
+

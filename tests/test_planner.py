@@ -1,10 +1,10 @@
-"""Tests for JARVIS task planner module."""
+"""Tests for Tobi task planner module."""
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from jarvis.agent.planner import (
+from Tobi.agent.planner import (
     TaskPlanner,
     needs_decomposition_heuristic,
     _has_sequence_markers,
@@ -432,3 +432,4 @@ class TestPlannerEdgeCases:
         text = "search for 信息 and 创建 a summary"
         result = needs_decomposition_heuristic(text)
         assert result is not None  # Should not crash
+

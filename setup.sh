@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# JARVIS Setup Script for macOS (Apple Silicon M1 Pro)
+# Tobi Setup Script for macOS (Apple Silicon M1 Pro)
 # Tailored to my machine: Homebrew, Python 3.11, Ollama
 # already installed. Only installs what is missing.
 #
@@ -76,7 +76,7 @@ ok "Ollama version: ${OLLAMA_VER}"
 if ollama --version 2>&1 | grep -q "Warning"; then
     warn "Ollama client/server version mismatch detected."
     echo "  To fix, update the Ollama app from: https://ollama.com/download"
-    echo "  (This is not blocking; JARVIS will still work.)"
+    echo "  (This is not blocking; Tobi will still work.)"
 fi
 
 # Check if a suitable model is already pulled
@@ -88,7 +88,7 @@ ollama list 2>/dev/null || echo "  (Could not list models. Make sure 'ollama ser
 if ollama list 2>/dev/null | grep -q "llama3.1:8b"; then
     ok "llama3.1:8b already available. No download needed."
 else
-    step "Pulling llama3.1:8b (~4.7GB download, the JARVIS brain)..."
+    step "Pulling llama3.1:8b (~4.7GB download, the Tobi brain)..."
     echo "  This is a one-time download. May take 5-10 minutes."
     echo "  (You already have llama3.2 which will serve as the fast/fallback model.)"
     ollama pull llama3.1:8b
@@ -140,7 +140,7 @@ echo "  [4/6] Installing Kokoro TTS (best quality voice)..."
 if pip install "kokoro>=0.9.0" --quiet 2>&1; then
     ok "Kokoro TTS"
 else
-    warn "Kokoro TTS failed to install. JARVIS will use Edge TTS or macOS say instead."
+    warn "Kokoro TTS failed to install. Tobi will use Edge TTS or macOS say instead."
     echo "  You can try installing manually later: pip install kokoro"
 fi
 
@@ -150,9 +150,9 @@ ok "Audio packages"
 
 # OpenWakeWord can also be tricky
 if pip install "openwakeword>=0.6.0" --quiet 2>&1; then
-    ok "OpenWakeWord (Hey JARVIS detection)"
+    ok "OpenWakeWord (Hey Tobi detection)"
 else
-    warn "OpenWakeWord failed. JARVIS will use keyboard activation instead."
+    warn "OpenWakeWord failed. Tobi will use keyboard activation instead."
     echo "  You can try manually: pip install openwakeword"
 fi
 
@@ -190,17 +190,18 @@ ok "Data directories created"
 # ============================================================
 echo ""
 echo "  ====================================="
-echo -e "  ${GREEN}JARVIS setup complete!${NC}"
+echo -e "  ${GREEN}Tobi setup complete!${NC}"
 echo "  ====================================="
 echo ""
-echo "  To start JARVIS:"
+echo "  To start Tobi:"
 echo ""
 echo "    1. Make sure Ollama is running (open the Ollama app"
 echo "       or run 'ollama serve' in another terminal)"
 echo ""
-echo "    2. Launch JARVIS:"
+echo "    2. Launch Tobi:"
 echo "       ./start.sh              # Text chat (recommended first)"
 echo "       ./start.sh voice        # Voice mode"
 echo "       ./start.sh server       # API server for UI"
 echo "       ./start.sh full         # Voice + API server"
 echo ""
+

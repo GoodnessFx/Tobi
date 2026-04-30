@@ -15,13 +15,13 @@ if ! command -v swiftc &> /dev/null; then
     exit 1
 fi
 
-echo -e "${BLUE}JARVIS Desktop Overlay Build${NC}"
+echo -e "${BLUE}Tobi Desktop Overlay Build${NC}"
 echo -e "${BLUE}=============================${NC}"
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${SCRIPT_DIR}/build"
-APP_NAME="JarvisOverlay"
+APP_NAME="TobiOverlay"
 APP_BUNDLE="${BUILD_DIR}/${APP_NAME}.app"
 MACOS_DIR="${APP_BUNDLE}/Contents/MacOS"
 RESOURCES_DIR="${APP_BUNDLE}/Contents"
@@ -40,7 +40,7 @@ mkdir -p "$MACOS_DIR"
 echo -e "${YELLOW}Compiling Swift code...${NC}"
 swiftc -framework Cocoa -framework WebKit -O \
     -o "${MACOS_DIR}/${APP_NAME}" \
-    "${SCRIPT_DIR}/JarvisOverlay.swift"
+    "${SCRIPT_DIR}/TobiOverlay.swift"
 
 if [ ! -f "${MACOS_DIR}/${APP_NAME}" ]; then
     echo -e "${RED}Compilation failed!${NC}"
@@ -59,13 +59,13 @@ cat > "${RESOURCES_DIR}/Info.plist" << 'EOF'
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>JarvisOverlay</string>
+    <string>TobiOverlay</string>
     <key>CFBundleIdentifier</key>
-    <string>com.jarvis.desktop-overlay</string>
+    <string>com.Tobi.desktop-overlay</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>JARVIS Overlay</string>
+    <string>Tobi Overlay</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -110,3 +110,4 @@ echo ""
 echo -e "${BLUE}To manage login items via command line:${NC}"
 echo -e "  ${YELLOW}open ~/.login-items.plist${NC}"
 echo ""
+

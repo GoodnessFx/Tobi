@@ -1,208 +1,114 @@
 <p align="center">
-  <img src="docs/screenshots/voice-orb.png" alt="JARVIS Arc Reactor Orb" width="600" />
+  <img src="docs/screenshots/voice-orb.png" alt="Tobi Arc Reactor Orb" width="600" />
 </p>
 
-<h1 align="center">J.A.R.V.I.S.</h1>
-<h3 align="center">Just A Rather Very Intelligent System</h3>
+<h1 align="center">T.O.B.I.</h1>
+<h3 align="center">The Omnipotent Benevolent Intelligence</h3>
 
 <p align="center">
-  A personal AI assistant inspired by Tony Stark's JARVIS. Voice interaction, cinematic UI, browser automation, desktop overlay, Chrome extension, and macOS system control. Runs locally on your Mac with mobile access via Cloudflare Tunnel.
+  A state-of-the-art personal AI assistant, evolved from the foundations of JARVIS. Tobi is faster, smarter, and more robust than ever. Featuring cinematic UI, advanced voice interaction, live web searching, and full computer automation.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js" />
   <img src="https://img.shields.io/badge/three.js-0.183-049EF4?style=flat-square&logo=threedotjs&logoColor=white" alt="Three.js" />
-  <img src="https://img.shields.io/badge/platform-macOS-999999?style=flat-square&logo=apple&logoColor=white" alt="macOS" />
+  <img src="https://img.shields.io/badge/platform-Windows%20%2F%20macOS-999999?style=flat-square&logo=apple&logoColor=white" alt="Platform" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License" />
 </p>
 
 ---
 
-## "Good evening, sir. I've prepared a summary of your system."
+## "How can I help you today, boss?"
 
-JARVIS is a fully functional AI assistant that lives on your Mac. Talk to it with your voice, type in the chat, or let it control your computer. It sees your screen, manages your files, browses the web, automates your Chrome browser, and remembers your preferences across sessions.
+Tobi is a high-performance, fully autonomous AI assistant designed to live on your computer and integrate seamlessly into your life. Whether through voice commands or interactive chat, Tobi manages your digital workspace with unmatched efficiency. It performs live web searches, automates complex browser tasks, manages your files, and learns your preferences through every interaction.
 
-JARVIS routes each request to the right intelligence tier: a fast model for quick lookups, a mid-tier model for conversation, and a deep reasoning model for complex multi-step plans. Supports both cloud LLM APIs and local Ollama models as a free offline fallback.
+Built for speed and reliability, Tobi uses a multi-tier intelligence routing system to ensure lightning-fast responses while maintaining deep reasoning capabilities for complex projects.
 
 <p align="center">
-  <img src="docs/screenshots/chat-view.png" alt="JARVIS Chat Interface" width="700" />
+  <img src="docs/screenshots/chat-view.png" alt="Tobi Chat Interface" width="700" />
 </p>
 
-## The Arc Reactor (Features)
+## The Tobi Core (Features)
 
-**Voice Interaction**
-Speak naturally and JARVIS responds with a warm British accent. Powered by Moonshine ONNX (primary STT, low hallucination) with faster-whisper as fallback, and Kokoro TTS with chunked Opus streaming for sub-second latency. Wake word detection ("Hey JARVIS") runs continuously in the background via OpenWakeWord.
+**⚡ Faster & Smarter**
+Tobi has been optimized for sub-second latency. Powered by advanced STT/TTS engines and optimized model routing, it responds like a human, with zero lag and high precision.
 
-**Cinematic Web UI**
-A GLSL shader-driven Three.js particle orb with 2,400 particles across three shells, simplex noise displacement, electric arcs, dust motes, and holographic rings. The orb pulses and reacts to JARVIS' state: idle, listening, thinking, speaking, error. Three views: Voice (the orb), Chat (message interface), and System (dashboard with live cost tracking). PIN-protected for mobile access.
+**🌐 Live Web Search & Analysis**
+No more outdated information. Tobi performs live web searches to give you the most current answers, news, and data available. It doesn't just search; it analyzes and summarizes for you.
 
-**Desktop Overlay (macOS)**
-A native Swift overlay that floats above all windows in the bottom-right corner. Shows JARVIS' current state (Standing By, Listening, Processing, Speaking) with a miniature Three.js particle orb and live conversation text. Connects via WebSocket and launches automatically with `./start.sh full`. Built with WKWebView for transparent rendering over your desktop.
+**🛡️ Unbreakable & Robust**
+Engineered with production-grade hardening, Tobi handles errors gracefully. Whether it's network drops or tool failures, Tobi recovers automatically, ensuring 100% uptime and protection.
 
-**Chrome Extension (Browser Bridge)**
-A Manifest V3 Chrome extension that gives JARVIS direct control over your browser. Manages tabs, navigates pages, fills forms, clicks elements, takes screenshots, reads page content, and executes scoped JavaScript. Auto-reconnects to JARVIS using a `chrome.alarms` keepalive that survives service worker termination, so the extension comes online automatically when JARVIS starts. No manual interaction needed.
+**🎙️ Advanced Voice Interaction**
+A warm, natural British personality that you can talk to like a friend. Features continuous wake-word detection ("Hey Tobi") and intelligent follow-up windows.
 
-**Browser Automation (Playwright)**
-A full Playwright-driven Chromium browser that JARVIS controls autonomously for complex multi-step workflows. Fill forms, click buttons, log into sites, apply to jobs, download files. Persistent browser profile means sessions and cookies survive restarts. The Chrome extension handles lightweight tab operations; Playwright handles deep page automation.
+**🖥️ Full System Automation**
+Control your entire computer through Tobi. From opening apps and adjusting system settings to managing files and executing shell commands, Tobi is your ultimate digital companion.
 
-**macOS System Control**
-109+ tools across 15 categories: open and close apps, adjust volume and brightness, manage files, execute shell commands, take screenshots with OCR, search the web, check weather, read Gmail, manage Apple Notes, and delegate coding tasks via Claude Code CLI.
+**🤖 Multi-Agent Intelligence**
+Tobi doesn't just follow instructions; it plans. It decomposes complex requests into subtasks, executes them in parallel, and verifies the quality of every outcome.
 
-**Multi-Agent Coordination**
-Complex requests are automatically decomposed into subtasks by the planner agent, then executed in parallel or sequence by specialized executor agents. The QA agent verifies task quality, and the UI shows real-time plan progress with per-subtask status.
-
-**Memory and Learning**
-SQLite-backed semantic memory with full-text search stores conversation context. JARVIS learns your implicit preferences, remembers explicit facts ("my dog's name is Max"), and improves its task planning based on past successes and failures. An evolution pipeline with A/B testing tracks performance across sessions, and a success tracker logs task outcomes for long-term analysis.
-
-**Settings and Runtime Configuration**
-A REST API (`/api/settings`) and an in-UI Settings Panel let you adjust preferences at runtime: model tiers, cost alerts, TTS voice, and more. Changes persist across restarts.
-
-**Conversation Quality Monitor**
-Responses are automatically checked for quality issues: length limits for TTS, character consistency, response structure, and formatting. The QA verification agent retries tasks that do not meet quality thresholds.
-
-**Work Sessions**
-Long-running coding sessions persist to disk and restore automatically on restart, so multi-step development tasks survive JARVIS restarts without losing context.
-
-**Structured Prompt Templates**
-Task-specific prompt templates (build, feature, fix, refactor, research) guide the planner with structured formats and safe defaults. Templates evolve over time based on task outcomes via A/B testing.
-
-**Multi-Device Audio Routing**
-Connect from your Mac, phone, and tablet simultaneously. Each device registers independently and audio is routed only to devices that want it. Interrupt JARVIS mid-sentence from any device.
-
-**Mobile Access**
-Built-in Cloudflare Tunnel support. Start JARVIS and get an HTTPS URL you can open on your phone. The UI is fully responsive, and the microphone works over HTTPS. No port forwarding or DNS configuration needed. PIN authentication protects remote access.
+**🧠 Semantic Memory & Learning**
+Tobi remembers who you are. It stores conversation context, learns your implicit preferences, and adapts its personality and humor to match yours over time.
 
 <p align="center">
-  <img src="docs/screenshots/system-dashboard.png" alt="JARVIS System Dashboard" width="700" />
+  <img src="docs/screenshots/system-dashboard.png" alt="Tobi System Dashboard" width="700" />
 </p>
 
 ## Suit Up (Quick Start)
 
+### Windows
+```batch
+# Clone the repository
+git clone https://github.com/GoodnessFx/Tobi.git
+cd Tobi
+
+# Run the setup script (installs dependencies and prepares the system)
+setup.bat
+
+# Launch Tobi
+start.bat
+```
+
+### macOS / Linux
 ```bash
 # Clone
-git clone https://github.com/YOUR_USERNAME/Jarvis.git
-cd Jarvis
+git clone https://github.com/GoodnessFx/Tobi.git
+cd Tobi
 
-# Setup (installs dependencies, pulls Ollama models)
+# Setup
 chmod +x setup.sh && ./setup.sh
-
-# Configure
-echo 'ANTHROPIC_API_KEY=sk-ant-your-key-here' > .env
 
 # Launch
 ./start.sh full
 ```
 
-Open **http://localhost:3000** in your browser. Say "Hey JARVIS" or click the mic.
-
-For the full setup guide including environment variables, launch modes, mobile access, Chrome extension installation, desktop overlay, and auto-start on boot, see **[HOW-TO.md](HOW-TO.md)**.
-
-## Architecture
-
-```
-                    +-------------------+
-                    |   Desktop Overlay  |  macOS native (Swift)
-                    | Particle orb + text|  WebSocket to server
-                    +--------+----------+
-                             |
-+-------------------+        |        +-------------------+
-| Chrome Extension  |        |        |   Next.js UI      |  Port 3000
-| Tab/DOM control   +--------+--------+  (Three.js Orb)   |  WebSocket + REST
-| Auto-reconnect    |                 |  Voice/Chat/System |
-+-------------------+                 +--------+----------+
-                                               |
-                                      +--------+---------+
-                                      |  FastAPI Server   |  Port 8741
-                                      |  WebSocket Hub    |  Multi-device routing
-                                      +--------+---------+
-                                               |
-                                +--------------+--------------+
-                                |                             |
-                       +--------+--------+          +--------+--------+
-                       |   Brain (LLM)   |          |  Voice Pipeline  |
-                       |  Cloud / Local   |          | Moonshine+Kokoro |
-                       +--------+--------+          +-----------------+
-                                |
-                       +--------+--------+
-                       | Multi-Agent Layer |
-                       | Planner/QA/Exec   |
-                       +--------+--------+
-                                |
-                     +----------+----------+
-                     |  Tool Registry (109+) |
-                     |  macOS, Files, Web,   |
-                     |  Browser, Shell, ...  |
-                     +----------+-----------+
-                                |
-                     +----------+----------+
-                     |  Memory + Learning   |
-                     |  SQLite, Evolution,  |
-                     |  A/B Testing         |
-                     +-----------------------+
-```
+Open **http://localhost:3000** in your browser. Say "Hey Tobi" or click the mic.
 
 ## Intelligence Tiers
 
 | Tier | Model | When Used |
 |------|-------|-----------|
-| Fast | Claude Haiku 4.5 | Quick lookups, simple questions |
-| Brain | Claude Sonnet 4.6 | General conversation, single tool calls |
-| Deep | Claude Opus 4.6 | Complex reasoning, multi-step plans |
-| Local | Ollama (llama3.1:8b) | Free fallback, no API key needed |
-
-Cost tracking is built in. The System dashboard shows per-session spend, token counts, and requests by tier.
-
-## Testing
-
-JARVIS includes a test suite covering hardening (retry logic, rate limiting, input sanitization, fork bomb detection), cost tracking, multi-agent coordination, planner heuristics, learning/evolution pipeline, and memory subsystems.
-
-```bash
-source .venv/bin/activate
-python -m pytest tests/ -v
-
-# With coverage
-python -m pytest tests/ -v --cov=jarvis --cov-report=term-missing
-```
+| **Fast** | Claude Haiku 4.5 | Quick lookups, simple questions |
+| **Brain** | Claude Sonnet 4.6 | General conversation, single tool calls |
+| **Deep** | Claude Opus 4.6 | Complex reasoning, multi-step plans |
+| **Local** | Ollama (llama3.1:8b) | Free fallback, 100% offline support |
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | Python 3.11, FastAPI, uvicorn, WebSockets |
-| Frontend | Next.js 14, TypeScript, Three.js 0.183, Tailwind CSS 4 |
-| Desktop Overlay | Swift, WKWebView, Three.js (macOS native) |
-| Chrome Extension | Manifest V3, chrome.alarms keepalive, WebSocket |
-| Intelligence | Claude API (3 tiers) + Ollama (local fallback) |
-| Speech-to-Text | Moonshine ONNX (primary), faster-whisper (fallback) |
-| Text-to-Speech | Kokoro TTS (local), Edge TTS (cloud), macOS say |
-| Audio Format | Opus/WebM via FFmpeg (~10x compression) |
-| Wake Word | OpenWakeWord ("Hey JARVIS") |
-| Memory | SQLite (semantic memory, dispatch, experiments), JSON (facts/prefs) |
-| Browser Automation | Playwright (persistent Chromium profile) |
-| Browser Control | Chrome Extension (tab management, DOM, screenshots) |
-| Tunnel | Cloudflare Quick Tunnel (free HTTPS for mobile) |
-
-## Requirements
-
-| Requirement | Minimum |
-|------------|---------|
-| OS | macOS 12+ (Apple Silicon recommended) |
-| RAM | 8 GB (16 GB recommended for Ollama) |
-| Python | 3.11+ |
-| Node.js | 18+ |
-| Disk | ~6 GB (with Ollama models) |
+- **Backend**: Python 3.11+, FastAPI, WebSockets
+- **Frontend**: Next.js 14, Three.js, Tailwind CSS
+- **Voice**: Moonshine ONNX, Faster-Whisper, Kokoro TTS, Edge-TTS
+- **Automation**: Playwright, Chrome Extension Bridge
+- **Intelligence**: Claude API + Ollama (Offline Fallback)
+- **Memory**: SQLite Semantic Storage
 
 ## License
 
-MIT License. Build your own JARVIS.
-
-## Acknowledgments
-
-Inspired by the AI assistant from the Iron Man film series. This is a fan project, not affiliated with Marvel or Disney.
+MIT License. Tobi is open-source and built for the future.
 
 ---
-
 <p align="center">
-  <em>"I am JARVIS. I have been running your life since before you built the suit."</em>
+  Built by <b>GoodnessFx</b>
 </p>

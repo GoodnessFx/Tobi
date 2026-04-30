@@ -1,8 +1,8 @@
-# JARVIS: Setup and Operations Guide
+# Tobi: Setup and Operations Guide
 
 ## Prerequisites
 
-Before running JARVIS, make sure you have the following installed on your Mac:
+Before running Tobi, make sure you have the following installed on your Mac:
 
 | Tool | Purpose | Install |
 |------|---------|---------|
@@ -25,8 +25,8 @@ Optional (recommended):
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/Jarvis.git
-cd Jarvis
+git clone https://github.com/YOUR_USERNAME/Tobi.git
+cd Tobi
 
 # 2. Run the setup script (installs Python deps, pulls Ollama models)
 chmod +x setup.sh
@@ -37,15 +37,15 @@ cp .env.example .env   # then edit with your keys
 # OR create manually:
 echo 'ANTHROPIC_API_KEY=sk-ant-your-key-here' > .env
 
-# 4. Start JARVIS
+# 4. Start Tobi
 ./start.sh full
 ```
 
-JARVIS will be available at **http://localhost:3000** in your browser.
+Tobi will be available at **http://localhost:3000** in your browser.
 
 ## Environment Variables (.env)
 
-Create a `.env` file in the project root. `ANTHROPIC_API_KEY` is required for the cloud LLM backend. Without it, JARVIS falls back to Ollama (local, free, slower).
+Create a `.env` file in the project root. `ANTHROPIC_API_KEY` is required for the cloud LLM backend. Without it, Tobi falls back to Ollama (local, free, slower).
 
 ```bash
 # Required for cloud LLM intelligence
@@ -85,7 +85,7 @@ OLLAMA_FAST_MODEL=llama3.2:latest
 
 ## Start Modes
 
-JARVIS supports four launch modes:
+Tobi supports four launch modes:
 
 ```bash
 ./start.sh text     # Terminal text chat only (no UI, no voice)
@@ -104,30 +104,30 @@ The full startup sequence brings up six components in order:
 2. **Desktop Overlay** (macOS only): Native Swift overlay app, built from source
 3. **Next.js UI**: Web interface on port 3000
 4. **Cloudflare Tunnel** (if cloudflared is installed): HTTPS URL for mobile access
-5. **JARVIS Backend**: FastAPI server on port 8741 with voice listener
+5. **Tobi Backend**: FastAPI server on port 8741 with voice listener
 6. **Chrome Extension** (if installed): Auto-connects via WebSocket within ~30 seconds
 
 The script also handles cleanup of orphaned processes from previous runs, installs missing dependencies (python-multipart, Playwright Chromium, PyYAML), and sets up a persistent browser profile.
 
 ## Chrome Extension (Browser Bridge)
 
-The Chrome extension gives JARVIS direct control over your browser tabs, navigation, page content, forms, and screenshots.
+The Chrome extension gives Tobi direct control over your browser tabs, navigation, page content, forms, and screenshots.
 
 ### Installation
 
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable **Developer mode** (toggle in the top-right corner)
 3. Click **Load unpacked**
-4. Select the `jarvis/extensions/chrome/` directory from the JARVIS project
-5. The JARVIS extension icon will appear in your toolbar
+4. Select the `Tobi/extensions/chrome/` directory from the Tobi project
+5. The Tobi extension icon will appear in your toolbar
 
 ### How It Works
 
-The extension connects to the JARVIS backend via WebSocket (`ws://localhost:8741/ws/extension`). It uses a `chrome.alarms` keepalive that fires every ~24 seconds, surviving Chrome's Manifest V3 service worker termination. This means:
+The extension connects to the Tobi backend via WebSocket (`ws://localhost:8741/ws/extension`). It uses a `chrome.alarms` keepalive that fires every ~24 seconds, surviving Chrome's Manifest V3 service worker termination. This means:
 
-- Start Chrome first, then start JARVIS: the extension auto-connects within ~30 seconds
-- Start JARVIS first, then open Chrome: the extension connects immediately on load
-- JARVIS restarts: the extension detects the new server and reconnects automatically
+- Start Chrome first, then start Tobi: the extension auto-connects within ~30 seconds
+- Start Tobi first, then open Chrome: the extension connects immediately on load
+- Tobi restarts: the extension detects the new server and reconnects automatically
 - No manual interaction needed: you never have to click the extension icon for it to come online
 
 ### Badge Status
@@ -136,28 +136,28 @@ The extension icon shows a badge indicating connection status:
 
 | Badge | Meaning |
 |-------|---------|
-| (no badge, green) | Connected to JARVIS |
+| (no badge, green) | Connected to Tobi |
 | ! (gray) | Disconnected, retrying |
 | ... (orange) | Processing a command |
 
 ### Capabilities
 
-JARVIS can ask the extension to: list open tabs, open/close/switch tabs, navigate to URLs, take screenshots of the active tab, read page content, click elements, type text, fill forms, scroll, and execute scoped JavaScript (restricted to localhost and JARVIS tunnel URLs).
+Tobi can ask the extension to: list open tabs, open/close/switch tabs, navigate to URLs, take screenshots of the active tab, read page content, click elements, type text, fill forms, scroll, and execute scoped JavaScript (restricted to localhost and Tobi tunnel URLs).
 
 ### Extension Popup
 
-Click the extension icon to see connection status, manually connect/disconnect, or send the current page to JARVIS for analysis.
+Click the extension icon to see connection status, manually connect/disconnect, or send the current page to Tobi for analysis.
 
 ## Desktop Overlay (macOS)
 
-The desktop overlay is a native Swift application that shows JARVIS' state as a floating panel above all windows.
+The desktop overlay is a native Swift application that shows Tobi' state as a floating panel above all windows.
 
 ### What It Shows
 
 - A miniature particle orb (Three.js rendered in WKWebView)
 - Current state label: STANDING BY, LISTENING, PROCESSING, SPEAKING
 - User utterance text (what you said)
-- JARVIS response text (what it is saying)
+- Tobi response text (what it is saying)
 - Color-coded status dot matching the current state
 
 ### Building Manually
@@ -167,10 +167,10 @@ The overlay is built automatically by `./start.sh full`. To build and run it man
 ```bash
 cd desktop-overlay
 bash build-overlay.sh
-open build/JarvisOverlay.app
+open build/TobiOverlay.app
 ```
 
-The overlay connects to JARVIS via `ws://localhost:8741/ws/overlay` and updates in real-time.
+The overlay connects to Tobi via `ws://localhost:8741/ws/overlay` and updates in real-time.
 
 ### Configuration
 
@@ -178,60 +178,60 @@ The overlay window is positioned in the bottom-right corner of the screen with 5
 
 ## Accessing from Your Phone
 
-JARVIS includes built-in Cloudflare Tunnel support for mobile access. When you have `cloudflared` installed, the tunnel starts automatically with `./start.sh full`.
+Tobi includes built-in Cloudflare Tunnel support for mobile access. When you have `cloudflared` installed, the tunnel starts automatically with `./start.sh full`.
 
 The console will print a URL like:
 ```
 https://random-words-here.trycloudflare.com
 ```
 
-Open that URL on your phone's browser. The JARVIS UI is fully responsive and the microphone works over HTTPS. You will be prompted for a PIN on first connect (displayed in the JARVIS console on your Mac).
+Open that URL on your phone's browser. The Tobi UI is fully responsive and the microphone works over HTTPS. You will be prompted for a PIN on first connect (displayed in the Tobi console on your Mac).
 
 For a persistent URL (instead of random words each time), set up a Named Cloudflare Tunnel:
 ```bash
 cloudflared tunnel login
-cloudflared tunnel create jarvis
-cloudflared tunnel route dns jarvis jarvis.yourdomain.com
+cloudflared tunnel create Tobi
+cloudflared tunnel route dns Tobi Tobi.yourdomain.com
 ```
 
 ## Auto-Start on Boot (macOS launchd)
 
-To have JARVIS start automatically when you log into your Mac:
+To have Tobi start automatically when you log into your Mac:
 
 ```bash
 # Copy the launchd plist to your LaunchAgents
-cp com.jarvis.assistant.plist ~/Library/LaunchAgents/
+cp com.Tobi.assistant.plist ~/Library/LaunchAgents/
 
-# Edit the plist if JARVIS is not in ~/Jarvis
+# Edit the plist if Tobi is not in ~/Tobi
 # (update the path in ProgramArguments)
 
 # Load (activate) the service
-launchctl load ~/Library/LaunchAgents/com.jarvis.assistant.plist
+launchctl load ~/Library/LaunchAgents/com.Tobi.assistant.plist
 
 # Verify it is running
-launchctl list | grep jarvis
+launchctl list | grep Tobi
 
 # To stop the auto-start service
-launchctl unload ~/Library/LaunchAgents/com.jarvis.assistant.plist
+launchctl unload ~/Library/LaunchAgents/com.Tobi.assistant.plist
 ```
 
-Logs are written to `/tmp/jarvis-stdout.log` and `/tmp/jarvis-stderr.log`.
+Logs are written to `/tmp/Tobi-stdout.log` and `/tmp/Tobi-stderr.log`.
 
 ## Project Structure
 
 ```
-Jarvis/
+Tobi/
   .env                        # Your API keys (git-ignored)
   setup.sh                    # One-time setup script
   start.sh                    # Launch script (text/voice/server/full)
   requirements.txt            # Python dependencies
-  com.jarvis.assistant.plist  # macOS auto-start config
+  com.Tobi.assistant.plist  # macOS auto-start config
   tests/                      # Unit tests (pytest)
   templates/prompts/          # Structured prompt templates (build, feature, fix, etc.)
   desktop-overlay/
-    JarvisOverlay.swift       # macOS native overlay (Swift + WKWebView)
+    TobiOverlay.swift       # macOS native overlay (Swift + WKWebView)
     build-overlay.sh          # Compile and bundle into .app
-  jarvis/
+  Tobi/
     main.py                   # Entry point and mode router
     config/
       settings.py             # All configuration in one place
@@ -293,7 +293,7 @@ Jarvis/
         popup.html            # Extension popup UI
         popup.js              # Popup controller
     ui/
-      jarvis-ui/              # Next.js 14 web interface
+      Tobi-ui/              # Next.js 14 web interface
         src/
           components/
             cinematic/        # WebGL particle orb (Three.js GLSL shaders)
@@ -303,12 +303,12 @@ Jarvis/
             settings/         # Settings panel (runtime config)
             shared/           # Reusable UI components (status bar, plan progress, etc.)
           hooks/
-            useJarvisWebSocket.ts  # WebSocket client with audio routing
+            useTobiWebSocket.ts  # WebSocket client with audio routing
 ```
 
 ## Tool Categories
 
-JARVIS has 109+ tools organized into these categories:
+Tobi has 109+ tools organized into these categories:
 
 | Category | Examples |
 |----------|---------|
@@ -327,7 +327,7 @@ JARVIS has 109+ tools organized into these categories:
 
 ## Intelligence Tiers
 
-JARVIS uses a tiered model system that routes requests to the appropriate level of intelligence:
+Tobi uses a tiered model system that routes requests to the appropriate level of intelligence:
 
 | Tier | Model | Use Case | Cost |
 |------|-------|----------|------|
@@ -340,7 +340,7 @@ The multi-agent planner automatically escalates complex requests to higher tiers
 
 ## Voice System
 
-JARVIS supports three TTS engines (in order of quality):
+Tobi supports three TTS engines (in order of quality):
 
 1. **Kokoro** (default): High-quality neural TTS, runs locally, British-accented voices (bf_emma)
 2. **Edge TTS**: Microsoft's cloud TTS, good quality, free, requires internet
@@ -351,13 +351,13 @@ Speech-to-text uses a two-tier approach:
 1. **Moonshine ONNX** (primary): Low hallucination rate, real-time optimized, runs locally. Tokenizer decodes raw model output into text.
 2. **faster-whisper** (fallback): Activates automatically if Moonshine fails or is unavailable. Supports hotwords and language hints.
 
-Wake word detection uses OpenWakeWord with a "hey_jarvis" model. The wake word listener runs continuously in the background with a configurable threshold (default 0.7) and an 8-second followup window after activation.
+Wake word detection uses OpenWakeWord with a "hey_Tobi" model. The wake word listener runs continuously in the background with a configurable threshold (default 0.7) and an 8-second followup window after activation.
 
 Audio is streamed to the browser in chunked Opus format (~10x smaller than WAV) for low-latency playback.
 
 ## Multi-Agent System
 
-JARVIS includes a full multi-agent pipeline for complex task execution:
+Tobi includes a full multi-agent pipeline for complex task execution:
 
 | Component | Purpose |
 |-----------|---------|
@@ -378,7 +378,7 @@ The FastAPI server exposes three WebSocket endpoints:
 | Endpoint | Purpose | Client |
 |----------|---------|--------|
 | `/ws` | Main client connection (voice, chat, audio) | Next.js UI, mobile browser |
-| `/ws/overlay` | Desktop overlay state and text updates | JarvisOverlay.app (Swift) |
+| `/ws/overlay` | Desktop overlay state and text updates | TobiOverlay.app (Swift) |
 | `/ws/extension` | Chrome extension command/response channel | Chrome extension (background.js) |
 
 ## API Endpoints
@@ -398,7 +398,7 @@ Key REST API endpoints:
 
 ## Testing
 
-JARVIS ships with unit tests. Run them with:
+Tobi ships with unit tests. Run them with:
 
 ```bash
 source .venv/bin/activate
@@ -410,17 +410,17 @@ Test modules cover: hardening (retry, rate limiting, input sanitization, fork bo
 To run with coverage:
 
 ```bash
-python -m pytest tests/ -v --cov=jarvis --cov-report=term-missing
+python -m pytest tests/ -v --cov=Tobi --cov-report=term-missing
 ```
 
 ## PIN Authentication
 
-JARVIS uses PIN-based authentication for browser and mobile access. The PIN is displayed in the terminal on first launch and persists across restarts.
+Tobi uses PIN-based authentication for browser and mobile access. The PIN is displayed in the terminal on first launch and persists across restarts.
 
 To regenerate the PIN:
 
 ```bash
-JARVIS_REGEN_PIN=true ./start.sh full
+Tobi_REGEN_PIN=true ./start.sh full
 ```
 
 The new PIN will be printed to the console before the server starts. Local connections (from the same machine) bypass PIN authentication automatically.
@@ -437,7 +437,7 @@ curl http://localhost:8741/api/settings
 
 ## Data Storage
 
-JARVIS stores persistent data in the `data/` directory:
+Tobi stores persistent data in the `data/` directory:
 
 | Path | Purpose |
 |------|---------|
@@ -451,13 +451,13 @@ JARVIS stores persistent data in the `data/` directory:
 | `data/plans/` | Saved multi-step plan states |
 | `data/profile/` | User profile and preference data |
 | `data/sessions/` | Persistent work session state |
-| `data/jarvis_dispatch.db` | Tool dispatch tracking (SQLite) |
-| `data/jarvis_experiments.db` | A/B testing experiment data (SQLite) |
-| `data/jarvis_memory.db` | Semantic memory with FTS (SQLite) |
+| `data/Tobi_dispatch.db` | Tool dispatch tracking (SQLite) |
+| `data/Tobi_experiments.db` | A/B testing experiment data (SQLite) |
+| `data/Tobi_memory.db` | Semantic memory with FTS (SQLite) |
 
 ## Troubleshooting
 
-**JARVIS won't start:**
+**Tobi won't start:**
 Check that Ollama is running (`ollama serve`) and your `.env` has a valid `ANTHROPIC_API_KEY`.
 
 **No voice output in browser:**
@@ -467,16 +467,17 @@ Make sure FFmpeg is installed (`brew install ffmpeg`). Check browser console for
 Verify PortAudio is installed (`brew install portaudio`). Grant microphone permission to Terminal in System Settings > Privacy > Microphone.
 
 **Mobile access not working:**
-Install cloudflared (`brew install cloudflared`). The tunnel URL is printed in the console when JARVIS starts.
+Install cloudflared (`brew install cloudflared`). The tunnel URL is printed in the console when Tobi starts.
 
 **Chrome extension not connecting:**
 Verify the extension is loaded in `chrome://extensions/` with Developer mode enabled. The extension auto-reconnects every ~24 seconds via the keepalive alarm. Check the extension's service worker console (click "Inspect views: service worker" on the extensions page) for connection logs.
 
 **Desktop overlay not showing:**
-The overlay only builds on macOS. Check that `desktop-overlay/build-overlay.sh` ran successfully during startup. You can rebuild manually with `cd desktop-overlay && bash build-overlay.sh && open build/JarvisOverlay.app`.
+The overlay only builds on macOS. Check that `desktop-overlay/build-overlay.sh` ran successfully during startup. You can rebuild manually with `cd desktop-overlay && bash build-overlay.sh && open build/TobiOverlay.app`.
 
 **High API costs:**
 Adjust `COST_DAILY_ALERT` in `.env`. Set `PREFER_CLAUDE=false` to default to local Ollama. The System tab in the UI shows real-time cost tracking.
 
 **Port conflicts:**
-JARVIS uses ports 3000 (UI) and 8741 (API). If something else is using those ports, JARVIS will attempt to kill orphaned processes on startup. You can override with `API_PORT` and `UI_PORT` in `.env`.
+Tobi uses ports 3000 (UI) and 8741 (API). If something else is using those ports, Tobi will attempt to kill orphaned processes on startup. You can override with `API_PORT` and `UI_PORT` in `.env`.
+

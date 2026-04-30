@@ -1,11 +1,11 @@
-# Deep Comparison: ethanplusai/jarvis vs Our Jarvis
+# Deep Comparison: ethanplusai/Tobi vs Our Tobi
 
 **Date:** 2026-04-02
-**Purpose:** Identify what ethanplusai's Jarvis does better than ours, with actionable takeaways.
+**Purpose:** Identify what ethanplusai's Tobi does better than ours, with actionable takeaways.
 
 ## TL;DR
 
-Our Jarvis is architecturally stronger: modular codebase, 86+ tools, multi-tier LLM routing, production-grade hardening, local-first voice, and enterprise UI. However, **ethanplusai has built several quality-of-life and continuous-improvement systems that we lack entirely**. These are the gaps worth closing.
+Our Tobi is architecturally stronger: modular codebase, 86+ tools, multi-tier LLM routing, production-grade hardening, local-first voice, and enterprise UI. However, **ethanplusai has built several quality-of-life and continuous-improvement systems that we lack entirely**. These are the gaps worth closing.
 
 ---
 
@@ -44,7 +44,7 @@ ethanplusai's `qa.py`:
 - `auto_retry()` with up to 3 attempts, passing exact issues to the retry prompt
 - `QAResult` dataclass with pass/fail and detailed issue tracking
 
-**Our Jarvis:** We have `qa_agent.py` (335 lines), but it's more tightly coupled to the executor and doesn't have the same structured retry-with-feedback loop. Their approach of spawning a separate verification process creates genuine independence between "doer" and "checker."
+**Our Tobi:** We have `qa_agent.py` (335 lines), but it's more tightly coupled to the executor and doesn't have the same structured retry-with-feedback loop. Their approach of spawning a separate verification process creates genuine independence between "doer" and "checker."
 
 **Priority:** MEDIUM. We have the foundation; the improvement is making the QA agent truly independent and adding structured retry-with-issues.
 
@@ -82,7 +82,7 @@ ethanplusai's `ab_testing.py`:
 - Winner detection: minimum 20 tasks per version, 10 percentage point difference threshold
 - Automatic promotion of winning templates
 
-**Our Jarvis:** We have `ab_testing.py` (321 lines) with the same core mechanics, but it's not visibly wired into the template evolution or prompt improvement pipeline.
+**Our Tobi:** We have `ab_testing.py` (321 lines) with the same core mechanics, but it's not visibly wired into the template evolution or prompt improvement pipeline.
 
 **Priority:** LOW (we have the mechanism; just need to wire it to template evolution).
 
@@ -124,7 +124,7 @@ ethanplusai's `work_mode.py`:
 - Session state restored from disk (survives restarts)
 - Casual vs. work mode detection (routes simple questions to Haiku, complex ones to persistent session)
 
-**Our Jarvis:** We have `tools/claude_code.py` for delegating to Claude Code CLI, but it's a one-shot tool, not a persistent session manager. Context resets between invocations.
+**Our Tobi:** We have `tools/claude_code.py` for delegating to Claude Code CLI, but it's a one-shot tool, not a persistent session manager. Context resets between invocations.
 
 **Priority:** MEDIUM. For coding workflows, persistent sessions are significantly more productive.
 
@@ -135,13 +135,13 @@ ethanplusai's `work_mode.py`:
 **They have it. We have something similar but less focused.**
 
 ethanplusai's `monitor.py`:
-- Analyzes every JARVIS response in real-time
+- Analyzes every Tobi response in real-time
 - Detects anti-patterns: corporate speak, breaking character, responses too long for voice
 - Flags when personality markers ("sir") aren't used enough
 - Detects user frustration patterns
 - Reports issues every 30 seconds
 
-**Our Jarvis:** We have `core/monitor.py` with voice output constraints (80-word limit, no em-dashes), but it's more of a formatting enforcer than a quality monitor.
+**Our Tobi:** We have `core/monitor.py` with voice output constraints (80-word limit, no em-dashes), but it's more of a formatting enforcer than a quality monitor.
 
 **Priority:** LOW-MEDIUM. Nice to have for maintaining personality consistency.
 
@@ -157,7 +157,7 @@ ethanplusai's `suggestions.py`:
 - References QA results to suggest quality improvements
 - Voice-friendly suggestion text
 
-**Our Jarvis:** Our `core/proactive.py` handles calendar alerts and email notifications, but doesn't suggest follow-up actions after task completion.
+**Our Tobi:** Our `core/proactive.py` handles calendar alerts and email notifications, but doesn't suggest follow-up actions after task completion.
 
 **Priority:** MEDIUM. This is a natural extension of our task decomposition system.
 
@@ -168,13 +168,13 @@ ethanplusai's `suggestions.py`:
 **They have it. We don't.**
 
 ethanplusai's `dispatch_registry.py`:
-- SQLite-backed registry of all projects/builds JARVIS has touched
+- SQLite-backed registry of all projects/builds Tobi has touched
 - Status tracking (pending -> building -> completed)
 - Timestamps and summaries per dispatch
 - `format_for_prompt()` generates LLM context from active/recent work
 - Fuzzy project name matching
 
-**Our gap:** No persistent record of which projects JARVIS has worked on. Each session starts fresh regarding project awareness.
+**Our gap:** No persistent record of which projects Tobi has worked on. Each session starts fresh regarding project awareness.
 
 **Priority:** MEDIUM. This would improve context continuity across sessions.
 
@@ -198,7 +198,7 @@ ethanplusai's `templates.py`:
 
 ## Where We Win (for context)
 
-These are areas where our Jarvis is clearly superior:
+These are areas where our Tobi is clearly superior:
 
 | Dimension | Our Advantage |
 |-----------|--------------|
@@ -247,4 +247,5 @@ These are areas where our Jarvis is clearly superior:
 
 ## Conclusion
 
-Our Jarvis is the better-engineered system at the infrastructure level. ethanplusai's Jarvis has invested more in the "getting smarter over time" layer: testing, template evolution, QA feedback loops, and user-facing polish. The biggest gap we should close is automated testing, followed by the self-improvement mechanisms (template evolution + A/B testing pipeline). These would compound our existing architectural advantages.
+Our Tobi is the better-engineered system at the infrastructure level. ethanplusai's Tobi has invested more in the "getting smarter over time" layer: testing, template evolution, QA feedback loops, and user-facing polish. The biggest gap we should close is automated testing, followed by the self-improvement mechanisms (template evolution + A/B testing pipeline). These would compound our existing architectural advantages.
+

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Quick screenshot capture helper for JARVIS README images.
-# Requires: Chrome + a running JARVIS instance.
-# Usage: ./capture.sh [JARVIS_URL]
+# Quick screenshot capture helper for Tobi README images.
+# Requires: Chrome + a running Tobi instance.
+# Usage: ./capture.sh [Tobi_URL]
 set -euo pipefail
 
 URL="${1:-http://localhost:8080}"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Capturing JARVIS screenshots from ${URL} ..."
+echo "Capturing Tobi screenshots from ${URL} ..."
 echo "Saving to: ${DIR}"
 
 # Voice / Orb view (default landing page)
@@ -35,3 +35,4 @@ echo ""
 echo "Note: Headless Chrome may not render WebGL correctly."
 echo "For best results, take manual screenshots from the live UI"
 echo "and save them as voice-orb.png, chat-view.png, system-dashboard.png"
+

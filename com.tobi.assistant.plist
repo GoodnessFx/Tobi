@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Tobi Auto-Start Service -->
+    <!-- Install: cp com.Tobi.assistant.plist ~/Library/LaunchAgents/ -->
+    <!-- Load:    launchctl load ~/Library/LaunchAgents/com.Tobi.assistant.plist -->
+    <!-- Unload:  launchctl unload ~/Library/LaunchAgents/com.Tobi.assistant.plist -->
+    <!-- Status:  launchctl list | grep Tobi -->
+
+    <key>Label</key>
+    <string>com.Tobi.assistant</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <!-- UPDATE THIS PATH to match your Tobi install location -->
+        <string>cd ~/Tobi && ./start.sh full</string>
+    </array>
+
+    <!-- Start automatically when the user logs in -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart if Tobi crashes (wait 10s before restart) -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <!-- Log stdout and stderr for debugging -->
+    <key>StandardOutPath</key>
+    <string>/tmp/Tobi-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/Tobi-stderr.log</string>
+
+    <!-- Environment variables (API key loaded from .env by start.sh) -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>/Users/becs</string>
+    </dict>
+
+    <!-- Limit resource usage -->
+    <key>ProcessType</key>
+    <string>Standard</string>
+</dict>
+</plist>
+

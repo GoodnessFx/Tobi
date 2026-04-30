@@ -1,8 +1,8 @@
-# JARVIS Chrome Extension: Architecture & Design
+# Tobi Chrome Extension: Architecture & Design
 
 ## Problem Statement
 
-JARVIS currently uses **Playwright with Claude Computer Use** for browser automation.
+Tobi currently uses **Playwright with Claude Computer Use** for browser automation.
 This approach has several limitations:
 
 1. **Separate browser instance**: Playwright runs its own Chromium, not the user's
@@ -16,10 +16,10 @@ This approach has several limitations:
 5. **No real session state**: Even with cookie sync, some sites detect Playwright's
    automation fingerprint and block or degrade the experience.
 
-## Solution: JARVIS Chrome Extension
+## Solution: Tobi Chrome Extension
 
 Build a Chrome extension that runs inside the user's actual Chrome browser and
-communicates with JARVIS's backend server via WebSocket/HTTP. This gives JARVIS
+communicates with Tobi's backend server via WebSocket/HTTP. This gives Tobi
 direct access to the DOM, native authentication, and the ability to interact with
 pages programmatically without vision-based guessing.
 
@@ -27,7 +27,7 @@ pages programmatically without vision-based guessing.
 
 ```
 +------------------+          WebSocket           +------------------+
-|  Chrome Extension | <========================> |  JARVIS Server    |
+|  Chrome Extension | <========================> |  Tobi Server    |
 |  (content script  |     ws://localhost:8741     |  (FastAPI)        |
 |   + background    |     /ws/extension           |                   |
 |   service worker) |                             |  brain.py         |
@@ -46,9 +46,9 @@ pages programmatically without vision-based guessing.
 The persistent (Manifest V3) service worker that:
 
 - Maintains a WebSocket connection to `ws://localhost:8741/ws/extension`
-- Routes commands from JARVIS to the correct tab's content script
+- Routes commands from Tobi to the correct tab's content script
 - Handles tab management (create, close, switch, list)
-- Sends tab/navigation events back to JARVIS
+- Sends tab/navigation events back to Tobi
 - Manages extension lifecycle and reconnection logic
 
 Key capabilities:
@@ -72,14 +72,14 @@ Injected into every page (or on-demand). Provides:
 ### 3. Popup UI (`popup.html`)
 
 Minimal UI showing:
-- Connection status to JARVIS server
+- Connection status to Tobi server
 - Current active task (if any)
-- Quick actions (e.g., "Send this page to JARVIS")
+- Quick actions (e.g., "Send this page to Tobi")
 - Extension settings (server URL, auto-connect, etc.)
 
 ## Communication Protocol
 
-### WebSocket Messages (JARVIS -> Extension)
+### WebSocket Messages (Tobi -> Extension)
 
 ```json
 {
@@ -117,7 +117,7 @@ Supported actions:
 | `fill_form` | Auto-fill a form | `fields: {selector: value}` |
 | `download` | Download a file | `url`, `filename?` |
 
-### WebSocket Messages (Extension -> JARVIS)
+### WebSocket Messages (Extension -> Tobi)
 
 ```json
 {
@@ -136,7 +136,7 @@ Supported actions:
 }
 ```
 
-Events pushed to JARVIS:
+Events pushed to Tobi:
 
 | Event | Description |
 |-------|-------------|
@@ -148,7 +148,7 @@ Events pushed to JARVIS:
 | `form_detected` | Page has fillable forms |
 | `error` | Something went wrong |
 
-## Integration with JARVIS
+## Integration with Tobi
 
 ### New Tool: `chrome_extension`
 
@@ -195,7 +195,7 @@ This reduces Computer Use API calls from ~10-30 per task to 0-2 per task.
 1. Create Manifest V3 extension scaffold
 2. Implement background service worker with WebSocket client
 3. Implement core content script (click, type, read, navigate)
-4. Add `/ws/extension` endpoint to JARVIS server
+4. Add `/ws/extension` endpoint to Tobi server
 5. Register basic chrome extension tools in tools_schema.py
 6. Test with simple tasks (navigate, click link, read page text)
 
@@ -219,7 +219,7 @@ This reduces Computer Use API calls from ~10-30 per task to 0-2 per task.
 ## File Structure
 
 ```
-jarvis/
+Tobi/
   extensions/
     chrome/
       manifest.json           # Manifest V3 config
@@ -240,8 +240,8 @@ jarvis/
 
 ## Security Considerations
 
-- The extension only connects to `localhost:8741` (JARVIS server). No external connections.
-- The WebSocket connection is authenticated using the same PIN system JARVIS already uses.
+- The extension only connects to `localhost:8741` (Tobi server). No external connections.
+- The WebSocket connection is authenticated using the same PIN system Tobi already uses.
 - Content scripts run in an isolated world; they cannot access the page's JavaScript variables
   unless explicitly using `chrome.scripting.executeScript` with `world: "MAIN"`.
 - The `execute_js` action should be used sparingly and logged for auditability.
@@ -270,19 +270,19 @@ jarvis/
 Claude Cowork uses a Chrome extension called "Claude in Chrome" that provides similar
 functionality. Key differences in our approach:
 
-| Aspect | Claude in Chrome | JARVIS Extension |
+| Aspect | Claude in Chrome | Tobi Extension |
 |--------|-----------------|------------------|
 | Connection | Cloud-based (Anthropic servers) | Local only (localhost:8741) |
 | Auth | Anthropic account | Local PIN |
 | DOM access | Yes, via content scripts | Yes, via content scripts |
 | Screenshot | `captureVisibleTab` | `captureVisibleTab` + fallback to Playwright |
-| Tool model | MCP tools (navigate, read_page, etc.) | JARVIS tool registry |
-| Voice control | No | Yes (via JARVIS voice pipeline) |
+| Tool model | MCP tools (navigate, read_page, etc.) | Tobi tool registry |
+| Voice control | No | Yes (via Tobi voice pipeline) |
 | Offline mode | No | Yes (Ollama fallback for decisions) |
 | Multi-tab | Yes | Yes (planned Phase 2) |
 
-The JARVIS extension is essentially the same pattern but self-hosted and integrated
-with JARVIS's voice, memory, and agentic systems.
+The Tobi extension is essentially the same pattern but self-hosted and integrated
+with Tobi's voice, memory, and agentic systems.
 
 ## Next Steps
 
@@ -291,3 +291,4 @@ with JARVIS's voice, memory, and agentic systems.
 3. Implement `chrome_extension.py` tool module
 4. Register new tools in `tools_schema.py`
 5. Test end-to-end with voice command -> brain -> extension -> DOM action -> result
+

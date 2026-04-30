@@ -1,4 +1,4 @@
-# JARVIS Development & Testing Dependencies
+# Tobi Development & Testing Dependencies
 # Install with: pip install -r requirements-dev.txt
 
 -r requirements.txt
@@ -17,3 +17,4 @@ mypy>=1.13.0
 
 # Security Scanning
 bandit>=1.8.0
+

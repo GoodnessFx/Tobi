@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# JARVIS GitHub Setup Script
+# Tobi GitHub Setup Script
 # Run this ON YOUR MAC
 #
 # Prerequisites:
@@ -14,7 +14,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
-REPO_NAME="Jarvis"
+REPO_NAME="Tobi"
 GITHUB_USER=$(gh api user --jq '.login' 2>/dev/null || echo "")
 
 if [[ -z "${GITHUB_USER}" ]]; then
@@ -24,7 +24,7 @@ if [[ -z "${GITHUB_USER}" ]]; then
 fi
 
 echo "============================================"
-echo " JARVIS GitHub Setup"
+echo " Tobi GitHub Setup"
 echo " User: ${GITHUB_USER}"
 echo " Repo: ${GITHUB_USER}/${REPO_NAME}"
 echo "============================================"
@@ -46,7 +46,7 @@ git status --short | head -20
 echo "... ($(git status --short | wc -l | tr -d ' ') files total)"
 echo ""
 
-git commit -m "Initial commit: JARVIS personal AI assistant v0.3.0
+git commit -m "Initial commit: Tobi personal AI assistant v0.3.0
 
 Complete Phases 1-6: voice interaction, cinematic web UI, browser automation,
 macOS system control, multi-agent coordination, and production hardening.
@@ -63,7 +63,7 @@ if gh repo view "${GITHUB_USER}/${REPO_NAME}" &>/dev/null; then
 else
     gh repo create "${REPO_NAME}" \
         --public \
-        --description "JARVIS: Just A Rather Very Intelligent System. A personal AI assistant with voice interaction, cinematic UI, browser automation, and macOS system control." \
+        --description "Tobi: Just A Rather Very Intelligent System. A personal AI assistant with voice interaction, cinematic UI, browser automation, and macOS system control." \
         --source . \
         --remote origin
 fi
@@ -81,10 +81,11 @@ echo "============================================"
 echo ""
 echo "Next steps (optional):"
 echo "  1. Install launchd auto-start:"
-echo "     cp com.jarvis.assistant.plist ~/Library/LaunchAgents/"
-echo "     launchctl load ~/Library/LaunchAgents/com.jarvis.assistant.plist"
+echo "     cp com.Tobi.assistant.plist ~/Library/LaunchAgents/"
+echo "     launchctl load ~/Library/LaunchAgents/com.Tobi.assistant.plist"
 echo ""
 echo "  2. Set up Named Cloudflare Tunnel for persistent URL:"
 echo "     cloudflared tunnel login"
-echo "     cloudflared tunnel create jarvis"
-echo "     cloudflared tunnel route dns jarvis jarvis.yourdomain.com"
+echo "     cloudflared tunnel create Tobi"
+echo "     cloudflared tunnel route dns Tobi Tobi.yourdomain.com"
+

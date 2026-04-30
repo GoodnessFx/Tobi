@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# JARVIS Launch Script
+# Tobi Launch Script
 # Usage: ./start.sh [text|voice|server|full]
 # Default: full (voice + API server + UI)
 #
@@ -14,7 +14,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="${SCRIPT_DIR}/.venv"
-UI_DIR="${SCRIPT_DIR}/jarvis/ui/jarvis-ui"
+UI_DIR="${SCRIPT_DIR}/Tobi/ui/Tobi-ui"
 MODE="${1:-full}"
 
 # Track child PIDs for cleanup
@@ -27,7 +27,7 @@ OVERLAY_PID=""
 
 cleanup() {
     echo ""
-    echo "Shutting down JARVIS..."
+    echo "Shutting down Tobi..."
     if [[ -n "${UI_PID}" ]] && kill -0 "${UI_PID}" 2>/dev/null; then
         echo "Stopping UI server..."
         kill -- -"${UI_PID}" 2>/dev/null || kill "${UI_PID}" 2>/dev/null || true
@@ -52,12 +52,12 @@ cleanup() {
         kill "${OVERLAY_PID}" 2>/dev/null || true
     fi
     # Also kill any orphaned overlay processes by name
-    pkill -f "JarvisOverlay" 2>/dev/null || true
+    pkill -f "TobiOverlay" 2>/dev/null || true
     if [[ -n "${OLLAMA_PID}" ]] && kill -0 "${OLLAMA_PID}" 2>/dev/null; then
         echo "Stopping Ollama..."
         kill "${OLLAMA_PID}" 2>/dev/null || true
     fi
-    echo "JARVIS shut down."
+    echo "Tobi shut down."
     exit 0
 }
 
@@ -98,13 +98,13 @@ fi
 
 # Browser automation uses Playwright with a persistent profile stored in
 # data/browser-profile/. Sessions, cookies, and logins persist between restarts.
-# The first time JARVIS browses a site, you may need to sign in. After that,
+# The first time Tobi browses a site, you may need to sign in. After that,
 # the session is saved and reused automatically (just like a normal browser).
 # This is more reliable than Chrome CDP, which has strict restrictions on macOS.
 BROWSER_PROFILE="${SCRIPT_DIR}/data/browser-profile"
 mkdir -p "${BROWSER_PROFILE}"
 echo "Browser automation: persistent profile at data/browser-profile/"
-echo "  (Sessions and logins persist between JARVIS restarts)"
+echo "  (Sessions and logins persist between Tobi restarts)"
 
 # Detect cloudflared for remote/mobile access via Cloudflare Tunnel.
 # This gives you an HTTPS URL accessible from your phone (mic works over HTTPS).
@@ -115,12 +115,12 @@ if command -v cloudflared &>/dev/null; then
     CLOUDFLARED_AVAILABLE="true"
     echo ""
     echo "Cloudflare Tunnel: cloudflared found ($(cloudflared --version 2>&1 | head -1))"
-    echo "  A tunnel will start after JARVIS is ready. Check the logs for your phone URL."
+    echo "  A tunnel will start after Tobi is ready. Check the logs for your phone URL."
 else
     echo ""
     echo "Note: Install cloudflared for mobile/phone access:"
     echo "  brew install cloudflared"
-    echo "  (Gives you a free HTTPS URL to access JARVIS from your phone)"
+    echo "  (Gives you a free HTTPS URL to access Tobi from your phone)"
 fi
 
 # Check if Ollama is running
@@ -143,15 +143,15 @@ mkdir -p "${SCRIPT_DIR}/templates/prompts"
 
 # Build and launch desktop overlay (macOS only, optional)
 OVERLAY_DIR="${SCRIPT_DIR}/desktop-overlay"
-OVERLAY_APP="${OVERLAY_DIR}/build/JarvisOverlay.app"
-OVERLAY_BIN="${OVERLAY_APP}/Contents/MacOS/JarvisOverlay"
-if [[ "${MODE}" == "full" ]] && [[ -f "${OVERLAY_DIR}/JarvisOverlay.swift" ]]; then
+OVERLAY_APP="${OVERLAY_DIR}/build/TobiOverlay.app"
+OVERLAY_BIN="${OVERLAY_APP}/Contents/MacOS/TobiOverlay"
+if [[ "${MODE}" == "full" ]] && [[ -f "${OVERLAY_DIR}/TobiOverlay.swift" ]]; then
     if command -v swiftc &>/dev/null; then
         # Build if executable is missing (not just .app directory)
         if [[ ! -x "${OVERLAY_BIN}" ]]; then
             # Clean stale/broken builds
             rm -rf "${OVERLAY_DIR}/build" 2>/dev/null || true
-            echo "Building JARVIS Desktop Overlay..."
+            echo "Building Tobi Desktop Overlay..."
             # Run in subshell so build failure does not kill start.sh
             set +e
             (cd "${OVERLAY_DIR}" && bash build-overlay.sh) 2>&1 | tail -5
@@ -160,13 +160,13 @@ if [[ "${MODE}" == "full" ]] && [[ -f "${OVERLAY_DIR}/JarvisOverlay.swift" ]]; t
             if [[ "${BUILD_EXIT}" -eq 0 ]]; then
                 echo "Overlay build succeeded."
             else
-                echo "Warning: Overlay build failed (exit ${BUILD_EXIT}). JARVIS will continue without the desktop overlay."
+                echo "Warning: Overlay build failed (exit ${BUILD_EXIT}). Tobi will continue without the desktop overlay."
                 echo "         You can retry manually: cd desktop-overlay && bash build-overlay.sh"
             fi
         fi
         if [[ -x "${OVERLAY_BIN}" ]]; then
             # Kill any orphaned overlay instances from previous runs
-            pkill -f "JarvisOverlay" 2>/dev/null || true
+            pkill -f "TobiOverlay" 2>/dev/null || true
             sleep 0.5
             echo "Launching Desktop Overlay..."
             # Launch the binary directly (not via 'open') so we get the real PID
@@ -201,7 +201,7 @@ if [[ "${MODE}" == "full" || "${MODE}" == "server" ]]; then
         # Give the OS a moment to release the port
         sleep 1
 
-        echo "Starting JARVIS UI on http://0.0.0.0:3000 ..."
+        echo "Starting Tobi UI on http://0.0.0.0:3000 ..."
         (cd "${UI_DIR}" && npm run dev -- --hostname 0.0.0.0 --port 3000) &
         UI_PID=$!
         # Give the dev server a moment to start
@@ -232,11 +232,11 @@ if [[ -n "${CLOUDFLARED_AVAILABLE}" ]] && [[ "${MODE}" == "full" || "${MODE}" ==
             # display it here in the tunnel URL banner for convenience.
             echo ""
             echo "=================================================="
-            echo "  JARVIS Mobile Access (open on your phone):"
+            echo "  Tobi Mobile Access (open on your phone):"
             echo "  ${TUNNEL_URL}"
             echo ""
             echo "  You will be prompted for a PIN on first connect."
-            echo "  The PIN is shown above when JARVIS starts."
+            echo "  The PIN is shown above when Tobi starts."
             echo "=================================================="
             echo ""
             break
@@ -245,9 +245,10 @@ if [[ -n "${CLOUDFLARED_AVAILABLE}" ]] && [[ "${MODE}" == "full" || "${MODE}" ==
     done
     if [[ -z "${TUNNEL_URL:-}" ]]; then
         echo "Warning: Could not get tunnel URL. Check ${TUNNEL_LOG} for details."
-        echo "  JARVIS still works locally at http://localhost:3000"
+        echo "  Tobi still works locally at http://localhost:3000"
     fi
 fi
 
-# Launch JARVIS backend
-python -m jarvis.main "${MODE}"
+# Launch Tobi backend
+python -m Tobi.main "${MODE}"
+

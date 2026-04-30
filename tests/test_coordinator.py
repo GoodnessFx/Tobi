@@ -1,7 +1,7 @@
-"""Tests for JARVIS multi-agent coordinator module."""
+"""Tests for Tobi multi-agent coordinator module."""
 import pytest
 
-from jarvis.agent.coordinator import (
+from Tobi.agent.coordinator import (
     AgentType,
     AgentProfile,
     AgentTask,
@@ -392,8 +392,9 @@ class TestCoordinatorIntegration:
     def test_routing_keywords_coverage(self):
         """All agent types should have routing keywords."""
         coord = AgentCoordinator()
-        from jarvis.agent.coordinator import _ROUTING_KEYWORDS
+        from Tobi.agent.coordinator import _ROUTING_KEYWORDS
         for agent_type in AgentType:
             if agent_type != AgentType.GENERALIST:
                 assert agent_type in _ROUTING_KEYWORDS
                 assert len(_ROUTING_KEYWORDS[agent_type]) > 0
+

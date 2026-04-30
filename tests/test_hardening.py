@@ -1,11 +1,11 @@
-"""Tests for JARVIS error handling and hardening module."""
+"""Tests for Tobi error handling and hardening module."""
 import asyncio
 import time
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from jarvis.core.hardening import (
+from Tobi.core.hardening import (
     ErrorCategory,
     classify_error,
     user_friendly_error,
@@ -209,7 +209,7 @@ class TestInputSanitization:
 
     def test_sanitize_max_length(self):
         """Truncated input should respect MAX_USER_INPUT_LENGTH."""
-        from jarvis.core.hardening import MAX_USER_INPUT_LENGTH
+        from Tobi.core.hardening import MAX_USER_INPUT_LENGTH
         text = "a" * (MAX_USER_INPUT_LENGTH + 1000)
         result = sanitize_user_input(text)
         assert len(result) <= MAX_USER_INPUT_LENGTH + 50  # Allow for "truncated" message
@@ -227,7 +227,7 @@ class TestToolArgValidation:
 
     def test_validate_truncate_long_string_args(self):
         """Long string arguments should be truncated."""
-        from jarvis.core.hardening import MAX_TOOL_ARG_LENGTH
+        from Tobi.core.hardening import MAX_TOOL_ARG_LENGTH
         long_text = "a" * (MAX_TOOL_ARG_LENGTH + 1000)
         args = {"query": long_text}
         result = validate_tool_args("search_web", args)
@@ -235,7 +235,7 @@ class TestToolArgValidation:
 
     def test_validate_truncate_file_paths(self):
         """Very long file paths should be truncated."""
-        from jarvis.core.hardening import MAX_FILE_PATH_LENGTH
+        from Tobi.core.hardening import MAX_FILE_PATH_LENGTH
         long_path = "/very/" * 100 + "long/path.txt"
         args = {"path": long_path}
         result = validate_tool_args("read_file", args)
@@ -468,3 +468,4 @@ class TestExecuteWithTimeout:
         with pytest.raises(asyncio.TimeoutError) as exc_info:
             await execute_with_timeout(slow_coro(), timeout_s=0.1, tool_name="test_tool")
         assert "test_tool" in str(exc_info.value)
+

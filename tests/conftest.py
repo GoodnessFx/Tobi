@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for JARVIS tests."""
+"""Shared pytest fixtures for Tobi tests."""
 import json
 import tempfile
 from pathlib import Path
@@ -87,7 +87,8 @@ def sample_tool_stats():
 @pytest.fixture
 def tmp_config(tmp_data_dir, monkeypatch):
     """Temporarily patch settings to use a temporary data directory."""
-    from jarvis.config import settings
+    from Tobi.config import settings
 
     monkeypatch.setattr(settings, "DATA_DIR", tmp_data_dir)
     return settings
+

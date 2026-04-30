@@ -1,15 +1,15 @@
-"""Tests for JARVIS memory module (facts and preferences)."""
+"""Tests for Tobi memory module (facts and preferences)."""
 import time
 
 import pytest
 
-from jarvis.memory.facts import (
+from Tobi.memory.facts import (
     FactStore,
     Fact,
     MIN_CONFIDENCE,
     DAILY_CONFIDENCE_DECAY,
 )
-from jarvis.memory.preferences import (
+from Tobi.memory.preferences import (
     PreferenceTracker,
     InteractionPattern,
     DECAY_RATE,
@@ -479,3 +479,4 @@ class TestMemoryPersistence:
         tracker2 = PreferenceTracker()
         tracker2.load()
         assert len(tracker2._patterns) > 0
+

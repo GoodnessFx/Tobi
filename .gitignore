@@ -1,5 +1,5 @@
 # ============================================================
-# JARVIS .gitignore
+# Tobi .gitignore
 # ============================================================
 
 # --- Secrets and credentials ---
@@ -27,9 +27,9 @@ data/
 *.sqlite3
 
 # --- Node.js / Next.js ---
-jarvis/ui/jarvis-ui/node_modules/
-jarvis/ui/jarvis-ui/.next/
-jarvis/ui/jarvis-ui/out/
+Tobi/ui/Tobi-ui/node_modules/
+Tobi/ui/Tobi-ui/.next/
+Tobi/ui/Tobi-ui/out/
 
 # --- macOS ---
 .DS_Store
@@ -54,8 +54,8 @@ logs/
 *.bak
 
 # --- Chrome extension build artifacts ---
-jarvis/browser_extension/*.crx
-jarvis/browser_extension/*.zip
+Tobi/browser_extension/*.crx
+Tobi/browser_extension/*.zip
 
 # --- Whisper / ML models (large, downloadable) ---
 *.bin
@@ -68,12 +68,13 @@ jarvis/browser_extension/*.zip
 *.mp3
 *.aiff
 *.webm
-!jarvis/ui/jarvis-ui/public/*.wav
+!Tobi/ui/Tobi-ui/public/*.wav
 
 # --- Claude Code local config (skills, rules, agents from plugins) ---
 .claude/
 
 # --- Internal planning docs (not for public repo) ---
 HANDOFF.md
-RESEARCH_JARVIS_INSPIRATION.md
+RESEARCH_Tobi_INSPIRATION.md
 *.docx
+

@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">T.O.B.I.</h1>
-<h3 align="center">The Omnipotent Benevolent Intelligence</h3>
+<h3 align="center">My Personal Intelligence</h3>
 
 <p align="center">
   A state-of-the-art personal AI assistant, evolved from the foundations of JARVIS. Tobi is faster, smarter, and more robust than ever. Featuring cinematic UI, advanced voice interaction, live web searching, and full computer automation.
@@ -110,5 +110,5 @@ MIT License. Tobi is open-source and built for the future.
 
 ---
 <p align="center">
-  Built by <b>GoodnessFx</b>
+  Built by <b>IG</b>
 </p>

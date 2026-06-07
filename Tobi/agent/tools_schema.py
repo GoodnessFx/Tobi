@@ -8,7 +8,12 @@ The TOOL_REGISTRY maps tool names to their async callable implementations.
 The TOOL_SCHEMAS list is passed directly to Claude's API.
 """
 import logging
-from Tobi.tools import mac_control, shell, filesystem, screen, web_search, web_browse
+import sys
+from Tobi.tools import shell, filesystem, screen, web_search, web_browse
+if sys.platform == "darwin":
+    from Tobi.tools import mac_control as system_control
+else:
+    from Tobi.tools import windows_control as system_control
 from Tobi.tools import browser_agent, claude_code, chrome_extension, calendar_email, weather, notes_access
 from Tobi.core import profile
 from Tobi.agent import planner as _planner_module
@@ -2133,22 +2138,22 @@ TOOL_SCHEMAS = [
 
 
 TOOL_REGISTRY = {
-    "open_application": mac_control.open_application,
-    "close_application": mac_control.close_application,
-    "get_running_applications": mac_control.get_running_applications,
-    "get_frontmost_application": mac_control.get_frontmost_application,
-    "open_url": mac_control.open_url,
-    "open_url_in_browser": mac_control.open_url_in_browser,
-    "search_in_browser": mac_control.search_in_browser,
-    "get_system_info": mac_control.get_system_info,
-    "get_battery_status": mac_control.get_battery_status,
-    "set_volume": mac_control.set_volume,
-    "set_brightness": mac_control.set_brightness,
-    "send_notification": mac_control.send_notification,
-    "get_clipboard": mac_control.get_clipboard,
-    "set_clipboard": mac_control.set_clipboard,
-    "paste_to_app": mac_control.paste_to_app,
-    "write_to_app": mac_control.write_to_app,
+    "open_application": system_control.open_application,
+    "close_application": system_control.close_application,
+    "get_running_applications": system_control.get_running_applications,
+    "get_frontmost_application": system_control.get_frontmost_application,
+    "open_url": system_control.open_url,
+    "open_url_in_browser": system_control.open_url_in_browser,
+    "search_in_browser": system_control.search_in_browser,
+    "get_system_info": system_control.get_system_info,
+    "get_battery_status": system_control.get_battery_status,
+    "set_volume": system_control.set_volume,
+    "set_brightness": system_control.set_brightness,
+    "send_notification": system_control.send_notification,
+    "get_clipboard": system_control.get_clipboard,
+    "set_clipboard": system_control.set_clipboard,
+    "paste_to_app": system_control.paste_to_app,
+    "write_to_app": system_control.write_to_app,
     # File system
     "list_directory": filesystem.list_directory,
     "read_file": filesystem.read_file,
@@ -2158,7 +2163,7 @@ TOOL_REGISTRY = {
     "copy_file": filesystem.copy_file,
     "create_directory": filesystem.create_directory,
     "get_file_info": filesystem.get_file_info,
-    "open_file": mac_control.open_file,
+    "open_file": system_control.open_file,
     # Screen
     "capture_screen": screen.capture_screen,
     "read_screen_text": screen.read_screen_text,

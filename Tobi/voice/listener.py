@@ -70,7 +70,9 @@ class VoiceListener:
         self._last_wake_time = 0.0
         self._on_wake_callback: Optional[Callable] = None
         self._on_speech_callback: Optional[Callable] = None
+        self._on_clap_callback: Optional[Callable] = None
         self.FOLLOWUP_WINDOW_SECONDS = 8.0
+        self._clap_window: list[float] = []
         self._followup_sustained_frames = 0
         self._followup_max_amplitude = 0.0
 
@@ -99,10 +101,10 @@ class VoiceListener:
             try:
                 openwakeword.utils.download_models()
                 self._wake_model = WakeWordModel(
-                    wakeword_models=["hey_Tobi_v0.1"],
+                    wakeword_models=["hey_Tobi_v0.1", "alexa"], # alexa is a good fallback for 'Tobi'
                     inference_framework="onnx",
                 )
-                logger.info("OpenWakeWord initialized (hey_Tobi model).")
+                logger.info("OpenWakeWord initialized (models: hey_Tobi, alexa).")
             except Exception as e:
                 logger.warning("Wake word init failed: %s. Will use keyboard activation.", e)
         else:
@@ -159,6 +161,10 @@ class VoiceListener:
         """Register callback for when speech is transcribed."""
         self._on_speech_callback = callback
 
+    def on_clap(self, callback: Callable):
+        """Register callback for when claps are detected."""
+        self._on_clap_callback = callback
+
     def set_speaking(self, speaking: bool, open_followup: bool = True):
         """Set whether Tobi is speaking; open follow-up window to listen without wake word."""
         self._is_speaking = speaking
@@ -206,9 +212,34 @@ class VoiceListener:
                     continue
 
                 audio_array = np.frombuffer(audio_data, dtype=np.int16)
+                amplitude = np.abs(audio_array).mean()
 
                 if self._is_speaking:
                     await asyncio.sleep(0.01)
+                    continue
+
+                # Clap detection logic
+                if amplitude > getattr(settings, "CLAP_THRESHOLD", 8000):
+                    now = time.time()
+                    if not self._clap_window or (now - self._clap_window[-1] > 0.15):
+                        self._clap_window.append(now)
+                        logger.debug("Potential clap spike (amp: %.0f)", amplitude)
+                
+                # Window for multi-clap detection (2 seconds)
+                self._clap_window = [t for t in self._clap_window if time.time() - t < 2.0]
+                
+                if len(self._clap_window) >= 2:
+                    num_claps = len(self._clap_window)
+                    # Wait a tiny bit more to see if a 3rd clap comes
+                    await asyncio.sleep(0.3)
+                    # Re-check
+                    self._clap_window = [t for t in self._clap_window if time.time() - t < 2.0]
+                    num_claps = len(self._clap_window)
+                    
+                    logger.info("%d claps detected!", num_claps)
+                    self._clap_window = []
+                    if self._on_clap_callback:
+                        asyncio.create_task(self._on_clap_callback(num_claps))
                     continue
 
                 if self._in_followup_window:

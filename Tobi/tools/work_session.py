@@ -106,6 +106,7 @@ class WorkSession:
         self.working_dir = str(Path(working_dir).expanduser().resolve())
         self.project_name = project_name
         self.session_id = f"{project_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.last_action: Optional[str] = None
         self._is_initialized = False
         self._process: Optional[subprocess.Popen] = None
 
@@ -207,6 +208,7 @@ class WorkSession:
             if len(output) > 8000:
                 output = output[:7500] + f"\n\n... [output truncated, total length: {len(output)} chars]"
 
+            self.last_action = user_text
             self._is_initialized = True
             self._save_session()
             logger.info(
@@ -265,6 +267,7 @@ class WorkSession:
                 project_name=data["project_name"],
             )
             session.session_id = data["session_id"]
+            session.last_action = data.get("last_action")
             session._is_initialized = data.get("_is_initialized", True)
 
             logger.info("WorkSession restored from disk: %s", session.session_id)
@@ -287,6 +290,7 @@ class WorkSession:
                 "session_id": self.session_id,
                 "working_dir": self.working_dir,
                 "project_name": self.project_name,
+                "last_action": self.last_action,
                 "_is_initialized": self._is_initialized,
                 "created_at": datetime.utcnow().isoformat(),
             }

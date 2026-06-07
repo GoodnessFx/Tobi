@@ -216,6 +216,22 @@ class TobiBrain:
         self._last_plan = None
         self._current_request_id: str = ""  # Correlation ID for the current request
 
+    async def get_last_session_summary(self) -> str:
+        """Summarize where the user stopped based on recent history."""
+        from Tobi.tools.work_session import WorkSession
+        session = WorkSession.restore()
+        
+        if session and session.last_action:
+            return f"You were last working on the {session.project_name} project. Your last action was: {session.last_action}."
+        
+        from Tobi.memory.conversation_store import load_conversation
+        recent_turns = load_conversation(limit=5)
+        if not recent_turns:
+            return "You haven't started any tasks yet today, boss."
+        
+        last_turn = recent_turns[0]
+        return f"You were last working on: {last_turn.user_text}."
+
     async def initialize(self) -> bool:
         """Initialize and check all dependencies."""
         logger.info("Initializing Tobi brain...")

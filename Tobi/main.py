@@ -20,13 +20,8 @@ logger = logging.getLogger("Tobi")
 
 
 BANNER = r"""
-       ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗
-       ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝
-       ██║███████║██████╔╝██║   ██║██║███████╗
-  ██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║
-  ╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║
-   ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝
-  Just A Rather Very Intelligent System  v0.3.0
+       TOBI
+       Just A Rather Very Intelligent System  v0.3.0
 """
 
 
@@ -250,6 +245,18 @@ async def run_full():
             await broadcast_overlay_state("idle")
             listener.set_speaking(False)
 
+        async def on_clap(num_claps: int):
+            logger.info("* %d claps detected *", num_claps)
+            if num_claps == 2:
+                # 2 claps: Wake up and summarize
+                summary = await brain.get_last_session_summary()
+                listener.set_speaking(True)
+                await _speak_response(f"Systems active. {summary}")
+            elif num_claps == 3:
+                # 3 claps: Quick status check
+                listener.set_speaking(True)
+                await _speak_response("All systems are functional and standing by.")
+
         def _needs_async_execution(text: str) -> bool:
             """Determine if a request should run async (immediate ack, background processing).
 
@@ -300,6 +307,14 @@ async def run_full():
 
         async def on_speech(text: str):
             logger.info("User said: %s", text)
+            
+            # Special case for "where did I stop"
+            if "where" in text.lower() and ("stop" in text.lower() or "leave off" in text.lower()):
+                summary = await brain.get_last_session_summary()
+                listener.set_speaking(True)
+                await _speak_response(summary)
+                return
+
             speaker.stop_speaking()
             listener.set_speaking(True)
 
@@ -334,6 +349,7 @@ async def run_full():
 
         listener.on_wake(on_wake)
         listener.on_speech(on_speech)
+        listener.on_clap(on_clap)
 
         if listener_ok and listener._wake_model is not None:
             logger.info("Starting voice mode with wake word detection...")

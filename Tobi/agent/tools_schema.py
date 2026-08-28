@@ -23,6 +23,12 @@ from Tobi.agent import coordinator as _coordinator_module
 
 logger = logging.getLogger("Tobi.agent.tools_schema")
 
+# ── Reminder tools ────────────────────────────────────────────────────────────
+from Tobi.agent.reminder_tools import (
+    REMINDER_TOOL_SCHEMAS,
+    REMINDER_TOOL_REGISTRY,
+)
+
 async def _chrome_extension_status() -> str:
     """Check if the Chrome extension is connected."""
     connected = chrome_extension.is_extension_connected()
@@ -2134,6 +2140,8 @@ TOOL_SCHEMAS = [
             "required": [],
         },
     },
+    # ── Reminders (Phase 0) ──────────────────────────────────────────────────
+    *REMINDER_TOOL_SCHEMAS,
 ]
 
 
@@ -2251,6 +2259,8 @@ TOOL_REGISTRY = {
     "search_notes": notes_access.search_notes,
     "create_note": notes_access.create_note,
     "get_note_folders": notes_access.get_note_folders,
+    # Reminders (Phase 0)
+    **REMINDER_TOOL_REGISTRY,
 }
 
 

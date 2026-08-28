@@ -58,6 +58,16 @@ const CATEGORY_CONFIG: Record<ProactiveCategory, {
     glowColor: "rgba(251,191,36,0.12)",
     label: "Reminder",
   },
+  goal_drift: {
+    icon: [
+      "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z",
+      "M12 9v4",
+      "M12 17h.01",
+    ],
+    accentClass: "text-orange-400",
+    glowColor: "rgba(251,146,60,0.12)",
+    label: "Drift",
+  },
 };
 
 function ToastItem({

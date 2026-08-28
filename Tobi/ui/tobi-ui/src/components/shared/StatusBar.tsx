@@ -33,6 +33,22 @@ const tabs: { mode: ViewMode; label: string; iconPaths: string[] }[] = [
     ],
   },
   {
+    mode: "reminders",
+    label: "Remind",
+    iconPaths: [
+      "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9",
+      "M13.73 21a2 2 0 0 1-3.46 0",
+    ],
+  },
+  {
+    mode: "memory",
+    label: "Memory",
+    iconPaths: [
+      "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z",
+      "M12 6v6l4 2",
+    ],
+  },
+  {
     mode: "dashboard",
     label: "System",
     iconPaths: [

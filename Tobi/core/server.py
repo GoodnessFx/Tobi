@@ -466,6 +466,8 @@ async def lifespan(app: FastAPI):
         )
     brain._on_plan_progress = broadcast_plan_progress
     brain.proactive._on_suggestion = _deliver_proactive_suggestion
+    # Register memory store for goal-drift checks
+    brain.proactive.set_memory(brain.memory)
     cleanup_task = asyncio.create_task(_session_cleanup_loop())
 
     # Register signal handlers for graceful shutdown. When uvicorn receives
@@ -1370,3 +1372,283 @@ async def websocket_overlay(websocket: WebSocket):
         if websocket in _overlay_clients:
             _overlay_clients.remove(websocket)
 
+
+# ============================================================
+# Reminders API  (Phase 0)
+# ============================================================
+from Tobi.memory.reminders_store import (
+    create_reminder as _create_reminder_db,
+    get_reminder,
+    get_all_reminders,
+    get_upcoming_reminders as _get_upcoming_reminders_db,
+    update_reminder_status,
+    update_reminder_audio as _update_reminder_audio_db,
+    delete_reminder as _delete_reminder_db,
+    ReminderStatus,
+    PlaybackMode,
+    Recurrence,
+    AUDIO_DIR,
+)
+import uuid as _uuid
+
+
+class ReminderCreateRequest(BaseModel):
+    content: str
+    due_at_iso: str           # ISO-8601 datetime string
+    is_alarm: bool = False
+    recurrence: str = "none"
+    playback_mode: str = "tobi_voice"
+
+
+class ReminderUpdateRequest(BaseModel):
+    content: str | None = None
+    due_at_iso: str | None = None
+    is_alarm: bool | None = None
+    recurrence: str | None = None
+    playback_mode: str | None = None
+
+
+@app.get("/reminders", dependencies=[Depends(require_auth)])
+async def list_reminders_endpoint(upcoming: bool = True, hours: int = 48):
+    """List reminders. upcoming=true (default) → next N hours only."""
+    if upcoming:
+        reminders = _get_upcoming_reminders_db(hours=hours)
+    else:
+        reminders = get_all_reminders(include_deleted=False)
+    return {"reminders": [r.to_dict() for r in reminders], "count": len(reminders)}
+
+
+@app.post("/reminders", dependencies=[Depends(require_auth)])
+async def create_reminder_endpoint(body: ReminderCreateRequest):
+    """Create a new reminder."""
+    from datetime import datetime
+    try:
+        due_ts = datetime.fromisoformat(body.due_at_iso).timestamp()
+    except (ValueError, TypeError):
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Invalid due_at_iso: '{body.due_at_iso}'. Use ISO-8601."},
+        )
+    try:
+        rec = Recurrence(body.recurrence)
+    except ValueError:
+        rec = Recurrence.NONE
+    try:
+        pm = PlaybackMode(body.playback_mode)
+    except ValueError:
+        pm = PlaybackMode.TOBI_VOICE
+
+    reminder = _create_reminder_db(
+        content=body.content,
+        due_at=due_ts,
+        playback_mode=pm,
+        is_alarm=body.is_alarm,
+        recurrence=rec,
+    )
+    return reminder.to_dict()
+
+
+@app.get("/reminders/{reminder_id}", dependencies=[Depends(require_auth)])
+async def get_reminder_endpoint(reminder_id: int):
+    """Get a single reminder by ID."""
+    reminder = get_reminder(reminder_id)
+    if reminder is None:
+        return JSONResponse(status_code=404, content={"error": f"Reminder {reminder_id} not found."})
+    return reminder.to_dict()
+
+
+@app.patch("/reminders/{reminder_id}", dependencies=[Depends(require_auth)])
+async def update_reminder_endpoint(reminder_id: int, body: ReminderUpdateRequest):
+    """Update content, time, recurrence, alarm mode, or playback mode."""
+    import sqlite3
+    from datetime import datetime
+    from Tobi.memory.reminders_store import DB_PATH
+
+    reminder = get_reminder(reminder_id)
+    if reminder is None:
+        return JSONResponse(status_code=404, content={"error": f"Reminder {reminder_id} not found."})
+
+    fields: list[str] = []
+    values: list = []
+
+    if body.content is not None:
+        fields.append("content = ?")
+        values.append(body.content)
+
+    if body.due_at_iso is not None:
+        try:
+            due_ts = datetime.fromisoformat(body.due_at_iso).timestamp()
+            fields.append("due_at = ?")
+            values.append(due_ts)
+        except (ValueError, TypeError):
+            return JSONResponse(status_code=400, content={"error": f"Invalid due_at_iso: '{body.due_at_iso}'"})
+
+    if body.recurrence is not None:
+        try:
+            rec_val = Recurrence(body.recurrence).value
+        except ValueError:
+            rec_val = Recurrence.NONE.value
+        fields.append("recurrence = ?")
+        values.append(rec_val)
+
+    if body.is_alarm is not None:
+        fields.append("is_alarm = ?")
+        values.append(int(body.is_alarm))
+
+    if body.playback_mode is not None:
+        try:
+            pm_val = PlaybackMode(body.playback_mode).value
+        except ValueError:
+            pm_val = PlaybackMode.TOBI_VOICE.value
+        fields.append("playback_mode = ?")
+        values.append(pm_val)
+
+    if not fields:
+        return JSONResponse(status_code=400, content={"error": "No fields to update."})
+
+    values.append(reminder_id)
+    try:
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.execute(f"UPDATE reminders SET {', '.join(fields)} WHERE id = ?", values)
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+    return get_reminder(reminder_id).to_dict()
+
+
+@app.delete("/reminders/{reminder_id}", dependencies=[Depends(require_auth)])
+async def delete_reminder_endpoint(reminder_id: int):
+    """Soft-delete a reminder."""
+    reminder = get_reminder(reminder_id)
+    if reminder is None:
+        return JSONResponse(status_code=404, content={"error": f"Reminder {reminder_id} not found."})
+    _delete_reminder_db(reminder_id)
+    return {"status": "deleted", "id": reminder_id}
+
+
+@app.post("/reminders/{reminder_id}/dismiss", dependencies=[Depends(require_auth)])
+async def dismiss_reminder_endpoint(reminder_id: int):
+    """Dismiss a fired reminder (or advance a recurring one)."""
+    from Tobi.memory.reminders_store import advance_recurring_reminder
+    reminder = get_reminder(reminder_id)
+    if reminder is None:
+        return JSONResponse(status_code=404, content={"error": f"Reminder {reminder_id} not found."})
+
+    if reminder.recurrence != Recurrence.NONE:
+        updated = advance_recurring_reminder(reminder)
+        if updated:
+            return {"status": "advanced", "next": updated.to_dict()}
+
+    update_reminder_status(reminder_id, ReminderStatus.DISMISSED)
+    return {"status": "dismissed", "id": reminder_id}
+
+
+class SnoozeRequest(BaseModel):
+    minutes: int = 10
+
+
+@app.post("/reminders/{reminder_id}/snooze", dependencies=[Depends(require_auth)])
+async def snooze_reminder_endpoint(reminder_id: int, body: SnoozeRequest):
+    """Snooze a reminder for N minutes."""
+    import time
+    from datetime import datetime
+
+    reminder = get_reminder(reminder_id)
+    if reminder is None:
+        return JSONResponse(status_code=404, content={"error": f"Reminder {reminder_id} not found."})
+
+    if reminder.status not in (ReminderStatus.PENDING, ReminderStatus.FIRED, ReminderStatus.SNOOZED):
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Reminder {reminder_id} is {reminder.status.value} and cannot be snoozed."},
+        )
+
+    snooze_until = time.time() + body.minutes * 60
+    update_reminder_status(reminder_id, ReminderStatus.SNOOZED, snooze_until=snooze_until)
+    wake_fmt = datetime.fromtimestamp(snooze_until).strftime("%I:%M %p")
+    return {"status": "snoozed", "id": reminder_id, "wake_at": wake_fmt, "snooze_until": snooze_until}
+
+
+@app.post("/reminders/{reminder_id}/audio", dependencies=[Depends(require_auth)])
+async def upload_reminder_audio(reminder_id: int, audio: UploadFile = File(...)):
+    """
+    Upload a voice recording to attach to a reminder.
+
+    When playback_mode is 'own_voice', this audio clip is played back
+    verbatim when the reminder fires instead of generating TTS.
+
+    Accepts WebM/WAV/OGG. Max 10 MB.
+    """
+    reminder = get_reminder(reminder_id)
+    if reminder is None:
+        return JSONResponse(status_code=404, content={"error": f"Reminder {reminder_id} not found."})
+
+    MAX_AUDIO = 10 * 1024 * 1024  # 10 MB
+    allowed_types = {"audio/webm", "audio/wav", "audio/ogg", "audio/mpeg", "audio/mp4"}
+    base_ct = (audio.content_type or "").split(";")[0].strip()
+    if base_ct and base_ct not in allowed_types:
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Unsupported audio type: {audio.content_type}"},
+        )
+
+    content = await audio.read()
+    if len(content) > MAX_AUDIO:
+        return JSONResponse(
+            status_code=413,
+            content={"error": f"Audio too large (max {MAX_AUDIO // 1024 // 1024} MB)."},
+        )
+
+    ext = ".webm" if "webm" in (audio.content_type or "") else ".wav"
+    filename = f"reminder_{reminder_id}_{_uuid.uuid4().hex[:8]}{ext}"
+    audio_path = AUDIO_DIR / filename
+    audio_path.write_bytes(content)
+
+    _update_reminder_audio_db(reminder_id, filename, PlaybackMode.OWN_VOICE)
+    return {
+        "status": "uploaded",
+        "reminder_id": reminder_id,
+        "audio_url": filename,
+        "playback_mode": "own_voice",
+    }
+
+
+@app.get("/reminders/{reminder_id}/audio", dependencies=[Depends(require_auth)])
+async def serve_reminder_audio(reminder_id: int):
+    """Stream a reminder's voice recording back to the client."""
+    from fastapi.responses import FileResponse
+    reminder = get_reminder(reminder_id)
+    if reminder is None:
+        return JSONResponse(status_code=404, content={"error": "Reminder not found."})
+    if not reminder.audio_url:
+        return JSONResponse(status_code=404, content={"error": "No audio attached to this reminder."})
+
+    audio_path = AUDIO_DIR / reminder.audio_url
+    if not audio_path.exists():
+        return JSONResponse(status_code=404, content={"error": "Audio file not found on disk."})
+
+    media_type = "audio/webm" if reminder.audio_url.endswith(".webm") else "audio/wav"
+    return FileResponse(str(audio_path), media_type=media_type)
+
+
+# ── Digest endpoint ───────────────────────────────────────────────────────────
+
+@app.get("/digest", dependencies=[Depends(require_auth)])
+async def get_daily_digest():
+    """Generate and return today's morning digest (facts + reminders + nudges)."""
+    from Tobi.core.digest import build_digest
+    digest = await build_digest(brain)
+    return digest
+
+
+@app.get("/digest/wake-briefing", dependencies=[Depends(require_auth)])
+async def get_wake_briefing():
+    """
+    Short spoken wake briefing: today's date, top 3 priorities, reminders before noon.
+    Called by the alarm dismiss handler on mobile to play the morning TTS brief.
+    """
+    from Tobi.core.digest import build_wake_briefing
+    briefing = await build_wake_briefing(brain)
+    return briefing

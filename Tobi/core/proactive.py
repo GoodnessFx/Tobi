@@ -15,6 +15,7 @@ class SuggestionCategory(str, Enum):
     EMAIL = "email"
     GREETING = "greeting"
     REMINDER = "reminder"
+    GOAL_DRIFT = "goal_drift"   # Nudge when a goal/skill-gap hasn't been touched
 
 
 @dataclass
@@ -31,14 +32,16 @@ DEFAULT_INTERVALS = {
     SuggestionCategory.CALENDAR: 300,
     SuggestionCategory.EMAIL: 600,
     SuggestionCategory.GREETING: 3600,
-    SuggestionCategory.REMINDER: 900,
+    SuggestionCategory.REMINDER: 60,       # Check due reminders every 60 s
+    SuggestionCategory.GOAL_DRIFT: 21600,  # Check goal drift twice a day
 }
 
 COOLDOWN_PERIODS = {
     SuggestionCategory.CALENDAR: 600,
     SuggestionCategory.EMAIL: 1800,
     SuggestionCategory.GREETING: 14400,
-    SuggestionCategory.REMINDER: 1800,
+    SuggestionCategory.REMINDER: 300,      # Don't re-fire same reminder < 5 min
+    SuggestionCategory.GOAL_DRIFT: 43200,  # Max one drift nudge per 12 h
 }
 
 MEETING_ALERT_MINUTES = [15, 5]
@@ -159,6 +162,10 @@ class ProactiveEngine:
                     await self._check_email()
                 elif category == SuggestionCategory.GREETING:
                     await self._check_greeting()
+                elif category == SuggestionCategory.REMINDER:
+                    await self._check_reminders()
+                elif category == SuggestionCategory.GOAL_DRIFT:
+                    await self._check_goal_drift()
             except Exception as e:
                 logger.debug("Proactive check %s failed: %s", category.value, e)
 
@@ -361,6 +368,94 @@ class ProactiveEngine:
                 await self._on_suggestion(suggestion)
             except Exception as e:
                 logger.debug("Suggestion delivery failed: %s", e)
+
+    # ── memory reference for goal-drift checks ───────────────────────────────
+    def set_memory(self, memory) -> None:
+        """Register the MemoryStore instance for goal-drift checks."""
+        self._memory = memory
+
+    # ── due reminder delivery ─────────────────────────────────────────────────
+    async def _check_reminders(self) -> None:
+        """Fire any reminders that are now due."""
+        try:
+            from Tobi.memory.reminders_store import (
+                get_due_reminders, update_reminder_status,
+                advance_recurring_reminder, ReminderStatus, Recurrence,
+            )
+        except Exception as e:
+            logger.debug("Reminders store import failed: %s", e)
+            return
+
+        due = get_due_reminders()
+        if not due:
+            return
+
+        for reminder in due:
+            # own_voice clips are handled client-side; we still send text
+            msg = reminder.content
+            spoken = not bool(reminder.audio_url)
+
+            await self._deliver(Suggestion(
+                category=SuggestionCategory.REMINDER,
+                message=msg,
+                priority=3 if reminder.is_alarm else 2,
+                spoken=spoken,
+            ))
+
+            # Advance recurring or mark fired
+            if reminder.recurrence != Recurrence.NONE:
+                advance_recurring_reminder(reminder)
+            else:
+                import time as _time
+                update_reminder_status(
+                    reminder.id,
+                    ReminderStatus.FIRED,
+                    last_fired_at=_time.time(),
+                )
+
+            await asyncio.sleep(0.5)  # brief gap between simultaneous reminders
+
+    # ── goal-drift nudge ──────────────────────────────────────────────────────
+    async def _check_goal_drift(self) -> None:
+        """Nudge when a goal/skill-gap hasn't been touched in > 7 days."""
+        memory = getattr(self, "_memory", None)
+        if memory is None:
+            return
+
+        STALE_DAYS = 7
+        stale_cutoff = time.time() - STALE_DAYS * 86400
+
+        try:
+            goals = (
+                memory.facts.get_by_category("goal")
+                + memory.facts.get_by_category("skill_gap")
+            )
+        except Exception as e:
+            logger.debug("Goal drift: fact fetch failed: %s", e)
+            return
+
+        stale = [
+            f for f in goals
+            if f.last_reinforced < stale_cutoff and f.effective_confidence >= 0.3
+        ]
+        if not stale:
+            return
+
+        stale.sort(key=lambda f: f.last_reinforced)
+        worst = stale[0]
+        days_since = int((time.time() - worst.last_reinforced) / 86400)
+        label = worst.subject.replace("_", " ")
+        msg = (
+            f"Heads up, sir — '{worst.value}' ({label}) hasn't been touched "
+            f"in {days_since} days. Still a priority, or should we drop it?"
+        )
+
+        await self._deliver(Suggestion(
+            category=SuggestionCategory.GOAL_DRIFT,
+            message=msg,
+            priority=1,
+            spoken=False,
+        ))
 
     def cleanup_old_alerts(self):
         """Remove stale event alert keys."""

@@ -1,6 +1,6 @@
 export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
 
-export type ViewMode = "cinematic" | "chat" | "dashboard";
+export type ViewMode = "cinematic" | "chat" | "dashboard" | "reminders" | "memory";
 
 export interface ChatMessage {
   id: string;
@@ -42,7 +42,7 @@ export interface ServerStatus {
   sessionCost: CostSummary;
 }
 
-export type ProactiveCategory = "calendar" | "email" | "greeting" | "reminder";
+export type ProactiveCategory = "calendar" | "email" | "greeting" | "reminder" | "goal_drift";
 
 export interface ProactiveSuggestion {
   id: string;

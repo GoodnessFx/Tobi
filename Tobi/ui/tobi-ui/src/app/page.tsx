@@ -11,6 +11,8 @@ import PlanProgress from "@/components/shared/PlanProgress";
 import CinematicView from "@/components/cinematic/CinematicView";
 import ChatView from "@/components/chat/ChatView";
 import DashboardView from "@/components/dashboard/DashboardView";
+import RemindersPanel from "@/components/reminders/RemindersPanel";
+import MemoryPanel from "@/components/memory/MemoryPanel";
 import LoginScreen from "@/components/auth/LoginScreen";
 import { SettingsPanel } from "@/components/settings/SettingsPanel";
 
@@ -167,6 +169,18 @@ export default function Page() {
           isProcessing={isActive}
           onClearConversation={clearMessages}
         />
+      )}
+
+      {viewMode === "reminders" && (
+        <div className="flex-1 overflow-hidden">
+          <RemindersPanel />
+        </div>
+      )}
+
+      {viewMode === "memory" && (
+        <div className="flex-1 overflow-hidden">
+          <MemoryPanel token={authState.token} />
+        </div>
       )}
 
       <ProactiveToast

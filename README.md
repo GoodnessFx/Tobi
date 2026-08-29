@@ -23,7 +23,7 @@
 
 ## What is TOBI?
 
-TOBI is not a chatbot. It is an **operator with memory** — a personal AI system that runs on your own machine, knows your projects and goals, takes action through real tools, and proactively stays on top of things without being re-briefed every session.
+TOBI is not a chatbot. It is an **operator with memory** — a personal AI system that runs on your own machine, knows your projects and goals, takes real action through tools, and proactively stays on top of things without being re-briefed every session.
 
 The core promise: **you talk to TOBI like a co-founder who never forgets and never sleeps.**
 
@@ -42,24 +42,40 @@ Four pillars:
 
 ---
 
+## Modes
+
+TOBI ships with a mode toggle that controls which feature layer is active. Modes are additive — Dev mode does not remove anything from Personal mode.
+
+| Mode | Who it is for | What it adds |
+|---|---|---|
+| `personal` | Founders, executives, anyone | Reminders, voice, nudges, digest, goal tracking, relationship layer |
+| `dev` | Developers and engineers | Code sessions with narrated reasoning, smart contract audit mode, concept checkpoints, voice pair-programming, SMS delivery, desktop alarm |
+| `both` | Developer-founders | Everything from both layers running simultaneously |
+
+Set your mode in your profile via chat: *"switch to dev mode"* or *"set mode to both."*
+
+---
+
 ## Feature Overview
 
 ### Core Intelligence
 
 - **Multi-tier LLM routing** — Claude Haiku (fast), Sonnet (brain), Opus (deep) selected automatically per request; Ollama as offline fallback
-- **Persistent memory** — ChromaDB vector store + SQLite FTS5 for semantic and keyword recall across all sessions
+- **Persistent memory** — ChromaDB vector store plus SQLite FTS5 for semantic and keyword recall across all sessions
 - **Structured facts** — Automatically extracts facts from every conversation (name, location, preferences, projects, relationships) with confidence scoring and decay
 - **Agentic tool-calling loop** — Claude calls real tools (search, shell, filesystem, browser, calendar, email, notes) and iterates until the task is done
 - **Multi-agent coordinator** — Seven specialised agent types (researcher, coder, browser, system, communicator, analyst, generalist) routed automatically
 - **Task planner** — Decomposes complex requests into subtasks, executes them in parallel where possible, and verifies quality on completion
 - **Learning loop** — Tracks tool reliability, plan success rates, and common failure patterns to improve over time
 
-### Reminders and Alarms (Phase 0)
+### Reminders and Alarms
 
-- **Natural language reminder creation** — Say "remind me to follow up with OPES on Friday at 9am" and TOBI parses the date, creates the reminder, and delivers it when due
-- **Own-voice playback** — Record a reminder in your own voice; TOBI plays back your exact words at the due time instead of a TTS summary
+- **Natural language creation** — Say "remind me to follow up with OPES on Friday at 9am" and TOBI parses the date, creates the reminder, and delivers it when due
+- **Own-voice playback** — Record a reminder in your own voice; TOBI plays back your exact words at the due time instead of generating a TTS summary
 - **Alarm mode** — Full alarm delivery with snooze and dismiss actions via push notification
 - **Recurrence** — Once, daily, weekly, weekdays, or monthly
+- **SMS delivery** (Dev mode) — Reminders delivered as text messages via Twilio or Africa's Talking API so they reach you even when the app is closed
+- **Desktop alarm** (Dev mode) — Native OS notification via an Electron system-tray companion — fires on your PC, where developers actually work
 - **Proactive delivery** — Due reminders are checked every 60 seconds and delivered as spoken or text notifications
 
 ### Proactive Engine
@@ -67,13 +83,46 @@ Four pillars:
 - **Calendar alerts** — Upcoming meeting warnings at 15 and 5 minutes
 - **Email nudges** — Notifies when unread count reaches a meaningful threshold
 - **Morning greeting** — Time-appropriate briefing on first interaction each day
-- **Goal-drift detection** — Flags goals and skill-gaps that have not been touched in over 7 days with a candid nudge ("you said auditing was priority 1 — last touched 12 days ago")
-- **Reminder delivery** — Background engine checks and fires due reminders every 60 seconds
+- **Goal-drift detection** — Flags goals and skill-gaps untouched for over 7 days with a candid nudge
+- **Reminder delivery** — Background engine fires due reminders every 60 seconds
 
 ### Daily Digest and Wake Briefing
 
 - **Daily digest** — On-demand or scheduled: today's date, top priorities, due reminders, stale goals, and a one-sentence LLM-generated coaching insight
-- **Wake briefing** — Under 120 words, spoken by TTS immediately after a morning alarm dismisses: date, top 3 priorities, reminders before noon, open mic for immediate voice input
+- **Wake briefing** — Under 120 words, spoken by TTS after a morning alarm dismisses: date, top 3 priorities, reminders before noon, open mic for immediate voice input
+
+### Dev Mode — Code Companion
+
+This layer is additive. A developer using TOBI still gets all personal reminders, voice, nudges, and alarms. The coding layer adds context on top.
+
+**Narrated code sessions**
+
+Before writing or editing any code, TOBI always:
+1. States the approach in plain language
+2. Names the tradeoff or risk being addressed (e.g. "using a reentrancy guard here because the external call precedes the state update")
+3. Asks "build it this way, or explain more first?" — it never silently writes code without narrating first
+
+This is the default behaviour, not a setting. It is the core differentiator from pasting code into Claude.
+
+**Smart contract audit mode**
+
+Given a contract or file, TOBI walks through it the way a senior auditor explains findings to a junior — one issue at a time, in plain language, with the vulnerability class named (reentrancy, integer overflow, access control, oracle manipulation, front-running) and the fix reasoning explained. Not a raw linter dump.
+
+**Concept checkpoints**
+
+For users who opt into learning mode, TOBI pauses at key implementation decisions and asks a short check-question before continuing. Mirrors the ChainCodeCamp teaching model. Correct and incorrect answers are stored as facts (`type=skill_gap`) so nudges can later surface patterns: "you've missed 3 reentrancy-guard checkpoints this month — want a refresher?"
+
+**Voice pair-programming**
+
+While coding, you can talk through logic out loud using the existing Whisper pipeline. TOBI responds with both a spoken explanation and the code change. The own-voice audio storage schema for reminders is untouched — the two features share the same pipeline without conflicting.
+
+**Coding context bridge**
+
+Connect TOBI's tool-calling layer to a local CLI bridge or VS Code extension that streams the current file and repo context to the backend. TOBI reads what is on your screen and acts on it directly.
+
+**Coding-context relationship nudges**
+
+Dev mode adds a coding lens on top of the existing relationship nudge system. TOBI can correlate "you've been heads-down coding for 6 hours" with "you said don't let this happen again with [person]" using existing fact timestamps. No new data model is required.
 
 ### Voice
 
@@ -93,7 +142,7 @@ Four pillars:
 ### System and File Automation
 
 - **Full file system** — List, read, write, copy, move, search, create directories
-- **Shell execution** — Run any terminal command; get output back in chat
+- **Shell execution** — Run any terminal command and get output back in chat
 - **Screen capture and OCR** — Screenshot the current screen; read visible text; AI vision analysis of what is on screen
 - **Clipboard** — Read and write the system clipboard
 - **App control** — Open, close, and query running applications (macOS AppleScript; Windows PowerShell)
@@ -119,9 +168,9 @@ Four pillars:
 
 TOBI ships as a fully installable Progressive Web App:
 
-- **Android**: Open in Chrome → menu → "Add to Home Screen" — works immediately, no Play Store needed
-- **iOS**: Open in Safari → share → "Add to Home Screen" — full standalone mode, no App Store needed
-- **Desktop**: Chrome or Edge → install button in address bar
+- **Android**: Open in Chrome, tap menu, tap "Add to Home Screen" — works immediately, no Play Store needed
+- **iOS**: Open in Safari, tap share, tap "Add to Home Screen" — full standalone mode, no App Store needed
+- **Desktop**: Chrome or Edge install button in the address bar
 - **Push notifications** — Service worker handles reminder delivery and snooze/dismiss actions even when the app is not open
 - **Offline shell** — App shell caches locally so the UI loads instantly even on a slow connection
 
@@ -151,10 +200,10 @@ TOBI ships as a fully installable Progressive Web App:
 │  Tool-use loop   │  Executor + QA    │  Preferences      │  Calendar    │
 │  Streaming       │  Learning loop    │  Reminders store  │  Email       │
 ├──────────────────┴───────────────────┴───────────────────┴──────────────┤
-│                           TOOL LAYER  (99 tools)                         │
+│                        TOOL LAYER  (99 tools)                            │
 │  shell  filesystem  screen  web_search  web_browse  weather  browser    │
 │  calendar_email  notes_access  claude_code  chrome_extension             │
-│  mac_control  windows_control  reminder_tools                            │
+│  mac_control  windows_control  reminder_tools  audit_mode               │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -171,6 +220,7 @@ TOBI ships as a fully installable Progressive Web App:
 | Browser automation | Playwright, Chrome Extension (DOM bridge) |
 | Frontend | Next.js 14, React 18, Three.js, Tailwind CSS v4 |
 | PWA | Web App Manifest, Service Worker, Web Push API |
+| SMS | Twilio / Africa's Talking (Dev mode) |
 
 ---
 
@@ -250,17 +300,15 @@ chmod +x setup.sh && ./setup.sh   # first time only
 
 **iOS** — open in Safari, tap the share icon, tap "Add to Home Screen"
 
-**Desktop** — look for the install icon in the Chrome / Edge address bar
+**Desktop** — look for the install icon in the Chrome or Edge address bar
 
 ---
 
 ## Run Modes
 
-The Python backend supports four modes:
-
 | Mode | Command | Description |
 |---|---|---|
-| `server` | `python -m Tobi.main --mode server` | HTTP + WebSocket API only (for PWA / browser use) |
+| `server` | `python -m Tobi.main --mode server` | HTTP + WebSocket API only (for PWA and browser use) |
 | `voice` | `python -m Tobi.main --mode voice` | Terminal voice loop (mic in, TTS out) — no server |
 | `text` | `python -m Tobi.main --mode text` | Plain terminal chat — no voice, no server |
 | `full` | `python -m Tobi.main --mode full` | Server + voice loop together (recommended for desktop) |
@@ -301,14 +349,22 @@ UI_PORT=3741
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.1:8b
 
-# ElevenLabs (optional, higher-quality voice)
+# ElevenLabs (optional — higher-quality voice output)
 ELEVENLABS_API_KEY=your-key-here
 ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
 
-# Web Push (optional, for server-sent push notifications)
+# Web Push (optional — required for server-sent push to mobile)
 VAPID_PUBLIC_KEY=...
 VAPID_PRIVATE_KEY=...
 VAPID_EMAIL=mailto:you@example.com
+
+# SMS delivery — Dev mode (optional)
+TWILIO_ACCOUNT_SID=...
+TWILIO_AUTH_TOKEN=...
+TWILIO_FROM_NUMBER=+1...
+# Or Africa's Talking:
+AFRICAS_TALKING_API_KEY=...
+AFRICAS_TALKING_USERNAME=...
 ```
 
 ---
@@ -320,11 +376,11 @@ TOBI maintains memory across four layers that compound over time:
 | Layer | Storage | What lives here |
 |---|---|---|
 | Active context | RAM | Current conversation turns (last 100) |
-| Semantic recall | ChromaDB | Past conversation chunks, retrieved by embedding similarity |
+| Semantic recall | ChromaDB | Past conversation chunks retrieved by embedding similarity |
 | Structured facts | SQLite + JSON | Extracted knowledge: name, location, projects, goals, preferences, relationships — with confidence scores and decay |
 | Fast keyword lookup | SQLite FTS5 | Tasks, notes, and memories indexed for instant text search |
 
-Facts are extracted automatically from every conversation using pattern matching (high confidence) and Haiku-assisted extraction (lower confidence). They decay slowly when not reinforced, so stale facts fade out naturally.
+Facts are extracted automatically from every conversation using pattern matching (high confidence) and Haiku-assisted extraction (lower confidence). They decay slowly when not reinforced, so stale facts fade out naturally. Concept checkpoint answers from Dev mode are stored as `type=skill_gap` facts and feed directly into goal-drift nudges.
 
 ---
 
@@ -333,19 +389,21 @@ Facts are extracted automatically from every conversation using pattern matching
 Reminders are created by voice or text:
 
 > *"Remind me to follow up with the client on Friday at 2pm"*
+>
 > *"Set a daily alarm for 7am"*
+>
 > *"Remind me to deploy the contract before EOD — make it urgent"*
 
 Each reminder stores:
 
-- Content text
-- Due timestamp
+- Content text and due timestamp
 - Recurrence rule (once / daily / weekly / weekdays / monthly)
 - Alarm flag (full alarm vs. soft notification)
+- Delivery channel: `push` (default), `sms`, or `desktop_alarm` (Dev mode)
 - Optional voice recording for own-voice playback
-- Playback mode (`tobi_voice` generates TTS; `own_voice` plays your original recording back verbatim)
+- Playback mode (`tobi_voice` generates TTS at delivery time; `own_voice` plays your original recording back verbatim)
 
-The proactive engine checks for due reminders every 60 seconds and delivers them as spoken alerts or push notifications. Recurring reminders automatically advance to the next occurrence after firing.
+The proactive engine checks for due reminders every 60 seconds and delivers them as spoken alerts, push notifications, SMS messages, or desktop alarms depending on the channel setting. Recurring reminders automatically advance to the next occurrence after firing.
 
 ---
 
@@ -354,24 +412,24 @@ The proactive engine checks for due reminders every 60 seconds and delivers them
 ```
 Tobi/
 ├── Tobi/
-│   ├── main.py               — Entry point (text / voice / server / full modes)
+│   ├── main.py                    — Entry point (text / voice / server / full modes)
 │   ├── agent/
-│   │   ├── coordinator.py    — Multi-agent router (7 specialised agents)
-│   │   ├── executor.py       — Agentic tool-use loop with QA verification
-│   │   ├── learning.py       — Tool reliability and plan success tracking
-│   │   ├── planner.py        — Task decomposition into subtasks
-│   │   ├── reminder_tools.py — Reminder tool schemas and async handlers
-│   │   └── tools_schema.py   — Master tool registry (99 tools)
+│   │   ├── coordinator.py         — Multi-agent router (7 specialised agents)
+│   │   ├── executor.py            — Agentic tool-use loop with QA verification
+│   │   ├── learning.py            — Tool reliability and plan success tracking
+│   │   ├── planner.py             — Task decomposition into subtasks
+│   │   ├── reminder_tools.py      — Reminder tool schemas and async handlers
+│   │   └── tools_schema.py        — Master tool registry (99 tools)
 │   ├── config/
-│   │   └── settings.py       — All configuration with env var overrides
+│   │   └── settings.py            — All configuration with env var overrides
 │   ├── core/
-│   │   ├── brain.py          — Central orchestrator wiring all subsystems
-│   │   ├── digest.py         — Daily digest and morning wake briefing
-│   │   ├── llm.py            — Multi-backend LLM engine with streaming
-│   │   ├── proactive.py      — Background engine for reminders and nudges
-│   │   └── server.py         — FastAPI HTTP + WebSocket server
+│   │   ├── brain.py               — Central orchestrator wiring all subsystems
+│   │   ├── digest.py              — Daily digest and morning wake briefing
+│   │   ├── llm.py                 — Multi-backend LLM engine with streaming
+│   │   ├── proactive.py           — Background engine for reminders and nudges
+│   │   └── server.py              — FastAPI HTTP + WebSocket server
 │   ├── extensions/
-│   │   └── chrome/           — Chrome Extension (DOM bridge)
+│   │   └── chrome/                — Chrome Extension (DOM bridge)
 │   ├── memory/
 │   │   ├── conversation_store.py  — SQLite-backed conversation history
 │   │   ├── facts.py               — Fact extraction with confidence scoring
@@ -380,49 +438,49 @@ Tobi/
 │   │   ├── sqlite_store.py        — Tasks, notes, memories (FTS5)
 │   │   └── store.py               — MemoryStore (ChromaDB + SQLite)
 │   ├── tools/
-│   │   ├── browser_agent.py  — Playwright browser automation
-│   │   ├── calendar_email.py — Calendar.app and Mail.app integration
-│   │   ├── chrome_extension.py — Chrome DOM bridge tools
-│   │   ├── claude_code.py    — Claude Code sub-agent delegation
-│   │   ├── filesystem.py     — File system tools
-│   │   ├── mac_control.py    — macOS app and system control
-│   │   ├── notes_access.py   — Apple Notes integration
-│   │   ├── screen.py         — Screenshot and OCR
-│   │   ├── shell.py          — Shell command execution
-│   │   ├── weather.py        — Weather via Open-Meteo
-│   │   ├── web_browse.py     — Page fetching and link extraction
-│   │   ├── web_search.py     — DuckDuckGo search
-│   │   └── windows_control.py — Windows app and system control
+│   │   ├── browser_agent.py       — Playwright browser automation
+│   │   ├── calendar_email.py      — Calendar.app and Mail.app integration
+│   │   ├── chrome_extension.py    — Chrome DOM bridge tools
+│   │   ├── claude_code.py         — Claude Code sub-agent delegation
+│   │   ├── filesystem.py          — File system tools
+│   │   ├── mac_control.py         — macOS app and system control
+│   │   ├── notes_access.py        — Apple Notes integration
+│   │   ├── screen.py              — Screenshot and OCR
+│   │   ├── shell.py               — Shell command execution
+│   │   ├── weather.py             — Weather via Open-Meteo
+│   │   ├── web_browse.py          — Page fetching and link extraction
+│   │   ├── web_search.py          — DuckDuckGo search
+│   │   └── windows_control.py     — Windows app and system control
 │   ├── ui/
-│   │   └── tobi-ui/          — Next.js 14 frontend
+│   │   └── tobi-ui/               — Next.js 14 frontend
 │   │       ├── public/
-│   │       │   ├── manifest.json   — PWA manifest
-│   │       │   ├── sw.js           — Service worker
-│   │       │   └── icon-*.png      — App icons (72–512px)
+│   │       │   ├── manifest.json  — PWA manifest
+│   │       │   ├── sw.js          — Service worker
+│   │       │   └── icon-*.png     — App icons (72 to 512px)
 │   │       └── src/
-│   │           ├── app/            — Next.js App Router
+│   │           ├── app/           — Next.js App Router
 │   │           ├── components/
-│   │           │   ├── auth/       — Login screen
-│   │           │   ├── chat/       — Chat view
-│   │           │   ├── cinematic/  — Arc Reactor voice orb (Three.js)
-│   │           │   ├── dashboard/  — System stats dashboard
-│   │           │   ├── memory/     — Daily digest + facts panel
-│   │           │   ├── reminders/  — Reminders management panel
-│   │           │   ├── settings/   — Settings panel
-│   │           │   └── shared/     — Status bar, toasts, plan progress
-│   │           ├── hooks/          — React hooks (auth, WebSocket, API, push)
-│   │           └── lib/            — TypeScript types
+│   │           │   ├── auth/      — Login screen
+│   │           │   ├── chat/      — Chat view
+│   │           │   ├── cinematic/ — Arc Reactor voice orb (Three.js)
+│   │           │   ├── dashboard/ — System stats dashboard
+│   │           │   ├── memory/    — Daily digest and facts panel
+│   │           │   ├── reminders/ — Reminders management panel
+│   │           │   ├── settings/  — Settings panel
+│   │           │   └── shared/    — Status bar, toasts, plan progress
+│   │           ├── hooks/         — React hooks (auth, WebSocket, API, push)
+│   │           └── lib/           — TypeScript types
 │   └── voice/
-│       ├── listener.py       — Microphone + wake word + STT pipeline
-│       └── speaker.py        — TTS + audio output pipeline
-├── desktop-overlay/          — macOS Swift overlay (Arc Reactor HUD)
-├── docs/                     — Screenshots and architecture docs
-├── templates/prompts/        — YAML task templates for the agent
-├── tests/                    — pytest test suite
-├── .env.example              — Environment variable reference
-├── requirements.txt          — Python dependencies
-├── setup.bat / setup.sh      — One-time setup scripts
-└── start.bat / start.sh      — Launch scripts
+│       ├── listener.py            — Microphone + wake word + STT pipeline
+│       └── speaker.py             — TTS + audio output pipeline
+├── desktop-overlay/               — macOS Swift overlay (Arc Reactor HUD)
+├── docs/                          — Screenshots and architecture docs
+├── templates/prompts/             — YAML task templates for the agent
+├── tests/                         — pytest test suite
+├── .env.example                   — Environment variable reference
+├── requirements.txt               — Python dependencies
+├── setup.bat / setup.sh           — One-time setup scripts
+└── start.bat / start.sh           — Launch scripts
 ```
 
 ---
@@ -434,7 +492,7 @@ All endpoints require authentication (PIN-based session token) except `/auth/log
 | Method | Path | Description |
 |---|---|---|
 | `POST` | `/auth/login` | Verify PIN, get session token |
-| `GET` | `/auth/status` | Check if current request is authenticated |
+| `GET` | `/auth/status` | Check if the current request is authenticated |
 | `GET` | `/` | Status and uptime |
 | `GET` | `/health` | Full health report (circuit breakers, perf, cache) |
 | `POST` | `/chat` | Send a message, get a response |
@@ -451,14 +509,14 @@ All endpoints require authentication (PIN-based session token) except `/auth/log
 | `GET` | `/reminders/{id}/audio` | Stream the attached voice recording |
 | `GET` | `/digest` | Today's full daily digest |
 | `GET` | `/digest/wake-briefing` | Short spoken morning briefing text |
-| `GET` | `/profile` | Get user profile |
+| `GET` | `/profile` | Get user profile (includes `mode` field) |
 | `PUT` | `/profile` | Update a profile field |
 | `GET` | `/plan` | Active task plan status |
 | `GET` | `/learning` | Learning loop insights |
 | `GET` | `/proactive` | Proactive engine status |
 | `POST` | `/proactive/settings` | Enable or disable suggestion categories |
 | `GET` | `/agents` | Multi-agent coordinator status |
-| `POST` | `/voice/transcribe` | Transcribe uploaded audio (WebM/WAV/OGG) |
+| `POST` | `/voice/transcribe` | Transcribe uploaded audio (WebM / WAV / OGG) |
 | `WS` | `/ws` | Real-time chat with token streaming |
 | `WS` | `/ws/extension` | Chrome Extension DOM bridge |
 | `WS` | `/ws/overlay` | Desktop overlay state feed |
@@ -467,12 +525,13 @@ All endpoints require authentication (PIN-based session token) except `/auth/log
 
 ## Security
 
-- **PIN authentication** — All non-local connections require a session token obtained by verifying a PIN. Local connections (`localhost`) bypass auth for developer convenience.
+- **PIN authentication** — All non-local connections require a session token obtained by verifying a PIN. Local connections bypass auth for developer convenience.
 - **CSRF protection** — All mutating requests from non-local origins require an `X-Tobi-Client` header.
 - **Security headers** — Every response sets `X-Content-Type-Options`, `X-Frame-Options`, `Content-Security-Policy`, `Referrer-Policy`, and `Permissions-Policy`.
 - **Input sanitisation** — User input is stripped of prompt injection patterns before being passed to the LLM.
 - **Circuit breakers** — The Claude API and individual tools have circuit breakers that open after repeated failures to prevent cascading errors.
 - **Rate limiting** — The login endpoint is rate-limited per client IP.
+- **Confirmation on destructive actions** — Financial and data-deletion operations require explicit confirmation before execution. A compromised or injected session cannot silently delete data or trigger payments.
 
 ---
 
@@ -488,13 +547,22 @@ All endpoints require authentication (PIN-based session token) except `/auth/log
 - [x] Reminders management UI panel
 - [x] Memory and daily digest UI panel
 
+### Dev Mode (in progress)
+- [ ] Mode toggle in user profile (`personal` / `dev` / `both`)
+- [ ] Narrated code sessions — approach, tradeoffs, confirmation before writing
+- [ ] Smart contract audit mode — one finding at a time, plain language
+- [ ] Concept checkpoints with skill-gap fact storage
+- [ ] Voice pair-programming (Whisper pipeline + code output)
+- [ ] SMS reminder delivery (Twilio / Africa's Talking)
+- [ ] Desktop alarm via Electron system-tray companion
+
 ### Phase 1 — Contacts and Relationship Layer
 - [ ] Import contacts via CSV or Android Contacts API
 - [ ] Log last-contacted date per person
 - [ ] Relationship check-in nudges ("you haven't spoken to X in 3 weeks")
 
 ### Phase 2 — Founder Ops Dashboard
-- [ ] Connect to business database (inventory, sales queries via natural language)
+- [ ] Connect to business database for natural-language inventory and sales queries
 - [ ] Client pipeline status rollup
 - [ ] Cross-project status: "what's the state of everything?"
 
@@ -504,7 +572,7 @@ All endpoints require authentication (PIN-based session token) except `/auth/log
 - [ ] Relay client messages through the number
 
 ### Phase 4 — Agentic Execution
-- [ ] Website builder on command (generate and deploy a Vite/React site via Vercel API)
+- [ ] Website builder on command — generate and deploy a site via Vercel API
 - [ ] Inventory and business management writes (not just reads)
 - [ ] Invoice generation and client onboarding document creation
 

@@ -53,98 +53,20 @@ export interface AuthState {
 }
 
 export function useAuth(): AuthState {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLocal, setIsLocal] = useState(false);
-  const [token, setToken] = useState<string | null>(getStoredToken());
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const checkedRef = useRef(false);
-
-  useEffect(() => {
-    if (checkedRef.current) return;
-    checkedRef.current = true;
-
-    const checkAuth = async () => {
-      try {
-        const headers: Record<string, string> = {};
-        const storedToken = getStoredToken();
-        if (storedToken) {
-          headers["Authorization"] = `Bearer ${storedToken}`;
-        }
-
-        const resp = await fetch(`${API_BASE}/auth/status`, { headers });
-        if (resp.ok) {
-          const data = await resp.json();
-          setIsAuthenticated(data.authenticated);
-          setIsLocal(data.local || false);
-          if (data.authenticated && storedToken) {
-            setToken(storedToken);
-          }
-        }
-      } catch {
-        // Server not reachable; assume not authenticated
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  const login = useCallback(async (pin: string): Promise<boolean> => {
-    setLoginError(null);
-    try {
-      const resp = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin }),
-      });
-
-      if (resp.ok) {
-        const data = await resp.json();
-        const newToken = data.token;
-        setToken(newToken);
-        storeToken(newToken);
-        setIsAuthenticated(true);
-        return true;
-      } else {
-        const errData = await resp.json().catch(() => ({}));
-        setLoginError(errData.error || "Invalid PIN.");
-        return false;
-      }
-    } catch (err) {
-      setLoginError("Cannot reach Tobi server. Please try again.");
-      return false;
-    }
-  }, []);
-
-  const logout = useCallback(async () => {
-    try {
-      const headers: Record<string, string> = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      await fetch(`${API_BASE}/auth/logout`, {
-        method: "POST",
-        headers,
-      });
-    } catch {
-      // Best-effort logout
-    }
-    setToken(null);
-    clearStoredToken();
-    setIsAuthenticated(false);
-  }, [token]);
+  // Auth is disabled — no login screen, open access on localhost.
+  // The backend still validates tokens for remote connections,
+  // but we bypass the gate entirely in the UI.
+  const noopLogin = useCallback(async (_pin: string) => true, []);
+  const noopLogout = useCallback(async () => {}, []);
 
   return {
-    isAuthenticated,
-    isLoading,
-    isLocal,
-    token,
-    loginError,
-    login,
-    logout,
+    isAuthenticated: true,
+    isLoading: false,
+    isLocal: true,
+    token: "local",
+    loginError: null,
+    login: noopLogin,
+    logout: noopLogout,
   };
 }
 

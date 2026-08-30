@@ -67,16 +67,18 @@ export default function StatusBar({
   sessionCost = 0.0,
 }: StatusBarProps) {
   return (
-    <div className="w-full bg-Tobi-surface/80 backdrop-blur-xl border-b border-white/[0.04] px-3 sm:px-6 py-2 sm:py-2.5 flex-shrink-0">
+    <div className="w-full backdrop-blur-xl border-b px-3 sm:px-6 py-2 sm:py-2.5 flex-shrink-0"
+         style={{ background: 'var(--tobi-surface)', borderColor: 'var(--tobi-border)' }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-Tobi-cyan/60 hidden sm:block"
-               style={{ boxShadow: '0 0 6px rgba(0,212,255,0.4)' }} />
-          <span className="text-sm sm:text-base font-semibold Tobi-glow-subtle tracking-[0.18em] sm:tracking-[0.25em]">
-            J.A.R.V.I.S.
+          <div className="w-2 h-2 rounded-full hidden sm:block"
+               style={{ background: 'var(--color-gold-bright)', boxShadow: '0 0 8px rgba(212,168,67,0.5)' }} />
+          <span className="text-sm sm:text-base font-semibold Tobi-glow-subtle tracking-[0.18em] sm:tracking-[0.22em]"
+                style={{ color: 'var(--tobi-text)', fontWeight: 700 }}>
+            TOBI
           </span>
-          <span className="text-3xs text-Tobi-text-dim/30 font-mono hidden sm:inline">
-            v0.2.0
+          <span className="text-3xs text-Tobi-text-muted/60 font-mono hidden sm:inline">
+            v0.3.0
           </span>
         </div>
 
@@ -88,7 +90,8 @@ export default function StatusBar({
             </span>
           </div>
 
-          <div className="flex items-center Tobi-glass-subtle p-0.5 gap-0.5">
+          <div className="flex items-center p-0.5 gap-0.5 rounded-lg border"
+               style={{ background: 'rgba(74,55,40,0.05)', borderColor: 'var(--tobi-border)' }}>
             {tabs.map(({ mode, label, iconPaths }) => {
               const isActive = viewMode === mode;
               return (
@@ -100,8 +103,8 @@ export default function StatusBar({
                     transition-all duration-200 ease-out
                     text-2xs font-medium uppercase tracking-[0.08em]
                     ${isActive
-                      ? "bg-Tobi-cyan/10 text-Tobi-cyan border border-Tobi-cyan/15"
-                      : "text-Tobi-text-dim/40 hover:text-Tobi-text-dim/70 hover:bg-white/[0.03] border border-transparent"
+                      ? "bg-Tobi-gold/10 text-Tobi-gold border border-Tobi-gold/20"
+                      : "text-Tobi-text-dim/50 hover:text-Tobi-text-sub hover:bg-black/[0.03] border border-transparent"
                     }
                   `}
                   aria-label={label}
@@ -123,7 +126,7 @@ export default function StatusBar({
                   </svg>
                   <span className="hidden sm:inline">{label}</span>
                   {isActive && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-3 h-[2px] rounded-full bg-Tobi-cyan/50" />
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-3 h-[2px] rounded-full bg-Tobi-gold/60" />
                   )}
                 </button>
               );
@@ -132,16 +135,16 @@ export default function StatusBar({
         </div>
 
         <div className="text-right hidden sm:flex flex-col items-end">
-          <div className="text-3xs text-Tobi-text-dim/35 uppercase tracking-[0.12em]">
+          <div className="text-3xs uppercase tracking-[0.12em]" style={{ color: 'var(--tobi-text-muted)' }}>
             Session
           </div>
-          <div className="text-sm font-mono text-Tobi-cyan/70 tabular-nums">
+          <div className="text-sm font-mono tabular-nums" style={{ color: 'var(--color-gold)' }}>
             ${sessionCost.toFixed(4)}
           </div>
         </div>
 
         <div className="sm:hidden">
-          <div className="text-2xs font-mono text-Tobi-cyan/50 tabular-nums">
+          <div className="text-2xs font-mono tabular-nums" style={{ color: 'var(--color-gold)' }}>
             ${sessionCost.toFixed(2)}
           </div>
         </div>

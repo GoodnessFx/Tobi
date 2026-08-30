@@ -505,12 +505,17 @@ app = FastAPI(
 
 _cors_origins = [
     "http://localhost:3000",
+    "http://localhost:3001",
     "http://localhost:3741",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
     "http://127.0.0.1:3741",
     f"http://localhost:{settings.API_PORT}",
     f"http://127.0.0.1:{settings.API_PORT}",
 ]
+
+# Also allow any localhost port so Next.js auto-port shifting never breaks CORS
+_LOCAL_PORT_REGEX = r"http://(localhost|127\.0\.0\.1):\d+"
 
 _tunnel_domain = os.environ.get("Tobi_TUNNEL_DOMAIN", "")
 if _tunnel_domain:
@@ -519,7 +524,7 @@ if _tunnel_domain:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
-    allow_origin_regex=r"https://.*\.trycloudflare\.com",
+    allow_origin_regex=r"(https://.*\.trycloudflare\.com|http://(localhost|127\.0\.0\.1):\d+)",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["authorization", "content-type", "x-requested-with"],
@@ -1332,6 +1337,31 @@ async def websocket_extension(websocket: WebSocket):
         logger.error("Chrome extension WebSocket error: %s", e)
     finally:
         chrome_extension.clear_extension_ws()
+
+from Tobi.tools.vscode_bridge import vscode_bridge
+
+@app.websocket("/ws/vscode")
+async def websocket_vscode(websocket: WebSocket):
+    """WebSocket endpoint for Tobi VS Code Extension."""
+    client_host = websocket.client.host if websocket.client else ""
+    if not auth.is_local_request(client_host):
+        await websocket.close(code=4003, reason="VS Code extension only available locally")
+        return
+
+    await websocket.accept()
+    logger.info("VS Code extension connected.")
+    vscode_bridge.set_ws(websocket)
+
+    try:
+        while True:
+            data = await websocket.receive_json()
+            await vscode_bridge.handle_message(data)
+    except WebSocketDisconnect:
+        logger.info("VS Code extension disconnected.")
+    except Exception as e:
+        logger.error("VS Code extension WebSocket error: %s", e)
+    finally:
+        vscode_bridge.clear_ws()
 
 
 @app.websocket("/ws/overlay")

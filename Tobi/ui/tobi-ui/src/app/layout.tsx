@@ -3,16 +3,16 @@ import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: "TOBI",
-  description: "Total Omni Brain Intelligence — Personal AI companion with persistent memory",
+  description: "Total Omni Brain Intelligence — your personal AI operator",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "TOBI",
   },
   other: {
     "mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-status-bar-style": "default",
   },
 };
 
@@ -22,7 +22,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#000a19",
+  themeColor: "#faf7f2",
 };
 
 export default function RootLayout({

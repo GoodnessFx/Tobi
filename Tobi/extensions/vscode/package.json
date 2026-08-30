@@ -1,0 +1,64 @@
+{
+  "name": "tobi-vscode",
+  "displayName": "Tobi VS Code Bridge",
+  "description": "Bridges VS Code context to Tobi backend",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "tobi.auditContract",
+        "title": "TOBI: Audit this contract"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "tobi.auditContract",
+          "when": "resourceExtname == .sol",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "tobi-sidebar",
+          "title": "Tobi",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "tobi-sidebar": [
+        {
+          "type": "webview",
+          "id": "tobiSidebar",
+          "name": "Tobi AI Companion"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "18.x",
+    "@types/vscode": "^1.80.0",
+    "vsce": "^2.15.0",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}

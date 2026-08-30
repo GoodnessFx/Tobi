@@ -82,6 +82,12 @@ if %ERRORLEVEL% neq 0 (
     echo [OK] Playwright installed
 )
 
+:: ── PC Wake Setup (Windows) ──────────────────────────────────
+echo.
+echo Setting up OS wake permissions for alarms...
+powershell -Command "$action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument '/c exit'; $trigger = New-ScheduledTaskTrigger -Once -At '00:00'; $settings = New-ScheduledTaskSettingsSet -WakeToRun; Register-ScheduledTask -TaskName 'TobiWake' -Action $action -Trigger $trigger -Settings $settings -Force" >nul 2>&1
+echo [OK] Scheduled task 'TobiWake' created for PC wake functionality.
+
 :: ── Data directories ─────────────────────────────────────────
 if not exist "data" mkdir data
 if not exist "data\logs" mkdir data\logs

@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { ViewMode, OrbState } from "@/lib/types";
 import { useTobiWebSocket } from "@/hooks/useTobiWebSocket";
 import { useServerStatus } from "@/hooks/useServerStatus";
-import { useAuth } from "@/hooks/useAuth";
+import { useStartupGreeting } from "@/hooks/useStartupGreeting";
 import StatusBar from "@/components/shared/StatusBar";
 import ProactiveToast from "@/components/shared/ProactiveToast";
 import PlanProgress from "@/components/shared/PlanProgress";
@@ -13,13 +13,11 @@ import ChatView from "@/components/chat/ChatView";
 import DashboardView from "@/components/dashboard/DashboardView";
 import RemindersPanel from "@/components/reminders/RemindersPanel";
 import MemoryPanel from "@/components/memory/MemoryPanel";
-import LoginScreen from "@/components/auth/LoginScreen";
 import { SettingsPanel } from "@/components/settings/SettingsPanel";
 
 const SPEAKING_LINGER_MS = 1800;
 
 export default function Page() {
-  const authState = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>("cinematic");
   const [speakingLinger, setSpeakingLinger] = useState(false);
   const [isBrowserMicRecording, setIsBrowserMicRecording] = useState(false);
@@ -39,93 +37,74 @@ export default function Page() {
     suggestions,
     dismissSuggestion,
     activePlan,
-  } = useTobiWebSocket(authState.token);
+  } = useTobiWebSocket(null);
 
-  const { serverStatus } = useServerStatus(authState.token);
+  const { serverStatus } = useServerStatus(null);
 
+  // ── Startup greeting — fires once on connect ─────────────────────────
+  const { handleUserMessage: greetingIntercept } = useStartupGreeting({
+    isConnected: connectionStatus === "connected",
+    sendMessage,
+    isProcessing,
+  });
+
+  // ── Linger animation after voice/stream ends ─────────────────────────
   const prevStreamingRef = useRef(false);
   const prevVoiceSpeakingRef = useRef(false);
   useEffect(() => {
     const wasStreaming = prevStreamingRef.current;
-    const wasVoiceSpeaking = prevVoiceSpeakingRef.current;
+    const wasVoice = prevVoiceSpeakingRef.current;
     prevStreamingRef.current = isStreaming;
     prevVoiceSpeakingRef.current = isVoiceSpeaking;
 
-    const streamingJustEnded = wasStreaming && !isStreaming;
-    const voiceJustEnded = wasVoiceSpeaking && !isVoiceSpeaking;
-
-    if (streamingJustEnded || voiceJustEnded) {
+    if ((wasStreaming && !isStreaming) || (wasVoice && !isVoiceSpeaking)) {
       if (!isStreaming && !isVoiceSpeaking) {
         setSpeakingLinger(true);
-
         if (lingerTimerRef.current) clearTimeout(lingerTimerRef.current);
-        lingerTimerRef.current = setTimeout(() => {
-          setSpeakingLinger(false);
-        }, SPEAKING_LINGER_MS);
+        lingerTimerRef.current = setTimeout(() => setSpeakingLinger(false), SPEAKING_LINGER_MS);
       }
     }
-
     if (isProcessing) {
       setSpeakingLinger(false);
-      if (lingerTimerRef.current) {
-        clearTimeout(lingerTimerRef.current);
-        lingerTimerRef.current = null;
-      }
+      if (lingerTimerRef.current) { clearTimeout(lingerTimerRef.current); lingerTimerRef.current = null; }
     }
   }, [isStreaming, isVoiceSpeaking, isProcessing]);
 
-  useEffect(() => {
-    return () => {
-      if (lingerTimerRef.current) clearTimeout(lingerTimerRef.current);
-    };
-  }, []);
+  useEffect(() => () => { if (lingerTimerRef.current) clearTimeout(lingerTimerRef.current); }, []);
 
+  // ── Handlers ─────────────────────────────────────────────────────────
   const handleBrowserMicState = useCallback(
-    (recording: boolean) => {
-      setIsBrowserMicRecording(recording);
-      sendBrowserMicState(recording);
-    },
+    (recording: boolean) => { setIsBrowserMicRecording(recording); sendBrowserMicState(recording); },
     [sendBrowserMicState]
   );
 
+  // Intercept user messages for name-capture during first-time flow
+  const handleChatSubmit = useCallback(
+    (message: string) => { greetingIntercept(message); sendMessage(message); },
+    [sendMessage, greetingIntercept]
+  );
+
+  const handleModeChange = useCallback((mode: ViewMode) => setViewMode(mode), []);
+
   const orbState: OrbState = useMemo(() => {
     if (connectionStatus === "error") return "error";
-    if (isProcessing) return "thinking";
-    if (isStreaming) return "speaking";
-    if (isVoiceSpeaking) return "speaking";
-    if (speakingLinger) return "speaking";
+    if (isProcessing)          return "thinking";
+    if (isStreaming)           return "speaking";
+    if (isVoiceSpeaking)       return "speaking";
+    if (speakingLinger)        return "speaking";
     if (isBrowserMicRecording) return "listening";
     return "idle";
   }, [connectionStatus, isProcessing, isStreaming, isVoiceSpeaking, speakingLinger, isBrowserMicRecording]);
 
-  const handleChatSubmit = useCallback(
-    (message: string) => {
-      sendMessage(message);
-    },
-    [sendMessage]
-  );
-
-  const handleModeChange = useCallback((mode: ViewMode) => {
-    setViewMode(mode);
-  }, []);
-
   const sessionCost = costSummary?.sessionCostUsd ?? 0;
   const isActive = isProcessing || isStreaming;
 
-  if (authState.isLoading) {
-    return (
-      <div className="h-dvh w-screen flex items-center justify-center bg-black">
-        <div className="w-8 h-8 border-2 border-blue-400/40 border-t-blue-400 rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!authState.isAuthenticated) {
-    return <LoginScreen onLogin={authState.login} error={authState.loginError} />;
-  }
-
+  // ── Render ────────────────────────────────────────────────────────────
   return (
-    <div className="h-dvh w-screen flex flex-col bg-black overflow-hidden safe-top safe-bottom">
+    <div
+      className="h-dvh w-screen flex flex-col overflow-hidden safe-top safe-bottom"
+      style={{ background: "var(--tobi-bg)" }}
+    >
       <StatusBar
         viewMode={viewMode}
         onModeChange={handleModeChange}
@@ -133,6 +112,7 @@ export default function Page() {
         sessionCost={sessionCost}
       />
 
+      {/* Cinematic orb view — always mounted, hidden when inactive */}
       <div
         className="flex-1 flex flex-col"
         style={{ display: viewMode === "cinematic" ? "flex" : "none" }}
@@ -145,7 +125,7 @@ export default function Page() {
           onSendMessage={handleChatSubmit}
           disabled={connectionStatus !== "connected"}
           onBrowserMicState={handleBrowserMicState}
-          authToken={authState.token}
+          authToken={null}
         />
       </div>
 
@@ -157,7 +137,7 @@ export default function Page() {
           onClearConversation={clearMessages}
           disabled={connectionStatus !== "connected"}
           onBrowserMicState={handleBrowserMicState}
-          authToken={authState.token}
+          authToken={null}
         />
       )}
 
@@ -179,19 +159,13 @@ export default function Page() {
 
       {viewMode === "memory" && (
         <div className="flex-1 overflow-hidden">
-          <MemoryPanel token={authState.token} />
+          <MemoryPanel token={null} />
         </div>
       )}
 
-      <ProactiveToast
-        suggestions={suggestions}
-        onDismiss={dismissSuggestion}
-      />
-
+      <ProactiveToast suggestions={suggestions} onDismiss={dismissSuggestion} />
       <PlanProgress plan={activePlan} />
-
       <SettingsPanel />
     </div>
   );
 }
-

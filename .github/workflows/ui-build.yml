@@ -1,0 +1,32 @@
+name: UI Build Check
+
+on:
+  push:
+    paths:
+      - 'Tobi/ui/tobi-ui/**'
+  pull_request:
+    paths:
+      - 'Tobi/ui/tobi-ui/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Tobi/ui/tobi-ui
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'Tobi/ui/tobi-ui/package-lock.json'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build
+        run: npm run build

@@ -148,12 +148,12 @@ echo "  [5/6] Installing audio and wake word packages..."
 pip install "pyaudio>=0.2.14" "numpy>=2.0.0" --quiet 2>&1 | grep -v "already satisfied" || true
 ok "Audio packages"
 
-# OpenWakeWord can also be tricky
-if pip install "openwakeword>=0.6.0" --quiet 2>&1; then
+# OpenWakeWord can also be tricky (requires Python <= 3.11)
+if pip install -r requirements-voice-wakeword.txt --quiet 2>&1; then
     ok "OpenWakeWord (Hey Tobi detection)"
 else
-    warn "OpenWakeWord failed. Tobi will use keyboard activation instead."
-    echo "  You can try manually: pip install openwakeword"
+    warn "OpenWakeWord failed (requires Python <= 3.11). Tobi will use keyboard activation instead."
+    echo "  You can try manually: pip install -r requirements-voice-wakeword.txt"
 fi
 
 echo "  [6/6] Installing memory and utilities..."

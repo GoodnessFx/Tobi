@@ -1,0 +1,5 @@
+# Optional Wake Word Support
+# Important: openwakeword depends on tflite-runtime which currently
+# requires Python <= 3.11 on most platforms.
+
+openwakeword>=0.6.0

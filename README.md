@@ -128,9 +128,9 @@ Dev mode adds a coding lens on top of the existing relationship nudge system. TO
 
 - **Whisper STT** — Browser microphone or terminal microphone transcribed via faster-whisper
 - **Edge-TTS / Kokoro TTS** — Natural-sounding voice responses
-- **Wake-word detection** — "Tobi" or "Hey Tobi" keeps the mic loop alive
+- **Wake-word detection** — "Tobi" or "Hey Tobi" keeps the mic loop alive *(Note: Optional, requires Python <= 3.11)*
 - **Clap detection** — 2 claps to wake and summarise where you left off; 3 claps for status check
-- **Browser voice** — Full push-to-talk in the PWA; audio streamed in chunks for low latency
+- **Browser voice** — Full push-to-talk in the PWA; audio streamed in chunks for low latency *(Verified working on all supported Python versions)*
 
 ### Web and Browser Automation
 

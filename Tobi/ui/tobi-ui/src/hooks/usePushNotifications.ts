@@ -100,13 +100,18 @@ export function usePushNotifications({
     setSubscription(null);
   }, [subscription]);
 
+interface SwNotificationOptions extends NotificationOptions {
+  actions?: Array<{ action: string; title: string; icon?: string }>;
+}
+
   // ── local (in-page) notification helper ──────────────────────────────────
   /** Show a notification directly from the page (no push needed). */
   const showLocal = useCallback(
     async (title: string, body: string, data?: Record<string, unknown>) => {
       if (permission !== "granted") return;
       const reg = await navigator.serviceWorker.ready;
-      reg.showNotification(title, {
+      
+      const options: SwNotificationOptions = {
         body,
         icon: "/icon-192.png",
         badge: "/icon-96.png",
@@ -116,7 +121,9 @@ export function usePushNotifications({
           { action: "dismiss", title: "Dismiss" },
           { action: "snooze", title: "Snooze 10 min" },
         ],
-      });
+      };
+      
+      reg.showNotification(title, options as NotificationOptions);
     },
     [permission]
   );
@@ -129,5 +136,9 @@ function _urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = window.atob(base64);
-  return Uint8Array.from(raw, (c) => c.charCodeAt(0));
+  const outputArray = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; ++i) {
+    outputArray[i] = raw.charCodeAt(i);
+  }
+  return outputArray;
 }

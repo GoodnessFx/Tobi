@@ -22,7 +22,7 @@ edge-tts>=6.1.0
 soundfile>=0.13.0
 
 # Voice: Wake Word
-openwakeword>=0.6.0
+# openwakeword>=0.6.0 (Optional: requires Python <=3.11, see requirements-voice-wakeword.txt)
 
 # Voice: Audio I/O
 pyaudio>=0.2.14

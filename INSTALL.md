@@ -10,7 +10,7 @@ GitHub: [github.com/GoodnessFx/Tobi](https://github.com/GoodnessFx/Tobi)
 
 | Requirement | Minimum | Where to get it |
 |---|---|---|
-| Python | 3.11+ | [python.org/downloads](https://www.python.org/downloads/) |
+| Python | 3.11+ | [python.org/downloads](https://www.python.org/downloads/) (Note: Wake-word detection requires Python <= 3.11; push-to-talk works on any supported version) |
 | Node.js | 18+ | [nodejs.org](https://nodejs.org) |
 | Anthropic API key | — | [console.anthropic.com](https://console.anthropic.com) |
 | ffmpeg | any | [ffmpeg.org/download](https://ffmpeg.org/download.html) — add to PATH |

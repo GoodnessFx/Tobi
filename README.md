@@ -60,13 +60,32 @@ Set your mode in your profile via chat: *"switch to dev mode"* or *"set mode to 
 
 ### Core Intelligence
 
-- **Multi-tier LLM routing** — Claude Haiku (fast), Sonnet (brain), Opus (deep) selected automatically per request; Ollama as offline fallback
+- **Multi-provider LLM routing** — Claude stays the primary brain, but the router can hand off task types to OpenAI GPT, Google Gemini, or Grok when configured. Ollama remains the offline fallback.
 - **Persistent memory** — ChromaDB vector store plus SQLite FTS5 for semantic and keyword recall across all sessions
 - **Structured facts** — Automatically extracts facts from every conversation (name, location, preferences, projects, relationships) with confidence scoring and decay
 - **Agentic tool-calling loop** — Claude calls real tools (search, shell, filesystem, browser, calendar, email, notes) and iterates until the task is done
 - **Multi-agent coordinator** — Seven specialised agent types (researcher, coder, browser, system, communicator, analyst, generalist) routed automatically
 - **Task planner** — Decomposes complex requests into subtasks, executes them in parallel where possible, and verifies quality on completion
 - **Learning loop** — Tracks tool reliability, plan success rates, and common failure patterns to improve over time
+- **Encrypted API key vault** — Extra API keys (GPT, Gemini, Grok, GitHub, X, TikTok) are held in a Fernet-encrypted vault locally, never in plaintext `.env`
+
+### Business and Life Ops (the "second brain" layer)
+
+These tools run alongside the core assistant and connect to what you actually do day to day:
+
+| Area | What it does |
+|---|---|
+| **GitHub** | List repos, open PRs, recent commits, issues, stale branches; one summary of a repo or org |
+| **Job and gig search** | RemoteOK and ArbeitNow lookups via official APIs; a daily job brief for active goals |
+| **Market intelligence** | Live crypto prices and trending coins (CoinGecko), forex rates, AI/tech news via RSS — no scraping |
+| **Social monitoring** | X trending topics and search via the official API; TikTok Research/API trends. No scraping |
+| **CRM lite** | Contacts, deals, stages, activity log, stale-contact detection ("you haven't spoken to X in 3 weeks") |
+| **Content pipeline** | Tracks posts per venture (Growth Network, KDP, Vibe District, Tersor Concept), publish cadence, and revenue log |
+| **Coursework** | Courses and assignments with due dates, overdue flags, and a weekly academic brief |
+| **Earnings projection** | 3/6/12-month projection from logged income with a confidence level attached |
+| **Weekly retrospective** | One summary over memory, pipeline, CRM, GitHub, costs, and earnings |
+| **Focus mode** | Silences the proactive engine's nudges and pauses intel collection during a focus block |
+| **Intel engine** | Always-on background jobs that refresh crypto, forex, news, trending, and job briefs on intervals — stored between restarts and served through `/intel/*` |
 
 ### Reminders and Alarms
 
@@ -212,7 +231,10 @@ TOBI ships as a fully installable Progressive Web App:
 | Layer | Technology |
 |---|---|
 | Backend | Python 3.11+, FastAPI, Uvicorn, WebSockets |
-| LLM | Anthropic Claude API (Haiku / Sonnet / Opus) + Ollama fallback |
+| LLM | Anthropic Claude (primary) + optional OpenAI GPT, Google Gemini, Grok via router; Ollama fallback |
+| Market data | CoinGecko, ExchangeRate API, niche RSS feeds |
+| Job search | RemoteOK, ArbeitNow (official APIs) |
+| Social | X API (v2), TikTok Research/API |
 | STT | faster-whisper, Moonshine ONNX |
 | TTS | Kokoro, Edge-TTS |
 | Wake word | OpenWakeWord |
@@ -338,6 +360,19 @@ TTS_ENGINE=edge-tts
 TTS_VOICE=af_heart
 WHISPER_LANGUAGE=en
 
+# Multi-provider routing (all optional — Claude works without them)
+OPENAI_API_KEY=...
+GEMINI_API_KEY=...
+GROK_API_KEY=...
+
+# Business tools
+GITHUB_TOKEN=...
+X_BEARER_TOKEN=...
+TIKTOK_ACCESS_TOKEN=...
+NEWSAPI_KEY=...
+FOCUS_DEFAULT_MINUTES=45
+RETRO_DAY=7
+
 # Authentication PIN (auto-generated if not set)
 TOBI_PIN=1234
 
@@ -419,15 +454,20 @@ Tobi/
 │   │   ├── learning.py            — Tool reliability and plan success tracking
 │   │   ├── planner.py             — Task decomposition into subtasks
 │   │   ├── reminder_tools.py      — Reminder tool schemas and async handlers
-│   │   └── tools_schema.py        — Master tool registry (99 tools)
+│   │   └── tools_schema.py        — Master tool registry (90+ tools)
 │   ├── config/
 │   │   └── settings.py            — All configuration with env var overrides
 │   ├── core/
+│   │   ├── api_key_vault.py       — Encrypted storage for optional API keys
 │   │   ├── brain.py               — Central orchestrator wiring all subsystems
 │   │   ├── digest.py              — Daily digest and morning wake briefing
+│   │   ├── focus_mode.py          — Focus blocks (silences nudges and intel)
+│   │   ├── intel_engine.py        — Always-on scheduled intel collection
 │   │   ├── llm.py                 — Multi-backend LLM engine with streaming
+│   │   ├── multi_llm.py           — Task-type provider router (GPT/Gemini/Grok)
 │   │   ├── proactive.py           — Background engine for reminders and nudges
-│   │   └── server.py              — FastAPI HTTP + WebSocket server
+│   │   ├── server.py              — FastAPI HTTP + WebSocket server
+│   │   └── weekly_retro.py        — Weekly retrospective builder
 │   ├── extensions/
 │   │   └── chrome/                — Chrome Extension (DOM bridge)
 │   ├── memory/
@@ -442,11 +482,19 @@ Tobi/
 │   │   ├── calendar_email.py      — Calendar.app and Mail.app integration
 │   │   ├── chrome_extension.py    — Chrome DOM bridge tools
 │   │   ├── claude_code.py         — Claude Code sub-agent delegation
+│   │   ├── content_pipeline.py    — Content publishing tracker per venture
+│   │   ├── coursework.py          — Courses and assignment tracking
+│   │   ├── crm.py                 — Contacts, deals, and activity log
+│   │   ├── earnings.py            — Income log and projections
 │   │   ├── filesystem.py          — File system tools
+│   │   ├── github_tools.py        — GitHub repos, PRs, issues, commits
+│   │   ├── job_search.py          — RemoteOK / ArbeitNow job search
 │   │   ├── mac_control.py         — macOS app and system control
+│   │   ├── market_intel.py        — Crypto, forex, and AI/tech news
 │   │   ├── notes_access.py        — Apple Notes integration
 │   │   ├── screen.py              — Screenshot and OCR
 │   │   ├── shell.py               — Shell command execution
+│   │   ├── social_media.py        — X and TikTok official API monitoring
 │   │   ├── weather.py             — Weather via Open-Meteo
 │   │   ├── web_browse.py          — Page fetching and link extraction
 │   │   ├── web_search.py          — DuckDuckGo search
@@ -517,6 +565,43 @@ All endpoints require authentication (PIN-based session token) except `/auth/log
 | `POST` | `/proactive/settings` | Enable or disable suggestion categories |
 | `GET` | `/agents` | Multi-agent coordinator status |
 | `POST` | `/voice/transcribe` | Transcribe uploaded audio (WebM / WAV / OGG) |
+| `GET` | `/providers` | Multi-provider LLM routing status |
+| `POST` | `/providers/chat` | Chat pinned to a specific provider (openai / gemini / grok / claude / ollama) |
+| `GET` | `/github/repos` | List GitHub repos |
+| `GET` | `/github/prs` | Open PRs |
+| `GET` | `/github/issues` | Open issues |
+| `GET` | `/github/summary` | One-shot repo summary (includes recent commits) |
+| `GET` | `/jobs/search` | Search jobs (RemoteOK / ArbeitNow) |
+| `GET` | `/jobs/daily` | Daily job brief |
+| `GET` | `/market/crypto` | Live crypto prices + trending |
+| `GET` | `/market/forex` | Forex rates |
+| `GET` | `/market/news` | AI/tech news headlines |
+| `GET` | `/market/brief` | Combined market brief |
+| `GET` | `/market/niche/{niche}` | Niche-specific update |
+| `GET` | `/social/trending` | X + TikTok trending |
+| `GET` | `/social/search` | Search X |
+| `GET` | `/crm/summary` | CRM overview (contacts, deals, stale) |
+| `GET` | `/crm/contacts` | List contacts |
+| `POST` | `/crm/contacts` | Add a contact |
+| `GET` | `/crm/deals` | List deals |
+| `GET` | `/crm/stale` | Stale contacts (no activity in N days) |
+| `GET` | `/content/summary` | Content pipeline summary |
+| `GET` | `/content/{venture}` | Per-venture content update |
+| `GET` | `/academic/brief` | Coursework brief |
+| `GET` | `/academic/upcoming` | Upcoming assignments |
+| `GET` | `/academic/overdue` | Overdue assignments |
+| `GET` | `/earnings/brief` | Earnings projection brief |
+| `GET` | `/vault/status` | API key vault status |
+| `GET` | `/vault/keys` | Stored key names |
+| `GET` | `/focus/status` | Focus mode status |
+| `POST` | `/focus/start` | Start a focus block |
+| `POST` | `/focus/stop` | Stop the focus block |
+| `GET` | `/retro/weekly` | Weekly retrospective |
+| `GET` | `/intel/status` | Intel engine + latest stored results |
+| `GET` | `/intel/latest/{category}` | Latest intel for one category (crypto/forex/news/trending/jobs) |
+| `POST` | `/intel/refresh/{category}` | Force a collection now |
+| `POST` | `/intel/intervals` | Change a category's collection interval (min 300s) |
+| `GET` | `/daily/brief` | Combined brief across all modules (`?sections=digest,github,market`) |
 | `WS` | `/ws` | Real-time chat with token streaming |
 | `WS` | `/ws/extension` | Chrome Extension DOM bridge |
 | `WS` | `/ws/overlay` | Desktop overlay state feed |
@@ -546,6 +631,22 @@ All endpoints require authentication (PIN-based session token) except `/auth/log
 - [x] Push notification service worker with snooze and dismiss
 - [x] Reminders management UI panel
 - [x] Memory and daily digest UI panel
+
+### Business Ops Layer (complete)
+- [x] Encrypted API key vault for optional providers and services
+- [x] Multi-provider LLM routing (GPT / Gemini / Grok on top of Claude)
+- [x] GitHub integration — repos, PRs, commits, issues, summaries
+- [x] Job and gig search (RemoteOK, ArbeitNow) with daily brief
+- [x] Market intelligence — crypto, forex, AI/tech news
+- [x] Social monitoring via X and TikTok official APIs
+- [x] CRM lite — contacts, deals, stale-contact nudges
+- [x] Content pipeline tracker per venture
+- [x] Coursework tracker with overdue detection
+- [x] Earnings log and 3/6/12-month projections
+- [x] Weekly retrospective
+- [x] Focus mode (silences nudges + pauses intel engine)
+- [x] Always-on intel engine with stored, periodic results
+- [x] Combined `/daily/brief` endpoint across all modules
 
 ### Dev Mode (in progress)
 - [ ] Mode toggle in user profile (`personal` / `dev` / `both`)

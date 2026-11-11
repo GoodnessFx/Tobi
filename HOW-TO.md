@@ -396,6 +396,84 @@ Key REST API endpoints:
 | `POST /voice/transcribe` | None | Upload audio for speech-to-text |
 | `POST /clear` | Required | Clear conversation history |
 
+## Business Ops Layer (GitHub, Market, Social, CRM, and more)
+
+Tobi ships with an always-on "business ops" layer on top of the core assistant. Everything below reads its own SQLite table plus optional API keys. With no keys set, the tools report that no key is configured and the core assistant keeps working.
+
+### Multi-provider LLM routing
+
+Outside of Claude, you can optionally enable GPT, Gemini, or Grok. Keys are stored in an encrypted vault (`data/Tobi_vault.enc`, Fernet). Set them via env vars:
+
+```bash
+OPENAI_API_KEY=...
+GEMINI_API_KEY=...
+GROK_API_KEY=...
+```
+
+Then ask Tobi to handle a task type with a specific provider ("use GPT for this") or check routing status at `GET /providers`. The router maps task types — code, writing, analysis, quick Q&A — to whichever provider is configured.
+
+### GitHub
+
+```bash
+GITHUB_TOKEN=...
+```
+
+Exposed through `GET /github/repos`, `/github/prs`, `/github/commits`, `/github/issues`, and `/github/summary`. In chat, ask "what's the state of my GitHub?" or "summarize repo X".
+
+### Market intelligence
+
+```bash
+NEWSAPI_KEY=...   # optional, falls back to RSS feeds
+```
+
+- Crypto prices + trending coins via CoinGecko (no key needed)
+- Forex rates via ExchangeRate API (no key needed)
+- AI/tech headlines via NewsAPI or RSS
+- `GET /market/brief` combines all three
+
+### Job and gig search
+
+`GET /jobs/search?q=...` searches RemoteOK and ArbeitNow. No API key needed. The intel engine can pull a daily job brief if you set `GITHUB_TOKEN`-independent goals in memory.
+
+### Social monitoring (official APIs only)
+
+```bash
+X_BEARER_TOKEN=...        # X / Twitter API v2
+TIKTOK_ACCESS_TOKEN=...   # TikTok Research / Content Posting API
+```
+
+`GET /social/trending` and `GET /social/search`. Tobi does NOT scrape X or TikTok — only official APIs.
+
+### CRM lite
+
+No keys. Manage contacts and deals through `/crm/contacts`, `/crm/deals`, `/crm/summary`, `/crm/stale`. In chat: "add a contact for [name]", "who haven't I talked to recently?"
+
+### Content pipeline, coursework, earnings
+
+No keys. All logged in SQLite and surfaced through `/content/*`, `/academic/*`, `/earnings/*`. Tell Tobi "I posted to Vibe District" or "add assignment" in plain language — the relevant tool logs it.
+
+### Focus mode
+
+`POST /focus/start` (`{"minutes": 45}`) and `POST /focus/stop`. While active, the proactive engine stops sending nudges and the intel engine pauses collection. Useful during deep work.
+
+### Weekly retrospective
+
+`GET /retro/weekly` builds one summary across memory, content pipeline, CRM, GitHub activity, costs, and earnings for the week.
+
+### Intel engine
+
+The intel engine is an always-on background loop with these default intervals:
+
+| Category | Interval |
+|----------|----------|
+| crypto | 60 min |
+| forex | 120 min |
+| news | 30 min |
+| trending | 60 min |
+| jobs | 6 hours |
+
+Results persist across restarts in `data/intel/intel_state.json`. Surface them via `GET /intel/status`, `GET /intel/latest/{category}`, or the combined `GET /daily/brief`.
+
 ## Testing
 
 Tobi ships with unit tests. Run them with:
@@ -454,6 +532,11 @@ Tobi stores persistent data in the `data/` directory:
 | `data/Tobi_dispatch.db` | Tool dispatch tracking (SQLite) |
 | `data/Tobi_experiments.db` | A/B testing experiment data (SQLite) |
 | `data/Tobi_memory.db` | Semantic memory with FTS (SQLite) |
+| `data/Tobi_crm.db` | Contacts and deals (SQLite) |
+| `data/Tobi_content.db` | Content pipeline + earnings logs (SQLite) |
+| `data/Tobi_academic.db` | Courses and assignments (SQLite) |
+| `data/Tobi_vault.enc` | Encrypted vault for optional provider/service keys (Fernet) |
+| `data/intel/` | Intel engine state and periodic collection results |
 
 ## Troubleshooting
 

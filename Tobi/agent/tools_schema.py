@@ -432,6 +432,116 @@ async def _get_memory_stats() -> str:
     lines.append(f"  Preferences: {ps.get('total_patterns', 0)} patterns tracked")
 
     return "\n".join(lines)
+
+
+# ── New integration tool wrappers ─────────────────────────────────────────────
+async def _github_repos(limit: int = 10) -> str:
+    from Tobi.tools.github_tools import get_my_repos
+    return await get_my_repos(limit)
+
+
+async def _github_open_prs(repo: str = "") -> str:
+    from Tobi.tools.github_tools import get_open_prs
+    return await get_open_prs(repo)
+
+
+async def _github_recent_commits(repo: str, limit: int = 10) -> str:
+    from Tobi.tools.github_tools import get_recent_commits
+    return await get_recent_commits(repo, limit)
+
+
+async def _github_issues(repo: str = "") -> str:
+    from Tobi.tools.github_tools import get_open_issues
+    return await get_open_issues(repo)
+
+
+async def _github_summary():
+    from Tobi.tools.github_tools import get_github_summary
+    return await get_github_summary()
+
+
+async def _search_jobs(query: str = "web development", limit: int = 15) -> str:
+    from Tobi.tools.job_search import search_jobs
+    return await search_jobs(query, limit)
+
+
+async def _daily_job_brief():
+    from Tobi.tools.job_search import get_daily_job_brief
+    return await get_daily_job_brief()
+
+
+async def _get_crypto_prices():
+    from Tobi.tools.market_intel import get_crypto_prices
+    return await get_crypto_prices()
+
+
+async def _get_market_brief():
+    from Tobi.tools.market_intel import get_market_brief
+    return await get_market_brief()
+
+
+async def _get_forex_rates():
+    from Tobi.tools.market_intel import get_forex_rates
+    return await get_forex_rates()
+
+
+async def _get_ai_tech_news():
+    from Tobi.tools.market_intel import get_ai_tech_news
+    return await get_ai_tech_news()
+
+
+async def _get_niche_update(niche: str = "blockchain"):
+    from Tobi.tools.market_intel import get_niche_update
+    return await get_niche_update(niche)
+
+
+async def _get_social_brief():
+    from Tobi.tools.social_media import get_social_brief
+    return await get_social_brief()
+
+
+async def _search_x(query: str):
+    from Tobi.tools.social_media import search_x
+    return await search_x(query)
+
+
+async def _get_crm_brief():
+    from Tobi.tools.crm import get_crm_brief
+    return await get_crm_brief()
+
+
+async def _add_contact(name: str, email: str = "", phone: str = "", company: str = "",
+                       role: str = "", source: str = "", notes: str = "") -> str:
+    from Tobi.tools.crm import add_contact
+    contact = add_contact(name=name, email=email, phone=phone, company=company,
+                          role=role, source=source, notes=notes)
+    return f"Contact added: {contact.name} ({contact.email}) as: {contact.stage}"
+
+
+async def _search_contacts(query: str) -> str:
+    from Tobi.tools.crm import search_contacts
+    contacts = search_contacts(query)
+    if not contacts:
+        return f"No contacts found matching '{query}'."
+    lines = [f"- {c.name} ({c.company or c.email}) - stage: {c.stage}" for c in contacts[:10]]
+    return f"Contacts matching '{query}' ({len(contacts)}):\n" + "\n".join(lines)
+
+
+async def _get_content_brief():
+    from Tobi.tools.content_pipeline import get_content_brief
+    return await get_content_brief()
+
+
+async def _get_academic_brief():
+    from Tobi.tools.coursework import get_academic_brief
+    return await get_academic_brief()
+
+
+async def _get_earnings_brief():
+    from Tobi.tools.earnings import get_earnings_brief
+    return await get_earnings_brief()
+
+
 TOOL_SCHEMAS = [
     # ---- macOS Application Control ----
     {
@@ -2140,6 +2250,191 @@ TOOL_SCHEMAS = [
             "required": [],
         },
     },
+    # ── GitHub Integration ──────────────────────────────────────────────────
+    {
+        "name": "github_repos",
+        "description": "List the user's GitHub repositories with language, stars, and last update.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"limit": {"type": "integer", "description": "Max repos to return"}},
+        },
+    },
+    {
+        "name": "github_open_prs",
+        "description": "Get open pull requests across the user's repos or in a specific repo.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"repo": {"type": "string", "description": "Optional repo name like 'owner/repo'"}},
+        },
+    },
+    {
+        "name": "github_recent_commits",
+        "description": "Get recent commits from a specific GitHub repo.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "repo": {"type": "string", "description": "Repo name like 'owner/repo'"},
+                "limit": {"type": "integer", "description": "Max commits to return"},
+            },
+            "required": ["repo"],
+        },
+    },
+    {
+        "name": "github_issues",
+        "description": "Get open issues across the user's repos or in a specific repo.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"repo": {"type": "string", "description": "Optional repo name like 'owner/repo'"}},
+        },
+    },
+    {
+        "name": "github_summary",
+        "description": "Build a summary of all GitHub activity: repos, open PRs, issues. Used for daily briefings.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    # ── Job & Gig Search ─────────────────────────────────────────────────────
+    {
+        "name": "search_jobs",
+        "description": "Search job and gig boards for web dev and digital marketing work.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Search query like 'react developer' or 'digital marketing'"},
+                "limit": {"type": "integer", "description": "Max results to return"},
+            },
+        },
+    },
+    {
+        "name": "daily_job_brief",
+        "description": "Get a daily job brief with top matches across boards for the user's skillset.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    # ── Market Intelligence ──────────────────────────────────────────────────
+    {
+        "name": "get_crypto_prices",
+        "description": "Get current crypto prices for major coins (BTC, ETH, SOL, BNB, XRP).",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "get_market_brief",
+        "description": "Get a combined market brief: crypto prices, forex rates, and AI/tech news.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "get_forex_rates",
+        "description": "Get current forex rates for major pairs including USD/NGN.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "get_ai_tech_news",
+        "description": "Get the latest AI and tech news headlines.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "get_niche_update",
+        "description": "Get updates for a specific niche: blockchain, crypto, forex, or AI.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "niche": {"type": "string", "enum": ["blockchain", "crypto", "forex", "ai", "tech"], "description": "The niche to get updates for"},
+            },
+        },
+    },
+    # ── Social Media Monitoring ──────────────────────────────────────────────
+    {
+        "name": "get_social_brief",
+        "description": "Get trending topics from X/Twitter and TikTok.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "search_x",
+        "description": "Search recent posts on X/Twitter for a query.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"query": {"type": "string", "description": "Search query"}},
+            "required": ["query"],
+        },
+    },
+    # ── CRM Lite ─────────────────────────────────────────────────────────────
+    {
+        "name": "get_crm_brief",
+        "description": "Get CRM summary: contacts, leads, clients, deals, stale contacts.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "add_contact",
+        "description": "Add a new contact/client/lead to the CRM.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "description": "Contact name"},
+                "email": {"type": "string", "description": "Contact email"},
+                "phone": {"type": "string", "description": "Contact phone"},
+                "company": {"type": "string", "description": "Company"},
+                "role": {"type": "string", "description": "Role"},
+                "source": {"type": "string", "description": "Where they came from"},
+                "notes": {"type": "string", "description": "Notes"},
+            },
+            "required": ["name"],
+        },
+    },
+    {
+        "name": "search_contacts",
+        "description": "Search the CRM for contacts by name, company, or notes.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"query": {"type": "string", "description": "Search query"}},
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "get_content_brief",
+        "description": "Get content pipeline summary across ventures (Vibe District, KDP, etc.).",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "get_academic_brief",
+        "description": "Get academic brief: upcoming assignments, overdue items, courses.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "get_earnings_brief",
+        "description": "Get earnings projections across all ventures at 3, 6, and 12 months.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
     # ── Reminders (Phase 0) ──────────────────────────────────────────────────
     *REMINDER_TOOL_SCHEMAS,
 ]
@@ -2261,6 +2556,34 @@ TOOL_REGISTRY = {
     "get_note_folders": notes_access.get_note_folders,
     # Reminders (Phase 0)
     **REMINDER_TOOL_REGISTRY,
+    # GitHub Integration
+    "github_repos": _github_repos,
+    "github_open_prs": _github_open_prs,
+    "github_recent_commits": _github_recent_commits,
+    "github_issues": _github_issues,
+    "github_summary": _github_summary,
+    # Job & Gig Search
+    "search_jobs": _search_jobs,
+    "daily_job_brief": _daily_job_brief,
+    # Market Intelligence
+    "get_crypto_prices": _get_crypto_prices,
+    "get_market_brief": _get_market_brief,
+    "get_forex_rates": _get_forex_rates,
+    "get_ai_tech_news": _get_ai_tech_news,
+    "get_niche_update": _get_niche_update,
+    # Social Media
+    "get_social_brief": _get_social_brief,
+    "search_x": _search_x,
+    # CRM Lite
+    "get_crm_brief": _get_crm_brief,
+    "add_contact": _add_contact,
+    "search_contacts": _search_contacts,
+    # Content Pipeline
+    "get_content_brief": _get_content_brief,
+    # Academic
+    "get_academic_brief": _get_academic_brief,
+    # Earnings
+    "get_earnings_brief": _get_earnings_brief,
 }
 
 

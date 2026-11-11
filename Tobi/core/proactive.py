@@ -95,6 +95,18 @@ class ProactiveEngine:
         self._category_enabled[category] = enabled
         logger.info("Proactive category %s: %s", category.value, "enabled" if enabled else "disabled")
 
+    def _enabled_check(self) -> bool:
+        """Check if proactive engine should run given focus mode."""
+        if not self._enabled:
+            return False
+        try:
+            from Tobi.core.focus_mode import is_focus_active
+            if is_focus_active():
+                return False
+        except ImportError:
+            pass
+        return True
+
     def set_enabled(self, enabled: bool):
         """Enable or disable the entire proactive engine."""
         self._enabled = enabled
@@ -124,7 +136,7 @@ class ProactiveEngine:
 
         while self._running:
             try:
-                if self._enabled and not self._conversation_active:
+                if self._enabled_check() and not self._conversation_active:
                     await self._run_checks()
                 elif self._conversation_active:
                     if time.time() - self._last_interaction > 300:

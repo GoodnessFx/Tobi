@@ -468,6 +468,11 @@ async def lifespan(app: FastAPI):
     brain.proactive._on_suggestion = _deliver_proactive_suggestion
     # Register memory store for goal-drift checks
     brain.proactive.set_memory(brain.memory)
+
+    # Start the always-on intel engine
+    from Tobi.core.intel_engine import intel_engine
+    intel_engine.start()
+
     cleanup_task = asyncio.create_task(_session_cleanup_loop())
 
     # Register signal handlers for graceful shutdown. When uvicorn receives
@@ -490,6 +495,10 @@ async def lifespan(app: FastAPI):
             pass
 
     yield
+
+    # Stop the intel engine on shutdown
+    from Tobi.core.intel_engine import intel_engine
+    intel_engine.stop()
 
     cleanup_task.cancel()
     await brain.shutdown()
@@ -1682,3 +1691,490 @@ async def get_wake_briefing():
     from Tobi.core.digest import build_wake_briefing
     briefing = await build_wake_briefing(brain)
     return briefing
+
+
+# ============================================================
+# Multi-Provider LLM
+# ============================================================
+
+@app.get("/providers", dependencies=[Depends(require_auth)])
+async def get_providers():
+    """Get available AI providers and their status."""
+    from Tobi.core.multi_llm import multi_llm
+    return {"providers": multi_llm.get_available_providers()}
+
+
+@app.post("/providers/chat", dependencies=[Depends(require_auth)])
+async def provider_chat(request: ChatRequest, provider: str = "", tier: str = "brain"):
+    """Chat with a specific provider or auto-select."""
+    from Tobi.core.multi_llm import multi_llm
+    system_prompt = settings.get_system_prompt()
+    response = await multi_llm.chat(
+        message=request.message,
+        provider=provider,
+        tier=tier,
+        system_prompt=system_prompt,
+    )
+    if response is None:
+        # Fall back to main brain
+        response = await brain.process(request.message)
+    return {"response": response, "provider": provider or "auto"}
+
+
+# ============================================================
+# GitHub Integration
+# ============================================================
+
+@app.get("/github/repos", dependencies=[Depends(require_auth)])
+async def github_repos():
+    """Get the user's GitHub repositories."""
+    from Tobi.tools.github_tools import get_my_repos
+    return {"repos": await get_my_repos()}
+
+
+@app.get("/github/prs", dependencies=[Depends(require_auth)])
+async def github_prs(repo: str = ""):
+    """Get open pull requests."""
+    from Tobi.tools.github_tools import get_open_prs
+    return {"prs": await get_open_prs(repo)}
+
+
+@app.get("/github/issues", dependencies=[Depends(require_auth)])
+async def github_issues(repo: str = ""):
+    """Get open issues."""
+    from Tobi.tools.github_tools import get_open_issues
+    return {"issues": await get_open_issues(repo)}
+
+
+@app.get("/github/summary", dependencies=[Depends(require_auth)])
+async def github_summary():
+    """Get a full GitHub summary for the daily brief."""
+    from Tobi.tools.github_tools import get_github_summary
+    return {"summary": await get_github_summary()}
+
+
+# ============================================================
+# Job Search
+# ============================================================
+
+@app.get("/jobs/search", dependencies=[Depends(require_auth)])
+async def job_search(query: str = "web development", limit: int = 15):
+    """Search for jobs across multiple boards."""
+    from Tobi.tools.job_search import search_jobs
+    return {"results": await search_jobs(query, limit)}
+
+
+@app.get("/jobs/daily", dependencies=[Depends(require_auth)])
+async def daily_jobs():
+    """Get daily job brief."""
+    from Tobi.tools.job_search import get_daily_job_brief
+    return {"brief": await get_daily_job_brief()}
+
+
+# ============================================================
+# Market Intelligence
+# ============================================================
+
+@app.get("/market/crypto", dependencies=[Depends(require_auth)])
+async def market_crypto():
+    """Get crypto prices."""
+    from Tobi.tools.market_intel import get_crypto_prices
+    return {"prices": await get_crypto_prices()}
+
+
+@app.get("/market/forex", dependencies=[Depends(require_auth)])
+async def market_forex():
+    """Get forex rates."""
+    from Tobi.tools.market_intel import get_forex_rates
+    return {"rates": await get_forex_rates()}
+
+
+@app.get("/market/news", dependencies=[Depends(require_auth)])
+async def market_news():
+    """Get AI/tech news."""
+    from Tobi.tools.market_intel import get_ai_tech_news
+    return {"news": await get_ai_tech_news()}
+
+
+@app.get("/market/brief", dependencies=[Depends(require_auth)])
+async def market_brief():
+    """Get combined market brief."""
+    from Tobi.tools.market_intel import get_market_brief
+    return {"brief": await get_market_brief()}
+
+
+@app.get("/market/niche/{niche}", dependencies=[Depends(require_auth)])
+async def market_niche(niche: str):
+    """Get niche-specific market updates."""
+    from Tobi.tools.market_intel import get_niche_update
+    return {"update": await get_niche_update(niche)}
+
+
+# ============================================================
+# Social Media
+# ============================================================
+
+@app.get("/social/trending", dependencies=[Depends(require_auth)])
+async def social_trending():
+    """Get trending topics across social platforms."""
+    from Tobi.tools.social_media import get_social_brief
+    return {"brief": await get_social_brief()}
+
+
+@app.get("/social/search", dependencies=[Depends(require_auth)])
+async def social_search(query: str, platform: str = "x"):
+    """Search social media."""
+    from Tobi.tools.social_media import search_x
+    if platform == "x":
+        return {"results": await search_x(query)}
+    return {"error": f"Platform '{platform}' not supported yet."}
+
+
+# ============================================================
+# CRM Lite
+# ============================================================
+
+@app.get("/crm/summary", dependencies=[Depends(require_auth)])
+async def crm_summary():
+    """Get CRM summary."""
+    from Tobi.tools.crm import get_crm_brief
+    return {"brief": await get_crm_brief()}
+
+
+@app.get("/crm/contacts", dependencies=[Depends(require_auth)])
+async def crm_contacts(query: str = ""):
+    """Search or list contacts."""
+    from Tobi.tools.crm import search_contacts, get_all_contacts
+    if query:
+        return {"contacts": [c.to_dict() for c in search_contacts(query)]}
+    return {"contacts": [c.to_dict() for c in get_all_contacts()]}
+
+
+@app.post("/crm/contacts", dependencies=[Depends(require_auth)])
+async def crm_add_contact(request: Request):
+    """Add a new contact."""
+    from Tobi.tools.crm import add_contact
+    data = await request.json()
+    contact = add_contact(
+        name=data.get("name", ""),
+        email=data.get("email", ""),
+        phone=data.get("phone", ""),
+        company=data.get("company", ""),
+        role=data.get("role", ""),
+        source=data.get("source", ""),
+        notes=data.get("notes", ""),
+    )
+    return contact.to_dict()
+
+
+@app.get("/crm/deals", dependencies=[Depends(require_auth)])
+async def crm_deals():
+    """Get open deals."""
+    from Tobi.tools.crm import get_open_deals
+    return {"deals": [d.to_dict() for d in get_open_deals()]}
+
+
+@app.get("/crm/stale", dependencies=[Depends(require_auth)])
+async def crm_stale(days: int = 14):
+    """Get stale contacts not contacted in N days."""
+    from Tobi.tools.crm import get_stale_contacts
+    return {"contacts": [c.to_dict() for c in get_stale_contacts(days)]}
+
+
+# ============================================================
+# Content Pipeline
+# ============================================================
+
+@app.get("/content/summary", dependencies=[Depends(require_auth)])
+async def content_summary():
+    """Get content pipeline summary."""
+    from Tobi.tools.content_pipeline import get_content_brief
+    return {"brief": await get_content_brief()}
+
+
+@app.get("/content/{venture}", dependencies=[Depends(require_auth)])
+async def content_by_venture(venture: str):
+    """Get content items by venture."""
+    from Tobi.tools.content_pipeline import get_content_by_venture
+    return {"items": [c.to_dict() for c in get_content_by_venture(venture)]}
+
+
+@app.post("/content", dependencies=[Depends(require_auth)])
+async def content_add(request: Request):
+    """Add a content item."""
+    from Tobi.tools.content_pipeline import add_content
+    data = await request.json()
+    item = add_content(
+        venture=data.get("venture", ""),
+        title=data.get("title", ""),
+        content_type=data.get("content_type", "product"),
+        status=data.get("status", "idea"),
+        platform=data.get("platform", ""),
+        price=data.get("price", 0),
+        cost=data.get("cost", 0),
+        notes=data.get("notes", ""),
+    )
+    return item.to_dict()
+
+
+# ============================================================
+# Coursework Tracker
+# ============================================================
+
+@app.get("/academic/brief", dependencies=[Depends(require_auth)])
+async def academic_brief():
+    """Get academic brief."""
+    from Tobi.tools.coursework import get_academic_brief
+    return {"brief": await get_academic_brief()}
+
+
+@app.get("/academic/upcoming", dependencies=[Depends(require_auth)])
+async def academic_upcoming(days: int = 14):
+    """Get upcoming assignments."""
+    from Tobi.tools.coursework import get_upcoming_assignments
+    return {"assignments": [a.to_dict() for a in get_upcoming_assignments(days)]}
+
+
+@app.get("/academic/overdue", dependencies=[Depends(require_auth)])
+async def academic_overdue():
+    """Get overdue assignments."""
+    from Tobi.tools.coursework import get_overdue_assignments
+    return {"assignments": [a.to_dict() for a in get_overdue_assignments()]}
+
+
+@app.post("/academic/courses", dependencies=[Depends(require_auth)])
+async def academic_add_course(request: Request):
+    """Add a course."""
+    from Tobi.tools.coursework import add_course
+    data = await request.json()
+    course = add_course(
+        code=data.get("code", ""),
+        name=data.get("name", ""),
+        lecturer=data.get("lecturer", ""),
+        semester=data.get("semester", ""),
+        credits=data.get("credits", 3),
+    )
+    return course.to_dict()
+
+
+@app.post("/academic/assignments", dependencies=[Depends(require_auth)])
+async def academic_add_assignment(request: Request):
+    """Add an assignment."""
+    from Tobi.tools.coursework import add_assignment
+    data = await request.json()
+    assignment = add_assignment(
+        course_id=data.get("course_id", 0),
+        title=data.get("title", ""),
+        due_date=data.get("due_date", ""),
+        description=data.get("description", ""),
+        priority=data.get("priority", 3),
+        notes=data.get("notes", ""),
+    )
+    return assignment.to_dict()
+
+
+# ============================================================
+# Earnings Projection
+# ============================================================
+
+@app.get("/earnings/brief", dependencies=[Depends(require_auth)])
+async def earnings_brief():
+    """Get earnings projection brief."""
+    from Tobi.tools.earnings import get_earnings_brief
+    return {"brief": await get_earnings_brief()}
+
+
+# ============================================================
+# API Key Vault
+# ============================================================
+
+@app.get("/vault/status", dependencies=[Depends(require_auth)])
+async def vault_status():
+    """Get vault status."""
+    from Tobi.core.api_key_vault import get_vault_status
+    return get_vault_status()
+
+
+@app.get("/vault/keys", dependencies=[Depends(require_auth)])
+async def vault_keys():
+    """List all tracked keys (redacted values)."""
+    from Tobi.core.api_key_vault import list_keys
+    return {"keys": list_keys()}
+
+
+@app.post("/vault/keys", dependencies=[Depends(require_auth)])
+async def vault_store_key(request: Request):
+    """Store an API key."""
+    from Tobi.core.api_key_vault import store_key
+    data = await request.json()
+    store_key(data.get("name", ""), data.get("value", ""))
+    return {"status": "stored", "name": data.get("name")}
+
+
+@app.delete("/vault/keys/{key_name}", dependencies=[Depends(require_auth)])
+async def vault_remove_key(key_name: str):
+    """Remove an API key."""
+    from Tobi.core.api_key_vault import remove_key
+    removed = remove_key(key_name)
+    return {"status": "removed" if removed else "not_found", "name": key_name}
+
+
+# ============================================================
+# Focus Mode
+# ============================================================
+
+@app.get("/focus/status", dependencies=[Depends(require_auth)])
+async def focus_status():
+    """Get focus mode status."""
+    from Tobi.core.focus_mode import get_focus_status
+    return get_focus_status()
+
+
+@app.post("/focus/start", dependencies=[Depends(require_auth)])
+async def focus_start(request: Request):
+    """Start focus mode."""
+    from Tobi.core.focus_mode import start_focus
+    data = await request.json()
+    return start_focus(data.get("minutes", 25))
+
+
+@app.post("/focus/stop", dependencies=[Depends(require_auth)])
+async def focus_stop():
+    """Stop focus mode."""
+    from Tobi.core.focus_mode import stop_focus
+    return stop_focus()
+
+
+# ============================================================
+# Weekly Retro
+# ============================================================
+
+@app.get("/retro/weekly", dependencies=[Depends(require_auth)])
+async def weekly_retro():
+    """Get weekly retrospective."""
+    from Tobi.core.weekly_retro import build_weekly_retro
+    return await build_weekly_retro(brain)
+
+
+# ============================================================
+# Intel Engine (always-on background jobs)
+# ============================================================
+
+@app.get("/intel/status", dependencies=[Depends(require_auth)])
+async def intel_status():
+    """Get intel engine status."""
+    from Tobi.core.intel_engine import intel_engine, get_all_latest
+    return {
+        "engine": intel_engine.get_status(),
+        "latest": get_all_latest(),
+    }
+
+
+@app.get("/intel/latest/{category}", dependencies=[Depends(require_auth)])
+async def intel_latest(category: str):
+    """Get latest intel for a category."""
+    from Tobi.core.intel_engine import get_latest
+    if category not in ("crypto", "forex", "news", "trending", "jobs"):
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Unknown category: {category}. Valid: crypto, forex, news, trending, jobs"},
+        )
+    return get_latest(category)
+
+
+@app.post("/intel/refresh/{category}", dependencies=[Depends(require_auth)])
+async def intel_refresh(category: str):
+    """Force refresh intel for a category."""
+    from Tobi.core import intel_engine as ie
+    if category not in ie.DEFAULT_INTERVALS:
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Unknown category: {category}"},
+        )
+    data = await ie._collect(category)
+    if data:
+        ie._results[category] = {"data": data, "collected_at": __import__("time").time()}
+        ie._save_state()
+        return {"status": "refreshed", "category": category, "data": data}
+    return JSONResponse(status_code=500, content={"error": f"Collection failed for {category}"})
+
+
+@app.post("/intel/intervals", dependencies=[Depends(require_auth)])
+async def intel_set_interval(request: Request):
+    """Change collection interval for a category."""
+    from Tobi.core.intel_engine import intel_engine
+    data = await request.json()
+    category = data.get("category", "")
+    seconds = data.get("seconds", 0)
+    if category not in intel_engine._intervals or seconds < 300:
+        return JSONResponse(status_code=400, content={"error": "Invalid category or interval (min 300s)."})
+    intel_engine.set_interval(category, seconds)
+    return intel_engine.get_status()
+
+
+# ============================================================
+# Combined Daily Brief (everything in one message)
+# ============================================================
+
+@app.get("/daily/brief", dependencies=[Depends(require_auth)])
+async def daily_brief(sections: str = "all"):
+    """Build a combined daily brief across all modules.
+
+    sections: comma-separated list or 'all'. Valid: digest, github, market,
+    social, crm, content, academic, jobs, earnings, intel.
+    """
+    allowed = {"digest", "github", "market", "social", "crm", "content", "academic", "jobs", "earnings", "intel"}
+    if sections == "all":
+        requested = set(allowed)
+    else:
+        requested = set(s.strip() for s in sections.split(",") if s.strip())
+        requested = requested.intersection(allowed)
+
+    brief: dict[str, str] = {}
+
+    if "digest" in requested:
+        from Tobi.core.digest import build_digest
+        digest = await build_digest(brain)
+        brief["digest"] = digest
+
+    if "github" in requested:
+        from Tobi.tools.github_tools import get_github_summary
+        brief["github"] = await get_github_summary()
+
+    if "market" in requested:
+        from Tobi.tools.market_intel import get_market_brief
+        brief["market"] = await get_market_brief()
+
+    if "social" in requested:
+        from Tobi.tools.social_media import get_social_brief
+        brief["social"] = await get_social_brief()
+
+    if "crm" in requested:
+        from Tobi.tools.crm import get_crm_brief
+        brief["crm"] = await get_crm_brief()
+
+    if "content" in requested:
+        from Tobi.tools.content_pipeline import get_content_brief
+        brief["content"] = await get_content_brief()
+
+    if "academic" in requested:
+        from Tobi.tools.coursework import get_academic_brief
+        brief["academic"] = await get_academic_brief()
+
+    if "jobs" in requested:
+        from Tobi.tools.job_search import get_daily_job_brief
+        brief["jobs"] = await get_daily_job_brief()
+
+    if "earnings" in requested:
+        from Tobi.tools.earnings import get_earnings_brief
+        brief["earnings"] = await get_earnings_brief()
+
+    if "intel" in requested:
+        from Tobi.core.intel_engine import get_all_latest
+        intel = get_all_latest()
+        brief["intel"] = {
+            cat: entry.get("data", "No data collected yet.") if entry else "No data yet."
+            for cat, entry in intel.items()
+        }
+
+    return {"brief": brief, "sections": sorted(requested), "generated_at": time.time()}

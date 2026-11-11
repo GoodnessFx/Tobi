@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { ViewMode, OrbState } from "@/lib/types";
+import { CharacterStyle, ViewMode, OrbState } from "@/lib/types";
 import { useTobiWebSocket } from "@/hooks/useTobiWebSocket";
 import { useServerStatus } from "@/hooks/useServerStatus";
 import { useStartupGreeting } from "@/hooks/useStartupGreeting";
@@ -14,14 +14,29 @@ import DashboardView from "@/components/dashboard/DashboardView";
 import RemindersPanel from "@/components/reminders/RemindersPanel";
 import MemoryPanel from "@/components/memory/MemoryPanel";
 import { SettingsPanel } from "@/components/settings/SettingsPanel";
+import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
 
 const SPEAKING_LINGER_MS = 1800;
 
 export default function Page() {
   const [viewMode, setViewMode] = useState<ViewMode>("cinematic");
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
+  const [characterStyle, setCharacterStyle] = useState<CharacterStyle>("orb");
+  const [voiceInputEnabled, setVoiceInputEnabled] = useState(true);
   const [speakingLinger, setSpeakingLinger] = useState(false);
   const [isBrowserMicRecording, setIsBrowserMicRecording] = useState(false);
   const lingerTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    try {
+      setOnboardingComplete(localStorage.getItem("tobi_onboarding_complete") === "true");
+      const savedCharacter = localStorage.getItem("tobi_character");
+      setCharacterStyle(savedCharacter === "face" || savedCharacter === "mark" ? savedCharacter : "orb");
+      setVoiceInputEnabled(localStorage.getItem("tobi_voice_input_enabled") !== "false");
+    } catch {
+      setOnboardingComplete(false);
+    }
+  }, []);
 
   const {
     status: connectionStatus,
@@ -43,6 +58,7 @@ export default function Page() {
 
   // ── Startup greeting — fires once on connect ─────────────────────────
   const { handleUserMessage: greetingIntercept } = useStartupGreeting({
+    enabled: onboardingComplete === true,
     isConnected: connectionStatus === "connected",
     sendMessage,
     isProcessing,
@@ -86,6 +102,24 @@ export default function Page() {
 
   const handleModeChange = useCallback((mode: ViewMode) => setViewMode(mode), []);
 
+  const handleOnboardingComplete = useCallback(
+    (preferences: { nickname: string; character: CharacterStyle; voiceInputEnabled: boolean }) => {
+      try {
+        localStorage.setItem("tobi_onboarding_complete", "true");
+        localStorage.setItem("tobi_user_name", preferences.nickname);
+        localStorage.setItem("tobi_character", preferences.character);
+        localStorage.setItem("tobi_voice_input_enabled", String(preferences.voiceInputEnabled));
+        sessionStorage.removeItem("tobi_greeted_session");
+      } catch {
+        // Server-side profile persistence remains available if browser storage is disabled.
+      }
+      setCharacterStyle(preferences.character);
+      setVoiceInputEnabled(preferences.voiceInputEnabled);
+      setOnboardingComplete(true);
+    },
+    []
+  );
+
   const orbState: OrbState = useMemo(() => {
     if (connectionStatus === "error") return "error";
     if (isProcessing)          return "thinking";
@@ -100,6 +134,10 @@ export default function Page() {
   const isActive = isProcessing || isStreaming;
 
   // ── Render ────────────────────────────────────────────────────────────
+  if (onboardingComplete === null) {
+    return <div className="h-dvh w-screen bg-slate-50" aria-busy="true" />;
+  }
+
   return (
     <div
       className="h-dvh w-screen flex flex-col overflow-hidden safe-top safe-bottom"
@@ -126,6 +164,8 @@ export default function Page() {
           disabled={connectionStatus !== "connected"}
           onBrowserMicState={handleBrowserMicState}
           authToken={null}
+          characterStyle={characterStyle}
+          voiceInputEnabled={voiceInputEnabled}
         />
       </div>
 
@@ -138,6 +178,7 @@ export default function Page() {
           disabled={connectionStatus !== "connected"}
           onBrowserMicState={handleBrowserMicState}
           authToken={null}
+          voiceInputEnabled={voiceInputEnabled}
         />
       )}
 
@@ -166,6 +207,7 @@ export default function Page() {
       <ProactiveToast suggestions={suggestions} onDismiss={dismissSuggestion} />
       <PlanProgress plan={activePlan} />
       <SettingsPanel />
+      {!onboardingComplete && <OnboardingWizard onComplete={handleOnboardingComplete} />}
     </div>
   );
 }

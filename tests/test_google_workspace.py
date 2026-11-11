@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
+from Tobi.config import settings
 from Tobi.core import api_key_vault
 from Tobi.tools import google_workspace
 
@@ -45,6 +46,22 @@ def test_persist_credentials_refuses_unencrypted_storage(monkeypatch):
         google_workspace._persist_credentials(object())
 
     assert stored == []
+
+
+def test_google_workspace_connection_status_reports_readiness_without_credentials(tmp_path, monkeypatch):
+    client_secrets = tmp_path / "oauth-client.json"
+    client_secrets.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(settings, "GOOGLE_OAUTH_CLIENT_SECRETS", str(client_secrets))
+    monkeypatch.setattr(api_key_vault, "get_key", lambda key: "stored-token")
+    monkeypatch.setattr(api_key_vault, "get_vault_status", lambda: {"encrypted": True})
+
+    status = google_workspace.google_workspace_connection_status()
+
+    assert status == {
+        "configured": True,
+        "connected": True,
+        "encrypted_storage_available": True,
+    }
 
 
 def test_credentials_refreshes_expired_token_and_persists_it(monkeypatch):

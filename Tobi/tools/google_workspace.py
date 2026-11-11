@@ -64,6 +64,19 @@ def _service(api_name: str, version: str) -> Any:
     return build(api_name, version, credentials=_credentials(), cache_discovery=False)
 
 
+def google_workspace_connection_status() -> dict[str, bool]:
+    client_secrets = Path(os.path.expandvars(settings.GOOGLE_OAUTH_CLIENT_SECRETS)).expanduser()
+    return {
+        "configured": bool(settings.GOOGLE_OAUTH_CLIENT_SECRETS and client_secrets.is_file()),
+        "connected": bool(api_key_vault.get_key(TOKEN_KEY)),
+        "encrypted_storage_available": bool(api_key_vault.get_vault_status()["encrypted"]),
+    }
+
+
+async def connect_google_workspace_account() -> None:
+    await asyncio.to_thread(_credentials)
+
+
 def _format_calendar_event(event: dict[str, Any]) -> str:
     start = event.get("start", {}).get("dateTime", event.get("start", {}).get("date", "time unknown"))
     end = event.get("end", {}).get("dateTime", event.get("end", {}).get("date", ""))
@@ -185,7 +198,7 @@ async def google_calendar_list() -> str:
 async def connect_google_workspace() -> str:
     """Start the installed-app OAuth flow and persist encrypted credentials."""
     try:
-        await asyncio.to_thread(_credentials)
+        await connect_google_workspace_account()
     except GoogleWorkspaceNotConfiguredError as exc:
         return str(exc)
     return "Google Workspace connected. Gmail and Google Calendar read access is ready."

@@ -2,6 +2,8 @@ export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "er
 
 export type ViewMode = "cinematic" | "chat" | "dashboard" | "reminders" | "memory";
 
+export type CharacterStyle = "orb" | "face" | "mark";
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";

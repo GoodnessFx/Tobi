@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import PwaInstallCard from "@/components/settings/PwaInstallCard";
 
 interface Settings {
   models: {
@@ -245,6 +246,8 @@ export function SettingsPanel() {
 
         {/* Content */}
         <div className="p-4 space-y-6">
+          <PwaInstallCard />
+
           {/* Step Indicator */}
           <div className="flex gap-2">
             <button

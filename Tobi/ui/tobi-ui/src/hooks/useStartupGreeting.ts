@@ -71,6 +71,8 @@ function buildFirstTimePrompt(): string {
 }
 
 interface UseStartupGreetingOptions {
+  /** Prevent the greeting from running until first-run setup is complete. */
+  enabled?: boolean;
   /** Whether the WebSocket is currently connected */
   isConnected: boolean;
   /** Send a message through the normal chat pipeline */
@@ -80,6 +82,7 @@ interface UseStartupGreetingOptions {
 }
 
 export function useStartupGreeting({
+  enabled = true,
   isConnected,
   sendMessage,
   isProcessing,
@@ -118,10 +121,10 @@ export function useStartupGreeting({
 
   // Fire once when connected and not mid-boot-processing
   useEffect(() => {
-    if (isConnected && !isProcessing && !hasFiredRef.current) {
+    if (enabled && isConnected && !isProcessing && !hasFiredRef.current) {
       fire();
     }
-  }, [isConnected, isProcessing, fire]);
+  }, [enabled, isConnected, isProcessing, fire]);
 
   /**
    * Call this with every incoming assistant message to detect the

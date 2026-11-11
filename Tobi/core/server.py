@@ -10,18 +10,17 @@ import time
 from contextlib import asynccontextmanager
 from typing import List
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File, Depends, Request
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from Tobi.config import settings
-from Tobi.core.brain import TobiBrain
-from Tobi.core import cost_tracker
-from Tobi.core import auth
+from Tobi.core import auth, cost_tracker
 from Tobi.core import profile as user_profile
+from Tobi.core.brain import TobiBrain
 from Tobi.core.settings_api import settings_router
-from Tobi.tools import chrome_extension
+from Tobi.tools import chrome_extension, google_workspace
 
 logger = logging.getLogger("Tobi.server")
 
@@ -911,7 +910,8 @@ async def get_profile():
 _ALLOWED_PROFILE_KEYS = {
     "name", "nickname", "location", "timezone", "language",
     "communication_style", "interests", "occupation",
-    "wake_time", "sleep_time", "theme", "voice",
+    "wake_time", "sleep_time", "theme", "voice", "character",
+    "voice_input_enabled",
 }
 
 
@@ -925,6 +925,24 @@ async def update_profile_endpoint(body: ProfileUpdateRequest):
         )
     updated = user_profile.update_profile({body.key: body.value})
     return {"status": "updated", "profile": updated}
+
+
+@app.get("/integrations/google/status", dependencies=[Depends(require_auth)])
+async def google_workspace_status_endpoint():
+    """Return whether Google Workspace can be connected without exposing credentials."""
+    return google_workspace.google_workspace_connection_status()
+
+
+@app.post("/integrations/google/connect", dependencies=[Depends(require_auth)])
+async def connect_google_workspace_endpoint():
+    """Start the user-requested Google OAuth installed-app flow."""
+    try:
+        await google_workspace.connect_google_workspace_account()
+    except google_workspace.GoogleWorkspaceNotConfiguredError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return google_workspace.google_workspace_connection_status()
 
 
 @app.get("/profile/{key}", dependencies=[Depends(require_auth)])

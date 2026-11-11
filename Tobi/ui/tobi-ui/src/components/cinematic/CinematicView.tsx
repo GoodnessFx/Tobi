@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { ChatMessage, OrbState } from "@/lib/types";
+import { CharacterStyle, ChatMessage, OrbState } from "@/lib/types";
 import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
 import { unlockAudio } from "@/hooks/useTobiWebSocket";
+import Image from "next/image";
+import FaceAvatar from "@/components/cinematic/FaceAvatar";
 
 const ArcReactorGL = dynamic(
   () => import("./ArcReactorGL").then((mod) => mod.ArcReactorGL),
@@ -25,6 +27,8 @@ interface CinematicViewProps {
   disabled?: boolean;
   onBrowserMicState?: (recording: boolean) => void;
   authToken?: string | null;
+  characterStyle?: CharacterStyle;
+  voiceInputEnabled?: boolean;
 }
 
 const BOOT_DURATION_MS = 4500;
@@ -56,6 +60,8 @@ export default function CinematicView({
   disabled = false,
   onBrowserMicState,
   authToken,
+  characterStyle = "orb",
+  voiceInputEnabled = true,
 }: CinematicViewProps) {
   const [bootElapsed, setBootElapsed] = useState(0);
   const bootStartRef = useRef(Date.now());
@@ -169,7 +175,16 @@ export default function CinematicView({
           className="absolute inset-0"
           style={{ zIndex: 1, opacity: activeTransition }}
         >
-          <ArcReactorGL state={orbState} transitionIn={activeTransition} audioAmplitude={currentAmplitude} />
+          {characterStyle === "orb" ? (
+            <ArcReactorGL state={orbState} transitionIn={activeTransition} audioAmplitude={currentAmplitude} />
+          ) : characterStyle === "face" ? (
+            <FaceAvatar state={orbState} />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-3">
+              <Image src="/icon-192.png" alt="TOBI" width={112} height={112} priority />
+              <span className="text-xs font-semibold tracking-[0.3em] text-slate-500">TOBI</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -299,7 +314,7 @@ export default function CinematicView({
         </div>
       )}
 
-      {!showBoot && micSupported && (
+      {!showBoot && micSupported && voiceInputEnabled && (
         <div
           className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2.5"
           style={{ zIndex: 25 }}

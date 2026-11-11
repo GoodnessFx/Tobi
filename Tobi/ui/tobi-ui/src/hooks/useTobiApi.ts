@@ -48,10 +48,53 @@ async function apiFetch<T = unknown>(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error || `HTTP ${res.status}`);
+    throw new Error(err.error || err.detail || `HTTP ${res.status}`);
   }
   return res.json() as Promise<T>;
 }
+
+export interface OnboardingProfile {
+  name?: string;
+  nickname?: string;
+  voice?: string;
+  character?: string;
+  voice_input_enabled?: string;
+}
+
+export interface OnboardingSettings {
+  voice: {
+    tts_engine: string;
+    tts_voice: string;
+  };
+}
+
+export interface GoogleWorkspaceStatus {
+  configured: boolean;
+  connected: boolean;
+  encrypted_storage_available: boolean;
+}
+
+export interface CrmContactInput {
+  name: string;
+  email?: string;
+  phone?: string;
+  source?: string;
+}
+
+export const onboardingApi = {
+  getProfile: () => apiFetch<OnboardingProfile>("/profile"),
+  updateProfile: (key: keyof OnboardingProfile, value: string) =>
+    apiFetch<{ status: string }>("/profile", "PUT", { key, value }),
+  getSettings: () => apiFetch<OnboardingSettings>("/api/settings"),
+  updateSettings: (updates: Record<string, string>) =>
+    apiFetch<{ success: boolean }>("/api/settings/update", "POST", updates),
+  googleWorkspaceStatus: () =>
+    apiFetch<GoogleWorkspaceStatus>("/integrations/google/status"),
+  connectGoogleWorkspace: () =>
+    apiFetch<GoogleWorkspaceStatus>("/integrations/google/connect", "POST", {}),
+  createContact: (contact: CrmContactInput) =>
+    apiFetch<Record<string, unknown>>("/crm/contacts", "POST", contact),
+};
 
 // ── Reminders ────────────────────────────────────────────────────────────────
 

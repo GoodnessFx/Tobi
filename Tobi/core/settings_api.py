@@ -8,6 +8,7 @@ Only safe configuration keys are allowed for updates.
 """
 import logging
 import os
+import re
 import time
 from pathlib import Path
 from typing import Optional
@@ -220,6 +221,11 @@ async def update_settings(updates: dict) -> dict:
             status_code=400,
             detail=f"Cannot update these keys: {unsafe_keys}",
         )
+    if "TTS_VOICE" in updates and (
+        not isinstance(updates["TTS_VOICE"], str)
+        or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", updates["TTS_VOICE"])
+    ):
+        raise HTTPException(status_code=400, detail="TTS_VOICE must be a valid voice identifier.")
 
     try:
         env_path = settings.Tobi_HOME / ".env"
@@ -250,6 +256,8 @@ async def update_settings(updates: dict) -> dict:
                 f.write(f"{key}={value}\n")
 
         logger.info("Settings updated: %s", updated)
+        if "TTS_VOICE" in updates:
+            settings.TTS_VOICE = updates["TTS_VOICE"]
 
         return {
             "success": True,
@@ -263,4 +271,3 @@ async def update_settings(updates: dict) -> dict:
             status_code=500,
             detail=f"Failed to update settings: {str(e)}",
         )
-

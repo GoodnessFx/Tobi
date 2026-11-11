@@ -12,7 +12,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+" />
-  <img src="https://img.shields.io/badge/next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 14" />
+  <img src="https://img.shields.io/badge/next.js-15-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js 15" />
   <img src="https://img.shields.io/badge/claude-API-D97706?style=flat-square&logo=anthropic&logoColor=white" alt="Claude API" />
   <img src="https://img.shields.io/badge/PWA-installable-5A0FC8?style=flat-square&logo=pwa&logoColor=white" alt="PWA" />
   <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS-999999?style=flat-square" alt="Platform" />
@@ -181,17 +181,50 @@ Dev mode adds a coding lens on top of the existing relationship nudge system. TO
 
 ### Notes
 
-- **Apple Notes** — Read recent notes, search by keyword, read full note body, create new notes
+- **Apple Notes** — The AppleScript integration is a desktop Notes.app feature. In the PWA, users can explicitly paste selected note text or choose a plain-text/Markdown export and send it to TOBI for review. The PWA cannot read Notes in the background.
 
-### PWA — Install on Any Device
+### Install TOBI on a phone or desktop
 
-TOBI ships as a fully installable Progressive Web App:
+TOBI's web client is a Progressive Web App (PWA). After TOBI is deployed to a
+reachable **HTTPS** address with its API and WebSocket routes configured, users
+can add it to their home screen. This installs a web app shortcut; it is not an
+App Store or Play Store native application.
 
-- **Android**: Open in Chrome, tap menu, tap "Add to Home Screen" — works immediately, no Play Store needed
-- **iOS**: Open in Safari, tap share, tap "Add to Home Screen" — full standalone mode, no App Store needed
-- **Desktop**: Chrome or Edge install button in the address bar
-- **Push notifications** — Service worker handles reminder delivery and snooze/dismiss actions even when the app is not open
-- **Offline shell** — App shell caches locally so the UI loads instantly even on a slow connection
+- **Android**: Open the HTTPS address in Chrome, open the browser menu, and
+  choose **Install app** or **Add to Home screen**.
+- **iPhone/iPad**: Open the HTTPS address in Safari, tap **Share**, then **Add
+  to Home Screen**.
+- **Desktop**: Use the install icon in the Chrome or Edge address bar when
+  offered.
+- After signing in, **Settings → Phone and app access** also shows the browser's
+  install prompt when supported, or device-specific install instructions.
+
+The app and backend must both be reachable from the phone. The development URL
+`http://localhost:3741` refers to the phone itself, not a TOBI server running on
+another computer, and is only suitable for same-device development. Public
+deployment must use HTTPS and securely proxy the API and WebSocket endpoints;
+do not expose the development server directly to the internet.
+
+The service worker caches the app shell and static assets, not live API data or
+the assistant backend. Push notifications require server push configuration
+and browser support. An installed PWA does not provide an always-on microphone,
+an avatar floating over other apps, or unrestricted access to phone notes and
+other apps. Those require separate platform integrations and explicit user
+permission.
+
+TOBI's web-supported phone access is deliberately user-driven:
+
+- The PWA asks for microphone permission only when the user starts voice input.
+- Browser notifications are for TOBI reminders; they do not expose notification
+  history from other phone apps.
+- On browsers that implement the Contact Picker API, users can select specific
+  contacts, review the selection, and confirm importing them into TOBI CRM.
+- Google Calendar/Gmail access uses the existing read-only Google OAuth scopes.
+  The OAuth flow currently runs on the computer hosting the backend; connect it
+  there before using that backend from a phone.
+- iPhone users can copy selected Apple Notes text or choose a text export in
+  TOBI's Chat **Share a note** dialog. iOS does not permit a PWA to read private
+  Notes data automatically.
 
 <p align="center">
   <img src="docs/screenshots/system-dashboard.png" alt="TOBI System Dashboard" width="700" />
@@ -318,11 +351,54 @@ chmod +x setup.sh && ./setup.sh   # first time only
 
 ### Installing as a PWA
 
-**Android** — open `http://localhost:3741` in Chrome, tap the menu, tap "Add to Home Screen"
+First deploy TOBI to an HTTPS address that your phone can reach, with the API
+and WebSocket endpoints securely routed to the backend. `localhost` on a phone
+does not point to your development computer.
 
-**iOS** — open in Safari, tap the share icon, tap "Add to Home Screen"
+**Android** — open the HTTPS address in Chrome, tap the menu, then **Install
+app** or **Add to Home screen**.
 
-**Desktop** — look for the install icon in the Chrome or Edge address bar
+**iOS/iPadOS** — open the HTTPS address in Safari, tap **Share**, then **Add to
+Home Screen**.
+
+**Desktop** — look for the install icon in the Chrome or Edge address bar.
+
+This installs TOBI's web app shortcut, not a native App Store/Play Store app.
+The installed PWA does not run an avatar over other apps or grant access to
+Apple Notes or other apps. See the [feature audit](./FEATURES.md) for verified
+capabilities and platform limitations.
+
+### Production PWA launch checklist
+
+This repository is **not deployed**. Complete and verify these items before
+sharing a TOBI URL with users:
+
+- [ ] Choose a hosting provider and domain; terminate TLS so the site is served
+  over HTTPS.
+- [ ] Deploy the Next.js UI and Python 3.11+ backend. Keep the backend private
+  behind the HTTPS reverse proxy/firewall; do not expose its development port
+  directly to the public internet.
+- [ ] Route same-origin `https://<domain>/Tobi-api/*` requests to the backend's
+  HTTP API with the prefix removed, and route `wss://<domain>/Tobi-ws` to the
+  backend `/ws` endpoint with WebSocket upgrades enabled.
+- [ ] Configure production authentication/PIN, secrets, allowed origins, and
+  encrypted token storage. Never put API keys or OAuth client secrets in the
+  frontend bundle.
+- [ ] Configure Google OAuth for the actual deployment environment. The
+  current installed-app sign-in flow opens a browser on the backend host, so
+  connect Google on that host before using its account from a phone.
+- [ ] Verify `https://<domain>/`, `/manifest.json`, `/sw.js`, login, an
+  authenticated API request, and the WebSocket chat connection.
+- [ ] Install and test from Android Chrome and iPhone Safari over the public
+  HTTPS URL. Confirm home-screen launch, safe-area layout, microphone
+  permission, and expected offline behavior on real devices.
+- [ ] Confirm browser push configuration separately if reminder push is needed;
+  app-shell caching alone does not deliver push or run the assistant offline.
+
+Do not mark phone launch complete until these checks pass. The installed PWA
+does not have access to other apps' private notes/notification history or
+system-wide overlays; note sharing and contact picking are explicit,
+browser-limited actions.
 
 ---
 

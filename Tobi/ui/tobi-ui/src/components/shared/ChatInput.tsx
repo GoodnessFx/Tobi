@@ -10,6 +10,7 @@ interface ChatInputProps {
   isProcessing?: boolean;
   onBrowserMicState?: (recording: boolean) => void;
   authToken?: string | null;
+  voiceInputEnabled?: boolean;
 }
 
 export default function ChatInput({
@@ -18,6 +19,7 @@ export default function ChatInput({
   isProcessing = false,
   onBrowserMicState,
   authToken,
+  voiceInputEnabled = true,
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -82,7 +84,7 @@ export default function ChatInput({
   return (
     <div className="w-full border-t border-Tobi-border bg-Tobi-surface/95 backdrop-blur-xl px-4 sm:px-6 py-3 flex-shrink-0">
       <div className="flex items-center gap-2.5 sm:gap-3 max-w-3xl mx-auto">
-        {micSupported && (
+        {micSupported && voiceInputEnabled && (
           <button
             onClick={handleMicToggle}
             disabled={isBusy && !isRecording}

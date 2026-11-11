@@ -149,11 +149,11 @@ pip install "pyaudio>=0.2.14" "numpy>=2.0.0" --quiet 2>&1 | grep -v "already sat
 ok "Audio packages"
 
 # OpenWakeWord can also be tricky (requires Python <= 3.11)
-if pip install -r requirements-voice-wakeword.txt --quiet 2>&1; then
+if pip install -r requirements-wakeword.txt --quiet 2>&1; then
     ok "OpenWakeWord (Hey Tobi detection)"
 else
     warn "OpenWakeWord failed (requires Python <= 3.11). Tobi will use keyboard activation instead."
-    echo "  You can try manually: pip install -r requirements-voice-wakeword.txt"
+    echo "  You can try manually: pip install -r requirements-wakeword.txt"
 fi
 
 echo "  [6/6] Installing memory and utilities..."
@@ -204,4 +204,3 @@ echo "       ./start.sh voice        # Voice mode"
 echo "       ./start.sh server       # API server for UI"
 echo "       ./start.sh full         # Voice + API server"
 echo ""
-

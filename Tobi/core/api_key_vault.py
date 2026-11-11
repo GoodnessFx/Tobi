@@ -11,6 +11,7 @@ import json
 import logging
 import os
 from pathlib import Path
+from typing import Any, cast
 
 logger = logging.getLogger("Tobi.core.api_key_vault")
 
@@ -33,6 +34,7 @@ TRACKED_KEYS = [
     "ELEVENLABS_API_KEY",
     "NEWSAPI_KEY",
     "VAPID_PRIVATE_KEY",
+    "GOOGLE_WORKSPACE_TOKEN",
     "TOBI_PIN",
 ]
 
@@ -72,7 +74,7 @@ def _get_fernet():
     return _fernet
 
 
-def _read_vault() -> dict:
+def _read_vault() -> dict[str, Any]:
     """Read the encrypted vault file."""
     if not VAULT_FILE.exists():
         return {}
@@ -81,14 +83,14 @@ def _read_vault() -> dict:
     if fernet is None:
         # Fallback: plain JSON
         try:
-            return json.loads(VAULT_FILE.read_text())
+            return cast(dict[str, Any], json.loads(VAULT_FILE.read_text()))
         except Exception:
             return {}
 
     try:
         encrypted = VAULT_FILE.read_bytes()
         decrypted = fernet.decrypt(encrypted)
-        return json.loads(decrypted)
+        return cast(dict[str, Any], json.loads(decrypted))
     except Exception as e:
         logger.error("Failed to decrypt vault: %s", e)
         return {}
@@ -124,7 +126,8 @@ def get_key(name: str) -> str:
     """Retrieve an API key from the vault."""
     vault = _read_vault()
     entry = vault.get(name, {})
-    return entry.get("value", "")
+    value = entry.get("value", "")
+    return value if isinstance(value, str) else ""
 
 
 def remove_key(name: str) -> bool:

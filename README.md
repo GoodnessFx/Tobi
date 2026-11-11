@@ -169,7 +169,7 @@ Dev mode adds a coding lens on top of the existing relationship nudge system. TO
 
 ### Calendar and Email
 
-- **Calendar.app / Google Calendar** — Read upcoming events, create new events, search by title
+- **Calendar.app / Google Calendar** — macOS Calendar.app remains the platform fallback. Optional Google Workspace OAuth provides cross-platform Gmail search/unread counts and Google Calendar reads; OAuth tokens are stored in the encrypted local vault.
 - **Mail.app** — Read recent emails, get unread count, send emails, search by query
 - **Proactive meeting alerts** — Fires 15 and 5 minutes before any calendar event
 
@@ -237,7 +237,7 @@ TOBI ships as a fully installable Progressive Web App:
 | Social | X API (v2), TikTok Research/API |
 | STT | faster-whisper, Moonshine ONNX |
 | TTS | Kokoro, Edge-TTS |
-| Wake word | OpenWakeWord |
+| Wake word | Optional OpenWakeWord extra (`requirements-wakeword.txt`); terminal falls back to Enter-to-talk and the PWA has push-to-talk |
 | Memory | ChromaDB (vector), SQLite + FTS5, JSON facts |
 | Browser automation | Playwright, Chrome Extension (DOM bridge) |
 | Frontend | Next.js 14, React 18, Three.js, Tailwind CSS v4 |
@@ -372,6 +372,9 @@ TIKTOK_ACCESS_TOKEN=...
 NEWSAPI_KEY=...
 FOCUS_DEFAULT_MINUTES=45
 RETRO_DAY=7
+
+# Optional Google Workspace OAuth installed-app client JSON file path
+GOOGLE_OAUTH_CLIENT_SECRETS=...
 
 # Authentication PIN (auto-generated if not set)
 TOBI_PIN=1234

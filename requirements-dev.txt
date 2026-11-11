@@ -17,4 +17,4 @@ mypy>=1.13.0
 
 # Security Scanning
 bandit>=1.8.0
-
+pip-audit>=2.7.0

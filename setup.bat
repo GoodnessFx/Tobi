@@ -52,8 +52,8 @@ if %ERRORLEVEL% neq 0 (
 echo [OK] Python dependencies installed
 
 echo.
-echo [Optional] Attempting to install wake-word dependencies ^(requires Python ^= 3.11^)...
-pip install -r requirements-voice-wakeword.txt -q
+echo [Optional] Attempting to install wake-word dependencies ^(may require Python 3.11 or earlier^)...
+pip install -r requirements-wakeword.txt -q
 if %ERRORLEVEL% neq 0 (
     echo [WARN] Wake-word dependencies failed to install. Push-to-talk voice will still work.
 ) else (

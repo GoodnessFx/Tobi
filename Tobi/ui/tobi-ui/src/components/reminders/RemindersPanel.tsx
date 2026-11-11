@@ -538,7 +538,7 @@ export default function RemindersPanel() {
             </svg>
             <p className="text-sm text-white/25">No reminders yet.</p>
             <p className="text-xs text-white/15">
-              Say "remind me to…" or tap New above.
+              Say &quot;remind me to…&quot; or tap New above.
             </p>
           </div>
         )}

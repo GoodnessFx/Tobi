@@ -87,7 +87,7 @@ function DigestTab({ token }: { token: string | null }) {
         <div className="text-base font-semibold text-white/80">{data.greeting}, sir.</div>
         {data.insight && (
           <p className="mt-2 text-xs text-cyan-400/70 leading-relaxed italic border-l-2 border-cyan-400/25 pl-3">
-            "{data.insight}"
+            &quot;{data.insight}&quot;
           </p>
         )}
       </div>

@@ -9,25 +9,34 @@ The TOOL_SCHEMAS list is passed directly to Claude's API.
 """
 import logging
 import sys
-from Tobi.tools import shell, filesystem, screen, web_search, web_browse
+
+from Tobi.agent import coordinator as _coordinator_module
+from Tobi.agent import learning as _learning_module
+from Tobi.agent import planner as _planner_module
+from Tobi.agent.reminder_tools import REMINDER_TOOL_REGISTRY, REMINDER_TOOL_SCHEMAS
+from Tobi.core import proactive as _proactive_module
+from Tobi.core import profile
+from Tobi.tools import (
+    browser_agent,
+    calendar_email,
+    chrome_extension,
+    claude_code,
+    filesystem,
+    google_workspace,
+    notes_access,
+    screen,
+    shell,
+    weather,
+    web_browse,
+    web_search,
+)
+
 if sys.platform == "darwin":
     from Tobi.tools import mac_control as system_control
 else:
     from Tobi.tools import windows_control as system_control
-from Tobi.tools import browser_agent, claude_code, chrome_extension, calendar_email, weather, notes_access
-from Tobi.core import profile
-from Tobi.agent import planner as _planner_module
-from Tobi.agent import learning as _learning_module
-from Tobi.core import proactive as _proactive_module
-from Tobi.agent import coordinator as _coordinator_module
 
 logger = logging.getLogger("Tobi.agent.tools_schema")
-
-# ── Reminder tools ────────────────────────────────────────────────────────────
-from Tobi.agent.reminder_tools import (
-    REMINDER_TOOL_SCHEMAS,
-    REMINDER_TOOL_REGISTRY,
-)
 
 async def _chrome_extension_status() -> str:
     """Check if the Chrome extension is connected."""
@@ -56,7 +65,7 @@ async def _get_plan_status() -> str:
     """Get the current task plan status."""
     if _active_planner is None:
         return "Task planning system is not initialized."
-    return _active_planner.get_plan_status()
+    return str(_active_planner.get_plan_status())
 
 
 async def _get_plan_history() -> str:
@@ -209,7 +218,7 @@ async def _get_agent_status() -> str:
     lines.append(f"  Active tasks: {status['active_tasks']}")
     lines.append(f"  Total tasks executed: {status['total_executed']}")
     lines.append("  Agent profiles:")
-    for name, agent in status["agents"].items():
+    for _name, agent in status["agents"].items():
         if agent["total_tasks"] > 0:
             lines.append(
                 f"    {agent['display_name']}: "
@@ -437,37 +446,37 @@ async def _get_memory_stats() -> str:
 # ── New integration tool wrappers ─────────────────────────────────────────────
 async def _github_repos(limit: int = 10) -> str:
     from Tobi.tools.github_tools import get_my_repos
-    return await get_my_repos(limit)
+    return str(await get_my_repos(limit))
 
 
 async def _github_open_prs(repo: str = "") -> str:
     from Tobi.tools.github_tools import get_open_prs
-    return await get_open_prs(repo)
+    return str(await get_open_prs(repo))
 
 
 async def _github_recent_commits(repo: str, limit: int = 10) -> str:
     from Tobi.tools.github_tools import get_recent_commits
-    return await get_recent_commits(repo, limit)
+    return str(await get_recent_commits(repo, limit))
 
 
 async def _github_issues(repo: str = "") -> str:
     from Tobi.tools.github_tools import get_open_issues
-    return await get_open_issues(repo)
+    return str(await get_open_issues(repo))
 
 
 async def _github_summary():
     from Tobi.tools.github_tools import get_github_summary
-    return await get_github_summary()
+    return str(await get_github_summary())
 
 
 async def _search_jobs(query: str = "web development", limit: int = 15) -> str:
     from Tobi.tools.job_search import search_jobs
-    return await search_jobs(query, limit)
+    return str(await search_jobs(query, limit))
 
 
 async def _daily_job_brief():
     from Tobi.tools.job_search import get_daily_job_brief
-    return await get_daily_job_brief()
+    return str(await get_daily_job_brief())
 
 
 async def _get_crypto_prices():
@@ -1961,6 +1970,81 @@ TOOL_SCHEMAS = [
             "required": ["subject_search"],
         },
     },
+    # ---- Google Workspace (cross-platform) ----
+    {
+        "name": "connect_google_workspace",
+        "description": (
+            "Connect Gmail and Google Calendar using the locally configured "
+            "OAuth installed-app client. Opens the user's browser for consent; "
+            "tokens are stored in the encrypted local vault."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "gmail_search_messages",
+        "description": (
+            "Search Gmail using Gmail query syntax and return sender, subject, "
+            "date, and a short snippet. Requires a connected Google Workspace account."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Gmail search query"},
+                "count": {
+                    "type": "integer",
+                    "description": "Maximum messages to return (1-25, default 10)",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "gmail_unread_count",
+        "description": "Get the unread message count in the connected Gmail inbox.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
+    {
+        "name": "google_calendar_upcoming_events",
+        "description": "Read upcoming events from the connected primary Google Calendar.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "days": {
+                    "type": "integer",
+                    "description": "Number of days to look ahead (1-31, default 1)",
+                },
+            },
+        },
+    },
+    {
+        "name": "google_calendar_search_events",
+        "description": "Search upcoming Google Calendar events by text.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Text to search for"},
+                "days": {
+                    "type": "integer",
+                    "description": "Days to search ahead (1-90, default 30)",
+                },
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "google_calendar_list",
+        "description": "List calendars available to the connected Google account.",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
     # ---- Proactive Suggestions Engine ----
     {
         "name": "get_proactive_status",
@@ -2530,6 +2614,13 @@ TOOL_REGISTRY = {
     "send_email": calendar_email.send_email,
     "search_emails": calendar_email.search_emails,
     "read_email": calendar_email.read_email,
+    # Google Workspace
+    "connect_google_workspace": google_workspace.connect_google_workspace,
+    "gmail_search_messages": google_workspace.gmail_search_messages,
+    "gmail_unread_count": google_workspace.gmail_unread_count,
+    "google_calendar_upcoming_events": google_workspace.google_calendar_upcoming_events,
+    "google_calendar_search_events": google_workspace.google_calendar_search_events,
+    "google_calendar_list": google_workspace.google_calendar_list,
     # Proactive Suggestions
     "get_proactive_status": _get_proactive_status,
     "set_proactive_setting": _set_proactive_setting,
@@ -2590,4 +2681,3 @@ TOOL_REGISTRY = {
 def get_tool_names() -> list[str]:
     """Return all available tool names."""
     return list(TOOL_REGISTRY.keys())
-

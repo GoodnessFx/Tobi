@@ -351,7 +351,7 @@ Speech-to-text uses a two-tier approach:
 1. **Moonshine ONNX** (primary): Low hallucination rate, real-time optimized, runs locally. Tokenizer decodes raw model output into text.
 2. **faster-whisper** (fallback): Activates automatically if Moonshine fails or is unavailable. Supports hotwords and language hints.
 
-Wake word detection uses OpenWakeWord with a "hey_Tobi" model. The wake word listener runs continuously in the background with a configurable threshold (default 0.7) and an 8-second followup window after activation.
+Wake word detection is optional and uses OpenWakeWord with a "hey_Tobi" model. Install it separately with `pip install -r requirements-wakeword.txt`; the base install does not require the wake-word runtime. Without it, terminal voice mode falls back to Enter-to-talk and the PWA retains push-to-talk.
 
 Audio is streamed to the browser in chunked Opus format (~10x smaller than WAV) for low-latency playback.
 
@@ -563,4 +563,3 @@ Adjust `COST_DAILY_ALERT` in `.env`. Set `PREFER_CLAUDE=false` to default to loc
 
 **Port conflicts:**
 Tobi uses ports 3000 (UI) and 8741 (API). If something else is using those ports, Tobi will attempt to kill orphaned processes on startup. You can override with `API_PORT` and `UI_PORT` in `.env`.
-

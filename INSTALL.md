@@ -10,7 +10,7 @@ GitHub: [github.com/GoodnessFx/Tobi](https://github.com/GoodnessFx/Tobi)
 
 | Requirement | Minimum | Where to get it |
 |---|---|---|
-| Python | 3.11+ | [python.org/downloads](https://www.python.org/downloads/) (Note: Wake-word detection requires Python <= 3.11; push-to-talk works on any supported version) |
+| Python | 3.11+ | [python.org/downloads](https://www.python.org/downloads/) (Wake-word detection is optional via `requirements-wakeword.txt`; push-to-talk works without it) |
 | Node.js | 18+ | [nodejs.org](https://nodejs.org) |
 | Anthropic API key | — | [console.anthropic.com](https://console.anthropic.com) |
 | ffmpeg | any | [ffmpeg.org/download](https://ffmpeg.org/download.html) — add to PATH |
@@ -73,6 +73,21 @@ ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 with your real key from [console.anthropic.com](https://console.anthropic.com).
 
 Without this, TOBI starts and the UI works but AI responses are disabled.
+
+---
+
+## Optional Google Workspace connection
+
+To enable cross-platform Gmail search and Google Calendar reads:
+
+1. In Google Cloud, enable the Gmail API and Google Calendar API for a project.
+2. Create an OAuth client ID for a **Desktop app** and download its client JSON.
+3. Keep that JSON outside the repository and set `GOOGLE_OAUTH_CLIENT_SECRETS` in `.env` to its path.
+4. Ask TOBI to connect Google Workspace and complete Google's local consent flow.
+
+TOBI requests read-only Gmail and Calendar scopes. OAuth tokens are saved in
+the encrypted local key vault and refreshed when possible. The existing
+Mail.app/Calendar.app tools remain available as platform-specific fallbacks.
 
 ---
 

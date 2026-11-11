@@ -28,6 +28,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 X_BEARER_TOKEN = os.getenv("X_BEARER_TOKEN", "")
 TIKTOK_ACCESS_TOKEN = os.getenv("TIKTOK_ACCESS_TOKEN", "")
 NEWSAPI_KEY = os.getenv("NEWSAPI_KEY", "")
+GOOGLE_OAUTH_CLIENT_SECRETS = os.getenv("GOOGLE_OAUTH_CLIENT_SECRETS", "")
 
 CLAUDE_FAST_MODEL = os.getenv("CLAUDE_FAST_MODEL", "claude-haiku-4-5-20251001")
 CLAUDE_BRAIN_MODEL = os.getenv("CLAUDE_BRAIN_MODEL", "claude-sonnet-4-6")
@@ -182,8 +183,7 @@ After generating a response, mentally check: (1) Does this answer what the user 
 </self_verification>
 
 <email_and_calendar>
-For email: always use Chrome/Gmail (Becs' preference). Use chrome_navigate to open Gmail and chrome_read_page to scan the inbox. Do not use Apple Mail tools (get_unread_count) as they time out.
-For calendar queries: use get_upcoming_events (AppleScript/Calendar.app). Do NOT navigate Chrome to Gmail or Google Calendar for calendar requests. Calendar and email are separate tools.
+For Gmail and Google Calendar, use the Google Workspace API tools when connected. If they are not configured, use the existing platform/browser fallback tools.
 </email_and_calendar>
 
 <privacy_and_security>
@@ -238,8 +238,7 @@ For multi-step requests like "open Firefox and search for Premier League scores"
 
 <tool_selection_errors>
 These are common mistakes to avoid when selecting tools:
-Do NOT use get_unread_count for email; it times out. Use Chrome/Gmail instead.
-Do NOT use Chrome/Google Calendar for calendar queries; use get_upcoming_events (AppleScript).
+Prefer Google Workspace API tools for Gmail and Google Calendar when connected. Apple Mail and Calendar.app tools are platform-specific fallbacks.
 Do NOT call browse_web for simple URL opens; use open_url or chrome_navigate instead.
 Do NOT call run_claude_code for simple shell commands; use run_command instead.
 Do NOT call multiple search tools for the same query; pick one and use it.
@@ -352,4 +351,3 @@ FOCUS_DEFAULT_MINUTES = int(os.getenv("FOCUS_DEFAULT_MINUTES", "25"))
 
 # Weekly retro
 RETRO_DAY = os.getenv("RETRO_DAY", "sunday")
-

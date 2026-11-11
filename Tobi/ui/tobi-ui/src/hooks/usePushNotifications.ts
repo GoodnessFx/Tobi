@@ -78,7 +78,7 @@ export function usePushNotifications({
 
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: _urlBase64ToUint8Array(vapidPublicKey),
+          applicationServerKey: _urlBase64ToArrayBuffer(vapidPublicKey),
         });
         setSubscription(sub);
         return sub;
@@ -132,13 +132,14 @@ interface SwNotificationOptions extends NotificationOptions {
 }
 
 // ── utility ───────────────────────────────────────────────────────────────────
-function _urlBase64ToUint8Array(base64String: string): Uint8Array {
+function _urlBase64ToArrayBuffer(base64String: string): ArrayBuffer {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = window.atob(base64);
-  const outputArray = new Uint8Array(raw.length);
+  const buffer = new ArrayBuffer(raw.length);
+  const outputArray = new Uint8Array(buffer);
   for (let i = 0; i < raw.length; ++i) {
     outputArray[i] = raw.charCodeAt(i);
   }
-  return outputArray;
+  return buffer;
 }

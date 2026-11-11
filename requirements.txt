@@ -22,7 +22,7 @@ edge-tts>=6.1.0
 soundfile>=0.13.0
 
 # Voice: Wake Word
-# openwakeword>=0.6.0 (Optional: requires Python <=3.11, see requirements-voice-wakeword.txt)
+# openwakeword>=0.6.0 (Optional: requires Python <=3.11, see requirements-wakeword.txt)
 
 # Voice: Audio I/O
 pyaudio>=0.2.14
@@ -50,3 +50,7 @@ cryptography>=43.0.0
 
 # GitHub integration
 # (uses httpx, already listed above)
+
+# Google Workspace OAuth/API integrations
+google-api-python-client>=2.0.0
+google-auth-oauthlib>=1.2.0

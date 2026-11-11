@@ -5,38 +5,38 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // TOBI warm palette — ivory/cream/brown/gold
+        // TOBI clear palette — white/slate/electric blue
         Tobi: {
           // Backgrounds
-          bg:           "#faf7f2",
-          surface:      "#f5f0e8",
-          "surface-alt":"#ede5d8",
-          border:       "#e4dace",
+          bg:           "#ffffff",
+          surface:      "#f8fafc",
+          "surface-alt":"#f1f5f9",
+          border:       "#e2e8f0",
 
           // Text
-          text:         "#2e1f14",
-          "text-sub":   "#6b5744",
-          "text-dim":   "#8c7a6b",
-          "text-muted": "#b8ac9e",
+          text:         "#0f172a",
+          "text-sub":   "#334155",
+          "text-dim":   "#475569",
+          "text-muted": "#64748b",
 
-          // Accents — gold/amber
-          cyan:         "#d4a843",   // "cyan" slot → gold (used widely in existing classes)
-          "cyan-dim":   "#b8922e",
-          "cyan-bright":"#ddb84e",
-          gold:         "#d4a843",
-          "gold-dim":   "#9a7a26",
+          // Accents
+          cyan:         "#0284c7",
+          "cyan-dim":   "#0369a1",
+          "cyan-bright":"#0ea5e9",
+          gold:         "#0284c7",
+          "gold-dim":   "#0369a1",
 
           // State
-          success:      "#5a8a5a",
-          warning:      "#c97c2a",
-          error:        "#b85252",
+          success:      "#15803d",
+          warning:      "#d97706",
+          error:        "#b91c1c",
 
-          // Legacy aliases so existing components don't break
-          blue:         "#5a7a9a",
-          "blue-dark":  "#1a2a3a",
-          glow:         "#d4a843",
-          panel:        "rgba(245, 240, 232, 0.92)",
-          "panel-border":"rgba(180, 160, 130, 0.20)",
+          // Legacy aliases
+          blue:         "#0369a1",
+          "blue-dark":  "#0f172a",
+          glow:         "#0ea5e9",
+          panel:        "rgba(255, 255, 255, 0.96)",
+          "panel-border":"rgba(15, 23, 42, 0.10)",
         },
       },
       fontFamily: {

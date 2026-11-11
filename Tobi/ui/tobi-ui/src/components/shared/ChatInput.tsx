@@ -80,7 +80,7 @@ export default function ChatInput({
   const hasMessage = message.trim().length > 0;
 
   return (
-    <div className="w-full border-t border-white/[0.04] bg-Tobi-surface/80 backdrop-blur-xl px-4 sm:px-6 py-3 flex-shrink-0">
+    <div className="w-full border-t border-Tobi-border bg-Tobi-surface/95 backdrop-blur-xl px-4 sm:px-6 py-3 flex-shrink-0">
       <div className="flex items-center gap-2.5 sm:gap-3 max-w-3xl mx-auto">
         {micSupported && (
           <button
@@ -97,10 +97,10 @@ export default function ChatInput({
               relative flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
               transition-all duration-200 ease-out border
               ${isRecording
-                ? "bg-red-500/15 border-red-400/30 text-red-400 mic-ring-pulse"
+                ? "bg-red-50 border-red-200 text-red-700 mic-ring-pulse"
                 : isTranscribing
                   ? "bg-Tobi-cyan/8 border-Tobi-cyan/15 text-Tobi-cyan/50"
-                  : "bg-white/[0.03] border-white/[0.06] text-Tobi-text-dim/45 hover:text-Tobi-cyan hover:border-Tobi-cyan/25 hover:bg-Tobi-cyan/5"
+                  : "bg-white border-Tobi-border text-Tobi-text-dim hover:text-Tobi-cyan hover:border-Tobi-cyan/25 hover:bg-Tobi-cyan/5"
               }
               disabled:opacity-25 disabled:cursor-not-allowed
               active:scale-95
@@ -159,7 +159,7 @@ export default function ChatInput({
             transition-all duration-200 ease-out border
             ${hasMessage && !isBusy
               ? "bg-Tobi-cyan/12 border-Tobi-cyan/25 text-Tobi-cyan hover:bg-Tobi-cyan/18 hover:border-Tobi-cyan/40 hover:shadow-[0_0_12px_rgba(0,212,255,0.15)]"
-              : "bg-white/[0.02] border-white/[0.05] text-Tobi-text-dim/25"
+              : "bg-Tobi-surface-alt border-Tobi-border text-Tobi-text-muted"
             }
             disabled:opacity-25 disabled:cursor-not-allowed
             active:scale-95
@@ -206,4 +206,3 @@ export default function ChatInput({
     </div>
   );
 }
-

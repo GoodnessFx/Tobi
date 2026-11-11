@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ViewMode, ConnectionStatus } from "@/lib/types";
 
 interface StatusBarProps {
@@ -71,9 +72,14 @@ export default function StatusBar({
          style={{ background: 'var(--tobi-surface)', borderColor: 'var(--tobi-border)' }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="w-2 h-2 rounded-full hidden sm:block"
-               style={{ background: 'var(--color-gold-bright)', boxShadow: '0 0 8px rgba(212,168,67,0.5)' }} />
-          <span className="text-sm sm:text-base font-semibold Tobi-glow-subtle tracking-[0.18em] sm:tracking-[0.22em]"
+          <Image
+            src="/icon-192.png"
+            alt=""
+            width={32}
+            height={32}
+            className="rounded-lg"
+          />
+          <span className="text-sm sm:text-base font-semibold tracking-[0.18em] sm:tracking-[0.22em]"
                 style={{ color: 'var(--tobi-text)', fontWeight: 700 }}>
             TOBI
           </span>
@@ -91,7 +97,7 @@ export default function StatusBar({
           </div>
 
           <div className="flex items-center p-0.5 gap-0.5 rounded-lg border"
-               style={{ background: 'rgba(74,55,40,0.05)', borderColor: 'var(--tobi-border)' }}>
+               style={{ background: 'var(--color-parchment)', borderColor: 'var(--tobi-border)' }}>
             {tabs.map(({ mode, label, iconPaths }) => {
               const isActive = viewMode === mode;
               return (
@@ -152,4 +158,3 @@ export default function StatusBar({
     </div>
   );
 }
-

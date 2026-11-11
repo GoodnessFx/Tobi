@@ -15,6 +15,10 @@ not marked `WORKING` merely because a module or endpoint exists.
   dependency tree.
 - Frontend `/` route: returned HTTP 200 from the production server after the
   Next.js upgrade.
+- Phase 1 visual baseline: white app/PWA canvas, locally bundled Inter and
+  JetBrains Mono fonts, and the existing TOBI icon in the header and login.
+  Production build and HTTP asset checks passed; an interactive browser visual
+  review remains unavailable in this session.
 - Backend tests: 270 passed after installing the missing `pytest`,
   `pytest-asyncio`, and `httpx` packages into the current Python 3.10
   environment.

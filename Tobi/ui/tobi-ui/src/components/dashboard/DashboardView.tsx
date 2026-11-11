@@ -37,13 +37,13 @@ export default function DashboardView({
   return (
     <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="flex items-center justify-between px-5 py-2.5 border-b border-white/[0.04] bg-Tobi-surface/60 backdrop-blur-lg">
+        <div className="flex items-center justify-between px-5 py-2.5 border-b border-Tobi-border bg-Tobi-surface/80 backdrop-blur-lg">
           <div className="flex items-center gap-2">
             <h2 className="text-2xs font-medium text-Tobi-text-dim/55 uppercase tracking-[0.12em]">
               Activity Log
             </h2>
             {visibleMessages.length > 0 && (
-              <span className="text-3xs text-Tobi-text-dim/25 font-mono tabular-nums">
+              <span className="text-3xs text-Tobi-text-muted font-mono tabular-nums">
                 {visibleMessages.length}
               </span>
             )}
@@ -63,7 +63,7 @@ export default function DashboardView({
         >
           {visibleMessages.length === 0 ? (
             <div className="flex-1 flex items-center justify-center h-full">
-              <p className="text-sm text-Tobi-text-dim/30 font-light">
+              <p className="text-sm text-Tobi-text-dim font-light">
                 No activity yet. Use Voice or Chat to interact with Tobi.
               </p>
             </div>
@@ -78,7 +78,7 @@ export default function DashboardView({
                         text-3xs font-semibold mt-0.5
                         ${isUser
                           ? "bg-Tobi-cyan/8 text-Tobi-cyan/50 border border-Tobi-cyan/10"
-                          : "bg-white/[0.03] text-Tobi-text-dim/40 border border-white/[0.05]"
+                          : "bg-Tobi-surface-alt text-Tobi-text-dim border border-Tobi-border"
                         }
                       `}>
                       {isUser ? "B" : "J"}
@@ -91,7 +91,7 @@ export default function DashboardView({
                         {!isUser && (msg.agentType || msg.tierUsed) && (
                           <AgentBadge agentType={msg.agentType} tierUsed={msg.tierUsed} />
                         )}
-                        <span className="text-3xs text-Tobi-text-dim/20 font-mono tabular-nums">
+                        <span className="text-3xs text-Tobi-text-muted font-mono tabular-nums">
                           {new Date(msg.timestamp).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -100,7 +100,7 @@ export default function DashboardView({
                       </div>
                       <div className="text-[13px] text-Tobi-text/70 leading-relaxed whitespace-pre-wrap">
                         {msg.content || (
-                          <span className="text-Tobi-text-dim/40 italic text-xs">
+                          <span className="text-Tobi-text-dim italic text-xs">
                             Processing...
                           </span>
                         )}
@@ -125,7 +125,7 @@ export default function DashboardView({
         </div>
       </div>
 
-      <div className="hidden sm:flex w-72 flex-col border-l border-white/[0.04] bg-Tobi-surface/40 backdrop-blur-lg overflow-y-auto Tobi-scrollbar">
+      <div className="hidden sm:flex w-72 flex-col border-l border-Tobi-border bg-Tobi-surface/70 backdrop-blur-lg overflow-y-auto Tobi-scrollbar">
         <div className="p-4 space-y-4">
           <div className="Tobi-card">
             <div className="Tobi-card-header flex items-center gap-2">
@@ -231,7 +231,7 @@ export default function DashboardView({
                             {count}
                           </span>
                         </div>
-                        <div className="h-1 bg-white/[0.04] rounded-full overflow-hidden">
+                        <div className="h-1 bg-Tobi-surface-alt rounded-full overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500 ease-out"
                             style={{
@@ -293,4 +293,3 @@ function formatNumber(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
   return n.toString();
 }
-

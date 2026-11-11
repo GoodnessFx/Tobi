@@ -40,7 +40,7 @@ const stateLabels: Record<OrbState, string> = {
 };
 
 const stateColors: Record<OrbState, string> = {
-  idle: "text-Tobi-cyan/40",
+  idle: "text-Tobi-cyan",
   listening: "text-Tobi-cyan/70",
   thinking: "text-Tobi-gold/60",
   speaking: "text-Tobi-gold/70",
@@ -157,7 +157,7 @@ export default function CinematicView({
       );
 
   return (
-    <div className="flex-1 relative overflow-hidden bg-black">
+    <div className="flex-1 relative overflow-hidden bg-white">
       {showBoot && (
         <div className="absolute inset-0" style={{ zIndex: 2 }}>
           <BootScreen progress={bootProgress} />
@@ -189,7 +189,7 @@ export default function CinematicView({
         style={{
           zIndex: 10,
           background:
-            "radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.6) 100%)",
+            "radial-gradient(ellipse at center, transparent 45%, rgba(15,23,42,0.08) 100%)",
         }}
       />
 
@@ -197,7 +197,7 @@ export default function CinematicView({
         className="absolute inset-x-0 top-0 h-24 pointer-events-none"
         style={{
           zIndex: 10,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)",
+          background: "linear-gradient(to bottom, rgba(15,23,42,0.06) 0%, transparent 100%)",
         }}
       />
 
@@ -234,7 +234,7 @@ export default function CinematicView({
             transition-all duration-300 border
             ${showTranscript
               ? "bg-Tobi-cyan/6 border-Tobi-cyan/12 text-Tobi-cyan/50"
-              : "bg-white/[0.02] border-white/[0.04] text-Tobi-text-dim/20 hover:text-Tobi-text-dim/40"
+              : "bg-white border-Tobi-border text-Tobi-text-dim hover:text-Tobi-text"
             }
           `}
           style={{ zIndex: 20 }}
@@ -306,7 +306,7 @@ export default function CinematicView({
         >
           {micError && (
             <div className="Tobi-glass-subtle px-3 py-1.5 rounded-xl">
-              <p className="text-3xs text-red-400/70 flex items-center gap-1.5">
+              <p className="text-3xs text-red-700 flex items-center gap-1.5">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
@@ -330,10 +330,10 @@ export default function CinematicView({
               relative w-14 h-14 rounded-2xl flex items-center justify-center
               transition-all duration-300 border-2 backdrop-blur-md
               ${isRecording
-                ? "bg-red-500/12 border-red-400/40 text-red-400 shadow-[0_0_24px_rgba(239,68,68,0.2)] mic-ring-pulse"
+                ? "bg-red-50 border-red-200 text-red-700 shadow-[0_0_24px_rgba(239,68,68,0.12)] mic-ring-pulse"
                 : isTranscribing
                   ? "bg-Tobi-cyan/8 border-Tobi-cyan/20 text-Tobi-cyan/50"
-                  : "bg-white/[0.03] border-white/[0.08] text-Tobi-text-dim/40 hover:text-Tobi-cyan hover:border-Tobi-cyan/30 hover:bg-Tobi-cyan/5 hover:shadow-[0_0_20px_rgba(0,190,255,0.12)]"
+                  : "bg-white border-Tobi-border text-Tobi-text-dim hover:text-Tobi-cyan hover:border-Tobi-cyan/30 hover:bg-Tobi-cyan/5 hover:shadow-[0_0_20px_rgba(0,190,255,0.12)]"
               }
               disabled:opacity-15 disabled:cursor-not-allowed
               active:scale-95
@@ -376,4 +376,3 @@ export default function CinematicView({
     </div>
   );
 }
-

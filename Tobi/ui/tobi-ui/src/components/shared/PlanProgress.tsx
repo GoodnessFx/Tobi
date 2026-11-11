@@ -42,7 +42,7 @@ function StatusIcon({ status }: { status: PlanSubtask["status"] }) {
       );
     case "failed":
       return (
-        <div className={`${baseClass} text-red-400`}>
+        <div className={`${baseClass} text-red-700`}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
@@ -50,7 +50,7 @@ function StatusIcon({ status }: { status: PlanSubtask["status"] }) {
       );
     case "skipped":
       return (
-        <div className={`${baseClass} text-Tobi-text-dim/30`}>
+        <div className={`${baseClass} text-Tobi-text-dim`}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M5 12h14" />
           </svg>
@@ -59,7 +59,7 @@ function StatusIcon({ status }: { status: PlanSubtask["status"] }) {
     default:
       // pending
       return (
-        <div className={`${baseClass} text-Tobi-text-dim/20`}>
+        <div className={`${baseClass} text-Tobi-text-dim`}>
           <div className="w-3.5 h-3.5 rounded-full border border-Tobi-text-dim/15 ml-[1px] mt-[1px]" />
         </div>
       );
@@ -94,14 +94,14 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
         className="
           fixed bottom-20 left-1/2 -translate-x-1/2 z-40
           bg-Tobi-surface/90 backdrop-blur-xl
-          border border-white/[0.06] rounded-full
+          border border-Tobi-border rounded-full
           px-4 py-2 flex items-center gap-3
           shadow-lg
           transition-all duration-200
           hover:border-Tobi-cyan/20
           focus:outline-none focus:ring-1 focus:ring-Tobi-cyan/20
         "
-        style={{ boxShadow: "0 4px 20px rgba(0,212,255,0.08)" }}
+        style={{ boxShadow: "0 4px 20px rgba(14,165,233,0.08)" }}
         aria-label="Expand plan progress"
       >
         <div className="w-3 h-3 rounded-full border-2 border-Tobi-cyan/30 border-t-Tobi-cyan animate-spin" />
@@ -110,14 +110,14 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
           {plan.completed}/{plan.total}
         </span>
 
-        <div className="w-20 h-1 bg-white/[0.06] rounded-full overflow-hidden">
+        <div className="w-20 h-1 bg-Tobi-border rounded-full overflow-hidden">
           <div
             className="h-full bg-Tobi-cyan/50 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-Tobi-text-dim/30">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-Tobi-text-dim">
           <path d="M18 15l-6-6-6 6" />
         </svg>
       </button>
@@ -130,13 +130,13 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
         fixed bottom-20 left-1/2 -translate-x-1/2 z-40
         w-96 max-w-[calc(100vw-2rem)]
         bg-Tobi-surface/95 backdrop-blur-xl
-        border border-white/[0.06] rounded-xl
+        border border-Tobi-border rounded-xl
         shadow-lg overflow-hidden
         animate-fade-in
       "
-      style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.3), 0 4px 16px rgba(0,212,255,0.06)" }}
+      style={{ boxShadow: "0 8px 32px rgba(15,23,42,0.12), 0 4px 16px rgba(14,165,233,0.06)" }}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.04]">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-Tobi-border">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-5 h-5 rounded-md bg-Tobi-cyan/8 flex items-center justify-center">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-Tobi-cyan/60">
@@ -146,7 +146,7 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
           </div>
 
           <div className="min-w-0">
-            <div className="text-3xs text-Tobi-text-dim/40 uppercase tracking-[0.1em] font-medium">
+            <div className="text-3xs text-Tobi-text-dim uppercase tracking-[0.1em] font-medium">
               Active Plan
             </div>
             <div className="text-xs text-Tobi-text/65 truncate" title={plan.goal}>
@@ -159,8 +159,8 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
           onClick={handleToggle}
           className="
             w-6 h-6 rounded-md flex items-center justify-center
-            text-Tobi-text-dim/25 hover:text-Tobi-text-dim/50
-            hover:bg-white/[0.05]
+            text-Tobi-text-dim hover:text-Tobi-text
+            hover:bg-Tobi-surface-alt
             transition-all duration-150
             focus:outline-none focus:ring-1 focus:ring-Tobi-cyan/20
           "
@@ -174,20 +174,20 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
 
       <div className="px-4 pt-2.5 pb-1.5">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-3xs text-Tobi-text-dim/35 font-mono">
+          <span className="text-3xs text-Tobi-text-dim font-mono">
             Progress
           </span>
           <span className="text-3xs text-Tobi-cyan/60 font-mono tabular-nums">
             {plan.completed}/{plan.total}
           </span>
         </div>
-        <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+        <div className="h-1.5 bg-Tobi-border rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-700 ease-out"
             style={{
               width: `${progress}%`,
-              background: "linear-gradient(90deg, rgba(0,212,255,0.5), rgba(0,212,255,0.7))",
-              boxShadow: "0 0 8px rgba(0,212,255,0.3)",
+              background: "linear-gradient(90deg, rgba(14,165,233,0.6), rgba(14,165,233,0.85))",
+              boxShadow: "0 0 8px rgba(14,165,233,0.25)",
             }}
           />
         </div>
@@ -252,7 +252,7 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
                 )}
               </div>
 
-              <span className="text-3xs font-mono text-Tobi-text-dim/20 mt-0.5 tabular-nums">
+              <span className="text-3xs font-mono text-Tobi-text-muted mt-0.5 tabular-nums">
                 {idx + 1}
               </span>
             </div>
@@ -260,10 +260,10 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
         })}
       </div>
 
-      <div className="px-4 py-2 border-t border-white/[0.03]">
+      <div className="px-4 py-2 border-t border-Tobi-border">
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-Tobi-cyan/40 animate-pulse" />
-          <span className="text-3xs text-Tobi-text-dim/30 font-mono">
+          <span className="text-3xs text-Tobi-text-dim font-mono">
             Executing...
           </span>
         </div>
@@ -271,4 +271,3 @@ export default function PlanProgress({ plan, onCollapse }: PlanProgressProps) {
     </div>
   );
 }
-

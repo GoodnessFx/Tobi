@@ -209,16 +209,16 @@ export function SettingsPanel() {
 
       {/* Sliding Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full md:w-96 bg-gradient-to-b from-slate-900 to-slate-800 shadow-2xl z-50 transform transition-transform duration-300 ease-out overflow-y-auto ${
+        className={`fixed top-0 right-0 h-full w-full md:w-96 bg-white border-l border-Tobi-border shadow-2xl z-50 transform transition-transform duration-300 ease-out overflow-y-auto ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Panel Header */}
-        <div className="sticky top-0 bg-gradient-to-b from-slate-900/95 to-slate-800/95 backdrop-blur-md border-b border-slate-700 p-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white">Tobi Settings</h2>
+        <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-Tobi-border p-4 flex justify-between items-center">
+          <h2 className="text-xl font-bold text-Tobi-text">Tobi Settings</h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="text-slate-400 hover:text-white transition"
+            className="text-slate-500 hover:text-slate-900 transition"
           >
             <svg
               className="w-6 h-6"
@@ -238,7 +238,7 @@ export function SettingsPanel() {
 
         {/* Error Message */}
         {error && (
-          <div className="mx-4 mt-4 p-3 bg-red-900/30 border border-red-700 rounded text-red-200 text-sm">
+          <div className="mx-4 mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-800 text-sm">
             {error}
           </div>
         )}
@@ -252,7 +252,7 @@ export function SettingsPanel() {
               className={`flex-1 py-2 px-3 rounded text-xs font-semibold transition ${
                 currentStep === "api_keys"
                   ? "bg-blue-600 text-white"
-                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
               API
@@ -262,7 +262,7 @@ export function SettingsPanel() {
               className={`flex-1 py-2 px-3 rounded text-xs font-semibold transition ${
                 currentStep === "models"
                   ? "bg-blue-600 text-white"
-                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
               Models
@@ -272,7 +272,7 @@ export function SettingsPanel() {
               className={`flex-1 py-2 px-3 rounded text-xs font-semibold transition ${
                 currentStep === "voice"
                   ? "bg-blue-600 text-white"
-                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
               Voice
@@ -282,7 +282,7 @@ export function SettingsPanel() {
               className={`flex-1 py-2 px-3 rounded text-xs font-semibold transition ${
                 currentStep === "costs"
                   ? "bg-blue-600 text-white"
-                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
               Costs
@@ -293,7 +293,7 @@ export function SettingsPanel() {
           {currentStep === "api_keys" && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">
+                <label className="block text-sm font-semibold text-slate-800 mb-2">
                   Anthropic API Key
                 </label>
                 <input
@@ -301,7 +301,7 @@ export function SettingsPanel() {
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="sk-..."
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                 />
                 <button
                   onClick={testApiKey}
@@ -311,15 +311,15 @@ export function SettingsPanel() {
                   {loading ? "Testing..." : "Test API"}
                 </button>
                 {apiKeyValid === true && (
-                  <p className="mt-2 text-green-400 text-sm">API key is valid</p>
+                  <p className="mt-2 text-green-700 text-sm">API key is valid</p>
                 )}
                 {apiKeyValid === false && (
-                  <p className="mt-2 text-red-400 text-sm">API key is invalid</p>
+                  <p className="mt-2 text-red-700 text-sm">API key is invalid</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">
+                <label className="block text-sm font-semibold text-slate-800 mb-2">
                   Ollama URL
                 </label>
                 <input
@@ -327,7 +327,7 @@ export function SettingsPanel() {
                   value={ollamaUrl}
                   onChange={(e) => setOllamaUrl(e.target.value)}
                   placeholder="http://localhost:11434"
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                 />
                 <button
                   onClick={testOllama}
@@ -337,23 +337,23 @@ export function SettingsPanel() {
                   {loading ? "Testing..." : "Test Ollama"}
                 </button>
                 {ollamaValid === true && (
-                  <p className="mt-2 text-green-400 text-sm">Ollama is reachable</p>
+                  <p className="mt-2 text-green-700 text-sm">Ollama is reachable</p>
                 )}
                 {ollamaValid === false && (
-                  <p className="mt-2 text-red-400 text-sm">Ollama is not reachable</p>
+                  <p className="mt-2 text-red-700 text-sm">Ollama is not reachable</p>
                 )}
               </div>
 
               {/* Status Indicators */}
               {status && (
-                <div className="mt-6 p-3 bg-slate-700/50 rounded space-y-2">
+                <div className="mt-6 p-3 bg-slate-50 border border-slate-200 rounded space-y-2">
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-2 h-2 rounded-full ${
                         status.anthropic ? "bg-green-500" : "bg-red-500"
                       }`}
                     />
-                    <span className="text-sm text-slate-300">
+                    <span className="text-sm text-slate-700">
                       Anthropic: {status.anthropic ? "Connected" : "Disconnected"}
                     </span>
                   </div>
@@ -363,7 +363,7 @@ export function SettingsPanel() {
                         status.ollama ? "bg-green-500" : "bg-red-500"
                       }`}
                     />
-                    <span className="text-sm text-slate-300">
+                    <span className="text-sm text-slate-700">
                       Ollama: {status.ollama ? "Connected" : "Disconnected"}
                     </span>
                   </div>
@@ -376,22 +376,22 @@ export function SettingsPanel() {
           {currentStep === "models" && settings && (
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   Fast Model
                 </label>
-                <p className="text-xs text-slate-400">{settings.models.fast}</p>
+                <p className="text-xs text-slate-600">{settings.models.fast}</p>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   Brain Model
                 </label>
-                <p className="text-xs text-slate-400">{settings.models.brain}</p>
+                <p className="text-xs text-slate-600">{settings.models.brain}</p>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   Deep Model
                 </label>
-                <p className="text-xs text-slate-400">{settings.models.deep}</p>
+                <p className="text-xs text-slate-600">{settings.models.deep}</p>
               </div>
               <div>
                 <label className="text-sm font-semibold text-slate-300">
@@ -400,7 +400,7 @@ export function SettingsPanel() {
                 <select
                   defaultValue={settings.models.default}
                   onChange={(e) => saveSettings({ CLAUDE_DEFAULT_TIER: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="mt-1 w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:border-blue-500"
                 >
                   <option value="fast">Fast (Haiku)</option>
                   <option value="brain">Brain (Sonnet)</option>
@@ -414,19 +414,19 @@ export function SettingsPanel() {
           {currentStep === "voice" && settings && (
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   TTS Engine
                 </label>
-                <p className="text-xs text-slate-400">{settings.voice.tts_engine}</p>
+                <p className="text-xs text-slate-600">{settings.voice.tts_engine}</p>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   Voice
                 </label>
-                <p className="text-xs text-slate-400">{settings.voice.tts_voice}</p>
+                <p className="text-xs text-slate-600">{settings.voice.tts_voice}</p>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   Speech Speed
                 </label>
                 <input
@@ -436,14 +436,14 @@ export function SettingsPanel() {
                   step="0.05"
                   defaultValue={settings.voice.tts_speed}
                   onChange={(e) => saveSettings({ TTS_SPEED: parseFloat(e.target.value) })}
-                  className="mt-1 w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="mt-1 w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   STT Engine
                 </label>
-                <p className="text-xs text-slate-400">{settings.voice.stt_engine}</p>
+                <p className="text-xs text-slate-600">{settings.voice.stt_engine}</p>
               </div>
             </div>
           )}
@@ -452,7 +452,7 @@ export function SettingsPanel() {
           {currentStep === "costs" && settings && (
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   Daily Alert Threshold (USD)
                 </label>
                 <input
@@ -461,11 +461,11 @@ export function SettingsPanel() {
                   step="0.01"
                   defaultValue={settings.costs.daily_alert_usd}
                   onChange={(e) => saveSettings({ COST_DAILY_ALERT: parseFloat(e.target.value) })}
-                  className="mt-1 w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="mt-1 w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-300">
+                <label className="text-sm font-semibold text-slate-800">
                   Monthly Alert Threshold (USD)
                 </label>
                 <input
@@ -474,7 +474,7 @@ export function SettingsPanel() {
                   step="0.01"
                   defaultValue={settings.costs.monthly_alert_usd}
                   onChange={(e) => saveSettings({ COST_MONTHLY_ALERT: parseFloat(e.target.value) })}
-                  className="mt-1 w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  className="mt-1 w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -482,7 +482,7 @@ export function SettingsPanel() {
 
           {/* System Info */}
           {status && (
-            <div className="mt-6 p-3 bg-slate-700/50 rounded border border-slate-600 space-y-2 text-xs text-slate-400">
+            <div className="mt-6 p-3 bg-slate-50 rounded border border-slate-200 space-y-2 text-xs text-slate-600">
               <div>Memory entries: {status.memory_count}</div>
               <div>Uptime: {Math.floor(status.uptime_seconds / 60)}m</div>
             </div>
@@ -492,4 +492,3 @@ export function SettingsPanel() {
     </>
   );
 }
-

@@ -1,4 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import "@fontsource/inter/300.css";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -22,7 +28,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#faf7f2",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -33,10 +39,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
         {/* PWA icons */}
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png" />
@@ -74,4 +76,3 @@ export default function RootLayout({
     </html>
   );
 }
-

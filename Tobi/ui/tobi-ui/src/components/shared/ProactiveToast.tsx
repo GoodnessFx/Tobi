@@ -118,15 +118,15 @@ function ToastItem({
         className="
           relative overflow-hidden
           bg-Tobi-surface/90 backdrop-blur-xl
-          border border-white/[0.06] rounded-xl
+          border border-Tobi-border rounded-xl
           shadow-lg
           p-3.5
           transition-all duration-200
-          hover:border-white/[0.1]
+          hover:border-Tobi-cyan/30
           group
         "
         style={{
-          boxShadow: `0 4px 24px ${config.glowColor}, 0 1px 3px rgba(0,0,0,0.3)`,
+          boxShadow: `0 4px 24px ${config.glowColor}, 0 1px 3px rgba(15,23,42,0.08)`,
         }}
       >
         <div
@@ -141,8 +141,8 @@ function ToastItem({
             className={`
               flex-shrink-0 w-8 h-8 rounded-lg
               flex items-center justify-center
-              ${config.accentClass} bg-white/[0.04]
-              border border-white/[0.06]
+              ${config.accentClass} bg-Tobi-surface-alt
+              border border-Tobi-border
             `}
           >
             <svg
@@ -167,7 +167,7 @@ function ToastItem({
                 {config.label}
               </span>
               {suggestion.priority >= 2 && (
-                <span className="text-3xs font-mono text-amber-400/60 uppercase">
+                <span className="text-3xs font-mono text-amber-800 uppercase">
                   urgent
                 </span>
               )}
@@ -182,8 +182,8 @@ function ToastItem({
             className="
               flex-shrink-0 w-6 h-6 rounded-md
               flex items-center justify-center
-              text-Tobi-text-dim/25 hover:text-Tobi-text-dim/60
-              hover:bg-white/[0.05]
+              text-Tobi-text-dim hover:text-Tobi-text
+              hover:bg-Tobi-surface-alt
               transition-all duration-150
               opacity-0 group-hover:opacity-100
               focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-Tobi-cyan/20
@@ -197,7 +197,7 @@ function ToastItem({
           </button>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/[0.03]">
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-Tobi-border">
           <div
             className={`h-full ${config.accentClass}/30 rounded-full`}
             style={{
@@ -240,4 +240,3 @@ export default function ProactiveToast({ suggestions, onDismiss }: ProactiveToas
     </>
   );
 }
-

@@ -2,39 +2,39 @@
 @config "../../tailwind.config.ts";
 
 /* ============================================================
-   TOBI Design System — Warm Edition
-   Palette: ivory background, warm brown text, gold/amber accent
+   TOBI Design System — Clear Edition
+   Palette: white surfaces, slate text, electric-blue accent
    ============================================================ */
 
 :root {
   /* ── Primitive Tokens ─────────────────────────────────── */
-  --color-ivory:       #faf7f2;
-  --color-cream:       #f5f0e8;
-  --color-parchment:   #ede5d8;
-  --color-linen:       #e4dace;
-  --color-sand:        #d4c9b8;
-  --color-warm-gray:   #b8ac9e;
-  --color-brown-light: #8c7a6b;
-  --color-brown:       #6b5744;
-  --color-brown-dark:  #4a3728;
-  --color-espresso:    #2e1f14;
+  --color-ivory:       #ffffff;
+  --color-cream:       #f8fafc;
+  --color-parchment:   #f1f5f9;
+  --color-linen:       #e2e8f0;
+  --color-sand:        #cbd5e1;
+  --color-warm-gray:   #94a3b8;
+  --color-brown-light: #64748b;
+  --color-brown:       #475569;
+  --color-brown-dark:  #1e293b;
+  --color-espresso:    #0f172a;
 
-  --color-gold-bright: #d4a843;
-  --color-gold:        #b8922e;
-  --color-gold-dim:    #9a7a26;
-  --color-amber:       #c97c2a;
-  --color-rust:        #b85c2a;
+  --color-gold-bright: #0ea5e9;
+  --color-gold:        #0284c7;
+  --color-gold-dim:    #0369a1;
+  --color-amber:       #d97706;
+  --color-rust:        #c2410c;
 
-  --color-green-warm:  #5a8a5a;
-  --color-red-warm:    #b85252;
-  --color-blue-muted:  #5a7a9a;
+  --color-green-warm:  #15803d;
+  --color-red-warm:    #b91c1c;
+  --color-blue-muted:  #0369a1;
 
   /* ── Semantic Tokens ──────────────────────────────────── */
-  --tobi-bg:           var(--color-ivory);
+  --tobi-bg:           #ffffff;
   --tobi-surface:      var(--color-cream);
   --tobi-surface-alt:  var(--color-parchment);
   --tobi-border:       var(--color-linen);
-  --tobi-border-soft:  rgba(107, 87, 68, 0.12);
+  --tobi-border-soft:  rgba(15, 23, 42, 0.10);
 
   --tobi-text:         var(--color-espresso);
   --tobi-text-sub:     var(--color-brown);
@@ -43,11 +43,11 @@
 
   --tobi-accent:       var(--color-gold-bright);
   --tobi-accent-dim:   var(--color-gold);
-  --tobi-accent-soft:  rgba(212, 168, 67, 0.15);
-  --tobi-accent-glow:  rgba(212, 168, 67, 0.25);
+  --tobi-accent-soft:  rgba(14, 165, 233, 0.12);
+  --tobi-accent-glow:  rgba(14, 165, 233, 0.22);
 
-  --tobi-panel:        rgba(245, 240, 232, 0.92);
-  --tobi-panel-border: rgba(180, 160, 130, 0.2);
+  --tobi-panel:        rgba(255, 255, 255, 0.96);
+  --tobi-panel-border: rgba(15, 23, 42, 0.10);
 
   --tobi-success:      var(--color-green-warm);
   --tobi-warning:      var(--color-amber);
@@ -69,10 +69,10 @@
   --r-full:9999px;
 
   /* ── Shadows ──────────────────────────────────────────── */
-  --shadow-soft:  0 1px 4px rgba(74, 55, 40, 0.08), 0 4px 16px rgba(74, 55, 40, 0.06);
-  --shadow-card:  0 2px 8px rgba(74, 55, 40, 0.10), 0 8px 24px rgba(74, 55, 40, 0.07);
-  --shadow-gold:  0 0 16px rgba(212, 168, 67, 0.20), 0 0 4px rgba(212, 168, 67, 0.10);
-  --shadow-input: inset 0 1px 3px rgba(74, 55, 40, 0.08);
+  --shadow-soft:  0 1px 4px rgba(15, 23, 42, 0.05), 0 4px 16px rgba(15, 23, 42, 0.04);
+  --shadow-card:  0 2px 8px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.05);
+  --shadow-gold:  0 0 16px rgba(14, 165, 233, 0.16), 0 0 4px rgba(14, 165, 233, 0.10);
+  --shadow-input: inset 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 /* ============================================================
@@ -108,22 +108,22 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 .tobi-scrollbar::-webkit-scrollbar        { width: 4px; }
 .tobi-scrollbar::-webkit-scrollbar-track  { background: transparent; }
 .tobi-scrollbar::-webkit-scrollbar-thumb  {
-  background: rgba(107, 87, 68, 0.18);
+  background: rgba(71, 85, 105, 0.18);
   border-radius: var(--r-full);
 }
 .tobi-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 87, 68, 0.35);
+  background: rgba(71, 85, 105, 0.35);
 }
 .tobi-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(107, 87, 68, 0.18) transparent;
+  scrollbar-color: rgba(71, 85, 105, 0.18) transparent;
 }
 
 /* legacy alias */
 .Tobi-scrollbar { @extend .tobi-scrollbar; }
 
 /* ============================================================
-   Panel / Card / Glass — warm paper feel
+   Panel / Card / Glass — clean white surfaces
    ============================================================ */
 
 .tobi-panel {
@@ -147,7 +147,7 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 }
 .tobi-card:hover {
   border-color: var(--color-sand);
-  box-shadow: var(--shadow-card), 0 0 0 1px rgba(212, 168, 67, 0.06);
+  box-shadow: var(--shadow-card), 0 0 0 1px rgba(14, 165, 233, 0.06);
 }
 .tobi-card-header {
   font-size: 10px;
@@ -164,8 +164,8 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 .Tobi-card-header  { @extend .tobi-card-header; }
 
 .Tobi-glass {
-  background: rgba(245, 240, 232, 0.75);
-  border: 1px solid rgba(180, 160, 130, 0.18);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(15, 23, 42, 0.10);
   border-radius: var(--r-lg);
   backdrop-filter: blur(20px) saturate(1.1);
   -webkit-backdrop-filter: blur(20px) saturate(1.1);
@@ -173,8 +173,8 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 }
 
 .Tobi-glass-subtle {
-  background: rgba(237, 229, 216, 0.55);
-  border: 1px solid rgba(180, 160, 130, 0.12);
+  background: rgba(248, 250, 252, 0.88);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: var(--r-md);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -186,13 +186,13 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 
 .Tobi-glow {
   text-shadow:
-    0 0 10px rgba(212, 168, 67, 0.35),
-    0 0 24px rgba(212, 168, 67, 0.15);
+    0 0 10px rgba(14, 165, 233, 0.24),
+    0 0 24px rgba(14, 165, 233, 0.10);
 }
 .Tobi-glow-subtle {
   text-shadow:
-    0 0 6px rgba(212, 168, 67, 0.20),
-    0 0 14px rgba(212, 168, 67, 0.08);
+    0 0 6px rgba(14, 165, 233, 0.18),
+    0 0 14px rgba(14, 165, 233, 0.06);
 }
 
 /* ============================================================
@@ -217,8 +217,8 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
   border-color: var(--color-gold);
   box-shadow:
     var(--shadow-input),
-    0 0 0 3px rgba(212, 168, 67, 0.10),
-    0 0 16px rgba(212, 168, 67, 0.08);
+    0 0 0 3px rgba(14, 165, 233, 0.10),
+    0 0 16px rgba(14, 165, 233, 0.08);
 }
 .Tobi-input::placeholder { color: var(--tobi-text-muted); }
 .Tobi-input:disabled      { opacity: 0.35; cursor: not-allowed; }
@@ -238,10 +238,10 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
   flex-shrink: 0;
   transition: all var(--dur-base) ease;
 }
-.status-dot.connected    { background: var(--color-green-warm); box-shadow: 0 0 6px rgba(90,138,90,0.45); }
+.status-dot.connected    { background: var(--color-green-warm); box-shadow: 0 0 6px rgba(21,128,61,0.25); }
 .status-dot.connecting   { background: var(--color-amber);      box-shadow: 0 0 6px rgba(201,124,42,0.45); animation: statusPulse 1.5s ease-in-out infinite; }
 .status-dot.disconnected { background: var(--color-warm-gray);  }
-.status-dot.error        { background: var(--color-red-warm);   box-shadow: 0 0 6px rgba(184,82,82,0.45); animation: statusPulse 1s ease-in-out infinite; }
+.status-dot.error        { background: var(--color-red-warm);   box-shadow: 0 0 6px rgba(185,28,28,0.25); animation: statusPulse 1s ease-in-out infinite; }
 
 @keyframes statusPulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
 
@@ -279,13 +279,13 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 .Tobi-btn:disabled               { opacity: 0.35; cursor: not-allowed; }
 
 .Tobi-btn-primary {
-  background: rgba(212, 168, 67, 0.12);
-  border: 1px solid rgba(212, 168, 67, 0.25);
+  background: rgba(14, 165, 233, 0.10);
+  border: 1px solid rgba(14, 165, 233, 0.22);
   color: var(--color-gold);
 }
 .Tobi-btn-primary:hover:not(:disabled) {
-  background: rgba(212, 168, 67, 0.20);
-  border-color: rgba(212, 168, 67, 0.45);
+  background: rgba(14, 165, 233, 0.16);
+  border-color: rgba(14, 165, 233, 0.36);
   box-shadow: var(--shadow-gold);
 }
 
@@ -295,7 +295,7 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
   color: var(--tobi-text-dim);
 }
 .Tobi-btn-ghost:hover:not(:disabled) {
-  background: rgba(107, 87, 68, 0.06);
+  background: rgba(71, 85, 105, 0.06);
   color: var(--color-brown-dark);
 }
 
@@ -304,8 +304,8 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
    ============================================================ */
 
 .message-bubble         { border-radius: var(--r-lg); padding: 12px 16px; position: relative; }
-.message-bubble-user    { background: rgba(212, 168, 67, 0.08); border: 1px solid rgba(212, 168, 67, 0.12); }
-.message-bubble-assistant { background: rgba(107, 87, 68, 0.04); border: 1px solid rgba(107, 87, 68, 0.08); }
+.message-bubble-user    { background: rgba(14, 165, 233, 0.08); border: 1px solid rgba(14, 165, 233, 0.14); }
+.message-bubble-assistant { background: rgba(71, 85, 105, 0.04); border: 1px solid rgba(71, 85, 105, 0.08); }
 .message-bubble-user:hover,
 .message-bubble-assistant:hover { filter: brightness(0.97); }
 
@@ -317,14 +317,14 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 9px; font-family: 'JetBrains Mono', monospace;
   padding: 2px 8px; border-radius: var(--r-full);
-  background: rgba(212, 168, 67, 0.08);
-  border: 1px solid rgba(212, 168, 67, 0.14);
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.14);
   color: var(--color-gold-dim);
   letter-spacing: 0.03em;
 }
 .Tobi-badge-gold {
-  background: rgba(201, 124, 42, 0.08);
-  border-color: rgba(201, 124, 42, 0.14);
+  background: rgba(217, 119, 6, 0.08);
+  border-color: rgba(217, 119, 6, 0.14);
   color: var(--color-amber);
 }
 
@@ -359,16 +359,16 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 }
 .animate-shimmer {
   background: linear-gradient(90deg,
-    rgba(212,168,67,0.04) 25%,
-    rgba(212,168,67,0.10) 50%,
-    rgba(212,168,67,0.04) 75%);
+    rgba(14,165,233,0.04) 25%,
+    rgba(14,165,233,0.10) 50%,
+    rgba(14,165,233,0.04) 75%);
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
 }
 
 @keyframes breatheGold {
-  0%,100% { box-shadow: 0 0 12px rgba(212,168,67,0.15), 0 0 4px rgba(212,168,67,0.08); }
-  50%     { box-shadow: 0 0 24px rgba(212,168,67,0.30), 0 0 8px rgba(212,168,67,0.15); }
+  0%,100% { box-shadow: 0 0 12px rgba(14,165,233,0.12), 0 0 4px rgba(14,165,233,0.06); }
+  50%     { box-shadow: 0 0 24px rgba(14,165,233,0.22), 0 0 8px rgba(14,165,233,0.12); }
 }
 .animate-breathe { animation: breatheGold 2.5s ease-in-out infinite; }
 
@@ -420,11 +420,9 @@ body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 }
 
 /* ============================================================
-   Orb / Cinematic overrides — warm tones on dark bg
-   The cinematic view keeps a dark background for the 3D orb
-   but the overlay text/controls use warm palette
+   Orb / Cinematic overrides
    ============================================================ */
 
-.orb-overlay-text  { color: rgba(245, 240, 232, 0.75); }
+.orb-overlay-text  { color: rgba(15, 23, 42, 0.75); }
 .orb-accent-color  { color: var(--color-gold-bright); }
 .orb-state-label   { letter-spacing: 0.22em; font-size: 9px; text-transform: uppercase; }

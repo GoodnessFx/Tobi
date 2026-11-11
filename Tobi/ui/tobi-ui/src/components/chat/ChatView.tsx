@@ -41,13 +41,13 @@ export default function ChatView({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-2.5 border-b border-white/[0.04] bg-Tobi-surface/60 backdrop-blur-lg flex-shrink-0">
+      <div className="flex items-center justify-between px-5 py-2.5 border-b border-Tobi-border bg-Tobi-surface/80 backdrop-blur-lg flex-shrink-0">
         <div className="flex items-center gap-2">
           <h2 className="text-2xs font-medium text-Tobi-text-dim/55 uppercase tracking-[0.12em]">
             Conversation
           </h2>
           {visibleMessages.length > 0 && (
-            <span className="text-3xs text-Tobi-text-dim/25 font-mono tabular-nums">
+            <span className="text-3xs text-Tobi-text-muted font-mono tabular-nums">
               {visibleMessages.length}
             </span>
           )}
@@ -89,10 +89,10 @@ export default function ChatView({
                   />
                 </svg>
               </div>
-              <p className="text-sm text-Tobi-text-dim/35 font-light">
+              <p className="text-sm text-Tobi-text-dim font-light">
                 Start a conversation with Tobi
               </p>
-              <p className="text-2xs text-Tobi-text-dim/20 mt-1.5">
+              <p className="text-2xs text-Tobi-text-muted mt-1.5">
                 Type below or switch to Voice mode
               </p>
             </div>
@@ -115,7 +115,7 @@ export default function ChatView({
                         transition-colors duration-200
                         ${isUser
                           ? "bg-Tobi-cyan/8 text-Tobi-cyan/60 border border-Tobi-cyan/12"
-                          : "bg-white/[0.03] text-Tobi-text-dim/50 border border-white/[0.06]"
+                          : "bg-Tobi-surface-alt text-Tobi-text-dim border border-Tobi-border"
                         }
                       `}>
                       {isUser ? "B" : "J"}
@@ -129,7 +129,7 @@ export default function ChatView({
                         {!isUser && (msg.agentType || msg.tierUsed) && (
                           <AgentBadge agentType={msg.agentType} tierUsed={msg.tierUsed} />
                         )}
-                        <span className="text-3xs text-Tobi-text-dim/20 font-mono tabular-nums">
+                        <span className="text-3xs text-Tobi-text-muted font-mono tabular-nums">
                           {new Date(msg.timestamp).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -140,7 +140,7 @@ export default function ChatView({
                       <div className={`message-bubble ${isUser ? 'message-bubble-user' : 'message-bubble-assistant'}`}>
                         <div className="text-[13px] text-Tobi-text/80 leading-relaxed whitespace-pre-wrap">
                           {msg.content || (
-                            <span className="text-Tobi-text-dim/40 italic text-xs">
+                            <span className="text-Tobi-text-dim italic text-xs">
                               Thinking...
                             </span>
                           )}
@@ -176,4 +176,3 @@ export default function ChatView({
     </div>
   );
 }
-

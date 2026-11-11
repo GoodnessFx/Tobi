@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
 
 interface LoginScreenProps {
   onLogin: (pin: string) => Promise<boolean>;
@@ -97,24 +98,31 @@ export default function LoginScreen({ onLogin, error }: LoginScreenProps) {
   );
 
   return (
-    <div className="h-dvh w-screen flex flex-col items-center justify-center bg-black text-white safe-top safe-bottom">
+    <div className="h-dvh w-screen flex flex-col items-center justify-center bg-white text-slate-900 safe-top safe-bottom">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 40%, rgba(0, 120, 255, 0.08) 0%, transparent 60%)",
+            "radial-gradient(ellipse at 50% 40%, rgba(14, 165, 233, 0.10) 0%, transparent 60%)",
         }}
       />
 
       <div className="relative z-10 flex flex-col items-center px-6 max-w-sm w-full">
         <div className="mb-8 text-center">
+          <Image
+            src="/icon-192.png"
+            alt=""
+            width={64}
+            height={64}
+            className="mx-auto mb-4 rounded-2xl"
+          />
           <h1
             className="text-3xl font-light tracking-[0.3em] mb-2"
-            style={{ color: "#7eb8ff" }}
+            style={{ color: "#0369a1" }}
           >
-            J.A.R.V.I.S.
+            TOBI
           </h1>
-          <p className="text-sm text-gray-500 font-light">
+          <p className="text-sm text-gray-600 font-light">
             Enter your access PIN
           </p>
         </div>
@@ -139,8 +147,8 @@ export default function LoginScreen({ onLogin, error }: LoginScreenProps) {
               className={`
                 w-12 h-14 text-center text-2xl font-mono rounded-lg
                 border transition-all duration-200 outline-none
-                bg-gray-900/60 backdrop-blur-sm
-                ${digit ? "border-blue-500/60 text-white" : "border-gray-700/60 text-gray-400"}
+                bg-white backdrop-blur-sm
+                ${digit ? "border-blue-500/60 text-slate-900" : "border-gray-300 text-gray-500"}
                 focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30
                 disabled:opacity-50
               `}
@@ -150,17 +158,17 @@ export default function LoginScreen({ onLogin, error }: LoginScreenProps) {
         </div>
 
         {error && (
-          <p className="text-red-400 text-sm mb-4 text-center">{error}</p>
+          <p className="text-red-700 text-sm mb-4 text-center">{error}</p>
         )}
 
         {isSubmitting && (
-          <div className="flex items-center gap-2 text-gray-400 text-sm">
+          <div className="flex items-center gap-2 text-gray-600 text-sm">
             <div className="w-4 h-4 border-2 border-blue-400/40 border-t-blue-400 rounded-full animate-spin" />
             Verifying...
           </div>
         )}
 
-        <p className="text-xs text-gray-600 text-center mt-8 leading-relaxed">
+        <p className="text-xs text-gray-500 text-center mt-8 leading-relaxed">
           The PIN is displayed in the Tobi terminal on startup.
           <br />
           Local connections bypass this screen automatically.
@@ -180,4 +188,3 @@ export default function LoginScreen({ onLogin, error }: LoginScreenProps) {
     </div>
   );
 }
-

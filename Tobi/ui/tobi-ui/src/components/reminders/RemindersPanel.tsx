@@ -44,11 +44,11 @@ function formatDue(ts: number): string {
 }
 
 function statusColour(r: Reminder): string {
-  if (r.status === "fired") return "text-amber-400";
+  if (r.status === "fired") return "text-amber-800";
   const delta = r.due_at - Date.now() / 1000;
-  if (delta < 0) return "text-red-400/80";
-  if (delta < 1800) return "text-amber-400/80";
-  return "text-tobi-cyan/70";
+  if (delta < 0) return "text-red-700";
+  if (delta < 1800) return "text-amber-800";
+  return "text-Tobi-cyan";
 }
 
 // ISO-8601 local datetime string for <input type="datetime-local">
@@ -82,7 +82,7 @@ function RecurrenceBadge({ value }: { value: string }) {
     monthly: "mo",
   };
   return (
-    <span className="text-3xs font-mono bg-white/[0.05] text-white/40 px-1.5 py-0.5 rounded-full border border-white/[0.06]">
+    <span className="text-3xs font-mono bg-Tobi-surface-alt text-Tobi-text-sub px-1.5 py-0.5 rounded-full border border-Tobi-border">
       ↻ {labels[value] ?? value}
     </span>
   );
@@ -91,7 +91,7 @@ function RecurrenceBadge({ value }: { value: string }) {
 function AlarmBadge({ isAlarm }: { isAlarm: boolean }) {
   if (!isAlarm) return null;
   return (
-    <span className="text-3xs font-mono bg-amber-400/10 text-amber-400/70 px-1.5 py-0.5 rounded-full border border-amber-400/20">
+    <span className="text-3xs font-mono bg-amber-50 text-amber-800 px-1.5 py-0.5 rounded-full border border-amber-200">
       alarm
     </span>
   );
@@ -191,8 +191,8 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
   }, [content, dueLocal, isAlarm, recurrence, playbackMode, audioBlob, onCreated]);
 
   return (
-    <div className="bg-white/[0.03] border border-white/[0.07] rounded-xl p-4 space-y-3">
-      <div className="text-2xs font-medium text-white/50 uppercase tracking-[0.1em]">
+    <div className="bg-Tobi-surface border border-Tobi-border rounded-xl p-4 space-y-3">
+      <div className="text-2xs font-medium text-Tobi-text-sub uppercase tracking-[0.1em]">
         New Reminder
       </div>
 
@@ -202,7 +202,7 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
         placeholder="What should I remind you about?"
         rows={2}
-        className="w-full bg-white/[0.04] border border-white/[0.07] rounded-lg px-3 py-2.5 text-sm text-white/80 placeholder-white/20 resize-none focus:outline-none focus:border-cyan-500/40 focus:bg-white/[0.06] transition-all"
+        className="w-full bg-white border border-Tobi-border rounded-lg px-3 py-2.5 text-sm text-Tobi-text placeholder-Tobi-text-muted resize-none focus:outline-none focus:border-Tobi-cyan/50 focus:bg-Tobi-surface transition-all"
       />
 
       {/* Date/time */}
@@ -210,7 +210,7 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         type="datetime-local"
         value={dueLocal}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setDueLocal(e.target.value)}
-        className="w-full bg-white/[0.04] border border-white/[0.07] rounded-lg px-3 py-2.5 text-sm text-white/70 focus:outline-none focus:border-cyan-500/40 transition-all [color-scheme:dark]"
+        className="w-full bg-white border border-Tobi-border rounded-lg px-3 py-2.5 text-sm text-Tobi-text focus:outline-none focus:border-Tobi-cyan/50 transition-all [color-scheme:light]"
       />
 
       {/* Recurrence + Alarm row */}
@@ -218,7 +218,7 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         <select
           value={recurrence}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => setRecurrence(e.target.value)}
-          className="bg-white/[0.04] border border-white/[0.07] rounded-lg px-2.5 py-1.5 text-xs text-white/60 focus:outline-none focus:border-cyan-500/40 transition-all [color-scheme:dark]"
+          className="bg-white border border-Tobi-border rounded-lg px-2.5 py-1.5 text-xs text-Tobi-text focus:outline-none focus:border-Tobi-cyan/50 transition-all [color-scheme:light]"
         >
           <option value="none">Once</option>
           <option value="daily">Daily</option>
@@ -230,11 +230,11 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         <label className="flex items-center gap-2 cursor-pointer select-none">
           <div
             onClick={() => setIsAlarm((v) => !v)}
-            className={`w-8 h-4 rounded-full transition-colors duration-200 relative ${isAlarm ? "bg-amber-400/60" : "bg-white/10"}`}
+            className={`w-8 h-4 rounded-full transition-colors duration-200 relative ${isAlarm ? "bg-amber-500" : "bg-slate-200"}`}
           >
-            <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all duration-200 ${isAlarm ? "left-4" : "left-0.5"}`} />
+            <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-all duration-200 ${isAlarm ? "left-4" : "left-0.5"}`} />
           </div>
-          <span className="text-xs text-white/50">Full alarm</span>
+          <span className="text-xs text-Tobi-text-sub">Full alarm</span>
         </label>
       </div>
 
@@ -243,7 +243,7 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         {!recording && !audioUrl && (
           <button
             onClick={startRecording}
-            className="flex items-center gap-1.5 text-xs text-white/40 hover:text-cyan-400/70 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-Tobi-text-dim hover:text-Tobi-cyan transition-colors"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
@@ -257,7 +257,7 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         {recording && (
           <button
             onClick={stopRecording}
-            className="flex items-center gap-1.5 text-xs text-red-400/80 hover:text-red-400 transition-colors animate-pulse"
+            className="flex items-center gap-1.5 text-xs text-red-700 hover:text-red-800 transition-colors animate-pulse"
           >
             <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
             Stop recording
@@ -268,18 +268,18 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
             <audio src={audioUrl} controls className="h-7 max-w-[160px]" />
             <button
               onClick={() => { setAudioBlob(null); setAudioUrl(null); setPlaybackMode("tobi_voice"); }}
-              className="text-xs text-white/30 hover:text-red-400/70 transition-colors"
+              className="text-xs text-Tobi-text-muted hover:text-red-700 transition-colors"
               aria-label="Remove recording"
             >
               ✕
             </button>
-            <span className="text-3xs text-cyan-400/60">own voice ✓</span>
+            <span className="text-3xs text-cyan-800">own voice ✓</span>
           </div>
         )}
       </div>
 
       {error && (
-        <p className="text-xs text-red-400/80">{error}</p>
+        <p className="text-xs text-red-700">{error}</p>
       )}
 
       {/* Actions */}
@@ -287,13 +287,13 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="flex-1 bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/25 text-cyan-300/80 text-xs font-medium rounded-lg py-2 transition-all disabled:opacity-40"
+          className="flex-1 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 text-cyan-800 text-xs font-medium rounded-lg py-2 transition-all disabled:opacity-40"
         >
           {saving ? "Saving…" : "Set reminder"}
         </button>
         <button
           onClick={onCancel}
-          className="px-3 py-2 text-xs text-white/30 hover:text-white/60 transition-colors"
+          className="px-3 py-2 text-xs text-Tobi-text-dim hover:text-Tobi-text transition-colors"
         >
           Cancel
         </button>
@@ -319,8 +319,8 @@ function ReminderRow({ reminder: r, onDismiss, onSnooze, onDelete }: ReminderRow
     <div
       className={`group relative rounded-xl border transition-all duration-200 ${
         r.status === "fired"
-          ? "bg-amber-400/5 border-amber-400/15"
-          : "bg-white/[0.025] border-white/[0.05] hover:border-white/[0.09] hover:bg-white/[0.04]"
+          ? "bg-amber-50 border-amber-200"
+          : "bg-white border-Tobi-border hover:border-slate-300 hover:bg-Tobi-surface"
       }`}
     >
       <button
@@ -333,7 +333,7 @@ function ReminderRow({ reminder: r, onDismiss, onSnooze, onDelete }: ReminderRow
           r.status === "fired" ? "bg-amber-400 animate-pulse" :
           r.due_at - Date.now() / 1000 < 0 ? "bg-red-400/80" :
           r.due_at - Date.now() / 1000 < 1800 ? "bg-amber-400/70" :
-          "bg-cyan-400/50"
+          "bg-cyan-700"
         }`} />
 
         <div className="flex-1 min-w-0">
@@ -344,10 +344,10 @@ function ReminderRow({ reminder: r, onDismiss, onSnooze, onDelete }: ReminderRow
             <RecurrenceBadge value={r.recurrence} />
             <AlarmBadge isAlarm={r.is_alarm} />
             {r.audio_url && (
-              <span className="text-3xs text-cyan-400/50">🎙</span>
+              <span className="text-3xs text-cyan-800">🎙</span>
             )}
           </div>
-          <p className="text-sm text-white/70 mt-0.5 leading-snug line-clamp-2">
+          <p className="text-sm text-Tobi-text-sub mt-0.5 leading-snug line-clamp-2">
             {r.content}
           </p>
         </div>
@@ -355,7 +355,7 @@ function ReminderRow({ reminder: r, onDismiss, onSnooze, onDelete }: ReminderRow
         {/* Chevron */}
         <svg
           width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          strokeWidth="1.5" className={`flex-shrink-0 mt-1 text-white/20 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+          strokeWidth="1.5" className={`flex-shrink-0 mt-1 text-Tobi-text-muted transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -363,10 +363,10 @@ function ReminderRow({ reminder: r, onDismiss, onSnooze, onDelete }: ReminderRow
 
       {/* Expanded row actions */}
       {expanded && (
-        <div className="px-4 pb-3 pt-0 space-y-2.5 border-t border-white/[0.04] mt-0">
+        <div className="px-4 pb-3 pt-0 space-y-2.5 border-t border-Tobi-border mt-0">
           {audioUrl && (
             <div className="pt-2">
-              <p className="text-3xs text-white/30 mb-1 uppercase tracking-wider">Voice clip</p>
+              <p className="text-3xs text-Tobi-text-muted mb-1 uppercase tracking-wider">Voice clip</p>
               <audio src={audioUrl} controls className="h-8 w-full max-w-xs" />
             </div>
           )}
@@ -375,13 +375,13 @@ function ReminderRow({ reminder: r, onDismiss, onSnooze, onDelete }: ReminderRow
               <>
                 <button
                   onClick={() => onDismiss(r.id)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-white/50 hover:text-white/80 transition-all border border-white/[0.06]"
+                  className="text-xs px-3 py-1.5 rounded-lg bg-white hover:bg-Tobi-surface-alt text-Tobi-text-sub hover:text-Tobi-text transition-all border border-Tobi-border"
                 >
                   Dismiss
                 </button>
                 <button
                   onClick={() => onSnooze(r.id)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-amber-400/15 text-white/50 hover:text-amber-300/80 transition-all border border-white/[0.06] hover:border-amber-400/20"
+                  className="text-xs px-3 py-1.5 rounded-lg bg-white hover:bg-amber-50 text-Tobi-text-sub hover:text-amber-800 transition-all border border-Tobi-border hover:border-amber-200"
                 >
                   Snooze 10m
                 </button>
@@ -389,7 +389,7 @@ function ReminderRow({ reminder: r, onDismiss, onSnooze, onDelete }: ReminderRow
             )}
             <button
               onClick={() => onDelete(r.id)}
-              className="text-xs px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-red-400/10 text-white/30 hover:text-red-400/70 transition-all border border-white/[0.06] hover:border-red-400/20 ml-auto"
+              className="text-xs px-3 py-1.5 rounded-lg bg-white hover:bg-red-50 text-Tobi-text-sub hover:text-red-700 transition-all border border-Tobi-border hover:border-red-200 ml-auto"
             >
               Delete
             </button>
@@ -461,22 +461,22 @@ export default function RemindersPanel() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.04] bg-white/[0.015] backdrop-blur-lg flex-shrink-0">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-Tobi-border bg-white/90 backdrop-blur-lg flex-shrink-0">
         <div className="flex items-center gap-2.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-700">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
-          <span className="text-2xs font-medium text-white/50 uppercase tracking-[0.12em]">
+          <span className="text-2xs font-medium text-Tobi-text-sub uppercase tracking-[0.12em]">
             Reminders
           </span>
           {firedCount > 0 && (
-            <span className="text-3xs bg-amber-400/20 text-amber-400/80 px-1.5 py-0.5 rounded-full font-mono border border-amber-400/20">
+            <span className="text-3xs bg-amber-50 text-amber-800 px-1.5 py-0.5 rounded-full font-mono border border-amber-200">
               {firedCount} fired
             </span>
           )}
           {reminders.length > 0 && (
-            <span className="text-3xs text-white/20 font-mono">
+            <span className="text-3xs text-Tobi-text-muted font-mono">
               {reminders.length}
             </span>
           )}
@@ -485,13 +485,13 @@ export default function RemindersPanel() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setShowAll((v) => !v); }}
-            className="text-3xs text-white/30 hover:text-white/60 transition-colors"
+            className="text-3xs text-Tobi-text-dim hover:text-Tobi-text transition-colors"
           >
             {showAll ? "Upcoming" : "All"}
           </button>
           <button
             onClick={load}
-            className="text-3xs text-white/30 hover:text-cyan-400/60 transition-colors"
+            className="text-3xs text-Tobi-text-dim hover:text-Tobi-cyan transition-colors"
             aria-label="Refresh"
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -501,7 +501,7 @@ export default function RemindersPanel() {
           </button>
           <button
             onClick={() => setCreating(true)}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/25 text-cyan-300/80 transition-all"
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 text-cyan-800 transition-all"
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -522,22 +522,22 @@ export default function RemindersPanel() {
 
         {loading && (
           <div className="flex items-center justify-center py-10">
-            <div className="w-5 h-5 border-2 border-cyan-400/20 border-t-cyan-400/70 rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-cyan-200 border-t-cyan-700 rounded-full animate-spin" />
           </div>
         )}
 
         {!loading && error && (
-          <div className="text-xs text-red-400/70 text-center py-6">{error}</div>
+          <div className="text-xs text-red-700 text-center py-6">{error}</div>
         )}
 
         {!loading && !error && reminders.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-white/10">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-Tobi-text-muted/50">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
-            <p className="text-sm text-white/25">No reminders yet.</p>
-            <p className="text-xs text-white/15">
+            <p className="text-sm text-Tobi-text-muted">No reminders yet.</p>
+            <p className="text-xs text-Tobi-text-dim">
               Say &quot;remind me to…&quot; or tap New above.
             </p>
           </div>

@@ -5,38 +5,38 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // TOBI clear palette — white/slate/electric blue
+        // TOBI palette — warm paper, graphite, quiet evergreen
         Tobi: {
           // Backgrounds
-          bg:           "#ffffff",
-          surface:      "#f8fafc",
-          "surface-alt":"#f1f5f9",
-          border:       "#e2e8f0",
+          bg:           "#f5f4ef",
+          surface:      "#fffefa",
+          "surface-alt":"#efeee8",
+          border:       "#deddd4",
 
           // Text
-          text:         "#0f172a",
-          "text-sub":   "#334155",
-          "text-dim":   "#475569",
-          "text-muted": "#64748b",
+          text:         "#272a25",
+          "text-sub":   "#4f534b",
+          "text-dim":   "#686b62",
+          "text-muted": "#7b7c73",
 
           // Accents
-          cyan:         "#0284c7",
-          "cyan-dim":   "#0369a1",
-          "cyan-bright":"#0ea5e9",
-          gold:         "#0284c7",
-          "gold-dim":   "#0369a1",
+          cyan:         "#526b55",
+          "cyan-dim":   "#405944",
+          "cyan-bright":"#71816a",
+          gold:         "#9b6b32",
+          "gold-dim":   "#825723",
 
           // State
-          success:      "#15803d",
-          warning:      "#d97706",
-          error:        "#b91c1c",
+          success:      "#527653",
+          warning:      "#9b6b32",
+          error:        "#b34d43",
 
           // Legacy aliases
-          blue:         "#0369a1",
-          "blue-dark":  "#0f172a",
-          glow:         "#0ea5e9",
-          panel:        "rgba(255, 255, 255, 0.96)",
-          "panel-border":"rgba(15, 23, 42, 0.10)",
+          blue:         "#62798a",
+          "blue-dark":  "#272a25",
+          glow:         "#71816a",
+          panel:        "rgba(255, 254, 250, 0.98)",
+          "panel-border":"rgba(52, 56, 49, 0.1)",
         },
       },
       fontFamily: {

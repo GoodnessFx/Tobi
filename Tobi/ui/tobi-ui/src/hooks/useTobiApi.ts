@@ -68,6 +68,46 @@ export interface OnboardingSettings {
   };
 }
 
+export interface TobiSettings {
+  models: {
+    fast: string;
+    brain: string;
+    deep: string;
+    default: string;
+  };
+  costs: {
+    daily_alert_usd: number;
+    monthly_alert_usd: number;
+  };
+  voice: {
+    tts_engine: string;
+    tts_voice: string;
+    tts_speed: number;
+    stt_engine: string;
+  };
+  integrations: {
+    prefer_claude: boolean;
+    ollama_url: string;
+    ollama_model: string;
+  };
+}
+
+export interface TobiSystemStatus {
+  anthropic: boolean;
+  ollama: boolean;
+  tts: string;
+  stt: string;
+  memory_count: number;
+  uptime_seconds: number;
+}
+
+export interface IntegrationTestResult {
+  valid: boolean;
+  model?: string | null;
+  models?: string[];
+  error: string | null;
+}
+
 export interface GoogleWorkspaceStatus {
   configured: boolean;
   connected: boolean;
@@ -94,6 +134,21 @@ export const onboardingApi = {
     apiFetch<GoogleWorkspaceStatus>("/integrations/google/connect", "POST", {}),
   createContact: (contact: CrmContactInput) =>
     apiFetch<Record<string, unknown>>("/crm/contacts", "POST", contact),
+};
+
+export const settingsApi = {
+  get: () => apiFetch<TobiSettings>("/api/settings"),
+  status: () => apiFetch<TobiSystemStatus>("/api/settings/status"),
+  testAnthropic: (apiKey: string) =>
+    apiFetch<IntegrationTestResult>("/api/settings/test-api", "POST", { api_key: apiKey }),
+  testOllama: () =>
+    apiFetch<IntegrationTestResult>("/api/settings/test-ollama", "POST"),
+  update: (updates: Record<string, string | number>) =>
+    apiFetch<{ success: boolean; updated: string[]; error: string | null }>(
+      "/api/settings/update",
+      "POST",
+      updates
+    ),
 };
 
 // ── Reminders ────────────────────────────────────────────────────────────────

@@ -102,7 +102,7 @@ export default function ChatInput({
                 ? "bg-red-50 border-red-200 text-red-700 mic-ring-pulse"
                 : isTranscribing
                   ? "bg-Tobi-cyan/8 border-Tobi-cyan/15 text-Tobi-cyan/50"
-                  : "bg-white border-Tobi-border text-Tobi-text-dim hover:text-Tobi-cyan hover:border-Tobi-cyan/25 hover:bg-Tobi-cyan/5"
+                  : "bg-Tobi-surface-alt border-Tobi-border text-Tobi-text-dim hover:text-Tobi-cyan hover:border-Tobi-cyan/25 hover:bg-Tobi-cyan/5"
               }
               disabled:opacity-25 disabled:cursor-not-allowed
               active:scale-95

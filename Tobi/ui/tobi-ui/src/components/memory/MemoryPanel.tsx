@@ -14,14 +14,14 @@ import { digestApi, DigestData } from "@/hooks/useTobiApi";
 // ─────────────────────── helpers ─────────────────────────────────────────────
 
 const CATEGORY_COLOURS: Record<string, string> = {
-  personal:     "text-cyan-800 bg-cyan-50 border-cyan-200",
-  work:         "text-blue-800 bg-blue-50 border-blue-200",
-  preference:   "text-violet-800 bg-violet-50 border-violet-200",
-  location:     "text-emerald-800 bg-emerald-50 border-emerald-200",
-  relationship: "text-pink-800 bg-pink-50 border-pink-200",
-  habit:        "text-orange-800 bg-orange-50 border-orange-200",
-  skill_gap:    "text-amber-800 bg-amber-50 border-amber-200",
-  goal:         "text-yellow-800 bg-yellow-50 border-yellow-200",
+  personal:     "text-cyan-200 bg-cyan-400/10 border-cyan-300/20",
+  work:         "text-blue-200 bg-blue-400/10 border-blue-300/20",
+  preference:   "text-violet-200 bg-violet-400/10 border-violet-300/20",
+  location:     "text-emerald-200 bg-emerald-400/10 border-emerald-300/20",
+  relationship: "text-pink-200 bg-pink-400/10 border-pink-300/20",
+  habit:        "text-orange-200 bg-orange-400/10 border-orange-300/20",
+  skill_gap:    "text-amber-200 bg-amber-400/10 border-amber-300/20",
+  goal:         "text-yellow-200 bg-yellow-400/10 border-yellow-300/20",
   explicit:     "text-Tobi-text-sub bg-Tobi-surface-alt border-Tobi-border",
 };
 
@@ -34,13 +34,34 @@ function ConfidenceBar({ value }: { value: number }) {
   const colour =
     pct >= 80 ? "bg-emerald-400/50" :
     pct >= 50 ? "bg-cyan-400/40" :
-    "bg-slate-200";
+    "bg-Tobi-border";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-1 bg-Tobi-surface-alt rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all duration-500 ${colour}`} style={{ width: `${pct}%` }} />
       </div>
       <span className="text-3xs font-mono text-Tobi-text-muted tabular-nums w-7">{pct}%</span>
+    </div>
+  );
+}
+
+function UnavailableNotice({ title, onRetry }: { title: string; onRetry: () => void }) {
+  return (
+    <div role="alert" className="mx-auto mt-8 max-w-md rounded-2xl border border-Tobi-border bg-Tobi-surface p-6 text-center shadow-lg">
+      <div className="mx-auto mb-4 grid h-11 w-11 place-items-center rounded-2xl border border-Tobi-warning/20 bg-Tobi-warning/10 text-Tobi-warning">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
+          <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+        </svg>
+      </div>
+      <h3 className="text-sm font-semibold text-Tobi-text">{title}</h3>
+      <p className="mt-2 text-xs leading-relaxed text-Tobi-text-dim">
+        TOBI&apos;s service isn&apos;t responding. This view will be available when the connection is restored.
+      </p>
+      <button type="button" onClick={onRetry} className="Tobi-btn Tobi-btn-primary mt-5">
+        Try again
+      </button>
     </div>
   );
 }
@@ -73,9 +94,7 @@ function DigestTab({ token }: { token: string | null }) {
     </div>
   );
 
-  if (error) return (
-    <div className="text-xs text-red-700 text-center py-10">{error}</div>
-  );
+  if (error) return <UnavailableNotice title="Digest is temporarily unavailable" onRetry={() => void load()} />;
 
   if (!data) return null;
 
@@ -86,7 +105,7 @@ function DigestTab({ token }: { token: string | null }) {
         <div className="text-3xs text-Tobi-text-muted uppercase tracking-[0.15em] mb-1">{data.date_label}</div>
         <div className="text-base font-semibold text-Tobi-text">{data.greeting}, sir.</div>
         {data.insight && (
-          <p className="mt-2 text-xs text-cyan-800 leading-relaxed italic border-l-2 border-cyan-300 pl-3">
+          <p className="mt-2 text-xs text-cyan-200 leading-relaxed italic border-l-2 border-cyan-300 pl-3">
             &quot;{data.insight}&quot;
           </p>
         )}
@@ -122,7 +141,7 @@ function DigestTab({ token }: { token: string | null }) {
                 </div>
                 <span className={`text-3xs px-1.5 py-0.5 rounded-full border flex-shrink-0 ${
                   p.type === "goal"
-                    ? "text-yellow-800 bg-yellow-50 border-yellow-200"
+                    ? "text-yellow-200 bg-yellow-400/10 border-yellow-300/20"
                     : "text-Tobi-text-sub bg-Tobi-surface-alt border-Tobi-border"
                 }`}>
                   {p.type}
@@ -147,7 +166,7 @@ function DigestTab({ token }: { token: string | null }) {
                   </svg>
                 )}
                 <p className="flex-1 text-sm text-Tobi-text-sub truncate">{r.content}</p>
-                <span className="text-3xs font-mono text-cyan-800 whitespace-nowrap">{r.due_label}</span>
+                <span className="text-3xs font-mono text-cyan-200 whitespace-nowrap">{r.due_label}</span>
               </div>
             ))}
           </div>
@@ -157,17 +176,17 @@ function DigestTab({ token }: { token: string | null }) {
       {/* Drift nudges */}
       {data.drift_nudges.length > 0 && (
         <div>
-          <div className="text-3xs text-amber-800 uppercase tracking-[0.15em] mb-2 px-1">Slipping</div>
+          <div className="text-3xs text-amber-300 uppercase tracking-[0.15em] mb-2 px-1">Slipping</div>
           <div className="space-y-1.5">
             {data.drift_nudges.map((n, i) => (
-              <div key={i} className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-700 flex-shrink-0">
+              <div key={i} className="flex items-center gap-3 bg-amber-400/10 border border-amber-300/20 rounded-xl px-3 py-2.5">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-300 flex-shrink-0">
                   <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
                   <line x1="12" y1="9" x2="12" y2="13" />
                   <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
-                <p className="flex-1 text-sm text-amber-900 truncate">{n.value}</p>
-                <span className="text-3xs font-mono text-amber-800 whitespace-nowrap">{n.days_since}d ago</span>
+                <p className="flex-1 text-sm text-amber-100 truncate">{n.value}</p>
+                <span className="text-3xs font-mono text-amber-300 whitespace-nowrap">{n.days_since}d ago</span>
               </div>
             ))}
           </div>
@@ -225,7 +244,7 @@ function FactsTab({ facts }: FactsTabProps) {
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         placeholder="Search facts…"
-        className="w-full bg-white border border-Tobi-border rounded-lg px-3 py-2 text-sm text-Tobi-text placeholder-Tobi-text-muted focus:outline-none focus:border-Tobi-cyan/50 transition-all"
+        className="w-full bg-Tobi-surface-alt border border-Tobi-border rounded-lg px-3 py-2 text-sm text-Tobi-text placeholder-Tobi-text-muted focus:outline-none focus:border-Tobi-cyan/50 transition-all"
       />
 
       <div className="text-3xs text-Tobi-text-muted px-1">
@@ -271,14 +290,24 @@ export default function MemoryPanel({ token }: MemoryPanelProps) {
   const [tab, setTab] = useState<Tab>("digest");
   const [digestData, setDigestData] = useState<DigestData | null>(null);
   const [digestLoading, setDigestLoading] = useState(true);
+  const [digestError, setDigestError] = useState(false);
 
   // Pre-load digest so Facts tab can show facts_summary without extra fetch
-  useEffect(() => {
-    digestApi.get()
-      .then(setDigestData)
-      .catch(() => {})
-      .finally(() => setDigestLoading(false));
+  const loadDigest = useCallback(async () => {
+    setDigestLoading(true);
+    setDigestError(false);
+    try {
+      setDigestData(await digestApi.get());
+    } catch {
+      setDigestError(true);
+    } finally {
+      setDigestLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadDigest();
+  }, [loadDigest]);
 
   const tabs: { id: Tab; label: string; icon: string[] }[] = [
     {
@@ -299,7 +328,7 @@ export default function MemoryPanel({ token }: MemoryPanelProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-Tobi-border bg-white/90 backdrop-blur-lg flex-shrink-0">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-Tobi-border bg-Tobi-surface/90 backdrop-blur-lg flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-Tobi-cyan">
             <ellipse cx="12" cy="5" rx="9" ry="3" />
@@ -322,7 +351,7 @@ export default function MemoryPanel({ token }: MemoryPanelProps) {
               onClick={() => setTab(id)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-2xs font-medium transition-all duration-200 ${
                 tab === id
-                  ? "bg-white text-Tobi-text border border-Tobi-border shadow-sm"
+                  ? "bg-Tobi-surface text-Tobi-text border border-Tobi-border shadow-sm"
                   : "text-Tobi-text-dim hover:text-Tobi-text"
               }`}
             >
@@ -341,7 +370,9 @@ export default function MemoryPanel({ token }: MemoryPanelProps) {
         {tab === "facts" && (
           digestLoading
             ? <div className="flex items-center justify-center py-16"><div className="w-5 h-5 border-2 border-cyan-400/20 border-t-cyan-400/60 rounded-full animate-spin" /></div>
-            : <FactsTab facts={digestData?.facts_summary ?? []} />
+            : digestError
+              ? <UnavailableNotice title="Memory is temporarily unavailable" onRetry={() => void loadDigest()} />
+              : <FactsTab facts={digestData?.facts_summary ?? []} />
         )}
       </div>
     </div>

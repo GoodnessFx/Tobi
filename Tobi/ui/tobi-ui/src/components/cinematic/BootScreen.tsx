@@ -7,9 +7,9 @@ interface BootScreenProps {
   className?: string;
 }
 
-const CYAN: [number, number, number] = [0, 200, 255];
-const CYAN_BRIGHT: [number, number, number] = [140, 230, 255];
-const WHITE: [number, number, number] = [255, 255, 255];
+const GREEN: [number, number, number] = [82, 107, 85];
+const GREEN_LIGHT: [number, number, number] = [113, 129, 106];
+const PAPER: [number, number, number] = [245, 244, 239];
 
 function rgba(c: [number, number, number], a: number): string {
   return `rgba(${c[0]},${c[1]},${c[2]},${Math.max(0, Math.min(1, a))})`;
@@ -57,8 +57,8 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
 
       // Ambient glow background
       const amb = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * 2);
-      amb.addColorStop(0, rgba(CYAN, 0.06));
-      amb.addColorStop(0.3, rgba(CYAN, 0.02));
+      amb.addColorStop(0, rgba(GREEN, 0.035));
+      amb.addColorStop(0.3, rgba(GREEN, 0.012));
       amb.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = amb;
       ctx.fillRect(0, 0, W, H);
@@ -81,10 +81,10 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
         const ringRot = rot * ring.rotDir * (1 + ring.radius * 0.5);
 
         const arcLen = reveal * Math.PI * 2;
-        ctx.strokeStyle = rgba(CYAN, ring.opacity * reveal);
+        ctx.strokeStyle = rgba(GREEN, ring.opacity * reveal);
         ctx.lineWidth = ring.width;
-        ctx.shadowColor = rgba(CYAN, ring.opacity * 0.4 * reveal);
-        ctx.shadowBlur = 6;
+        ctx.shadowColor = rgba(GREEN, ring.opacity * 0.2 * reveal);
+        ctx.shadowBlur = 3;
         ctx.beginPath();
         ctx.arc(cx, cy, rr, ringRot, ringRot + arcLen);
         ctx.stroke();
@@ -101,7 +101,7 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
           const actualInnerR = isLong ? rr - maxR * ring.tickLen * 1.8 : innerR;
           const tickAlpha = isLong ? ring.opacity * 0.8 : ring.opacity * 0.4; // Every 4th tick is longer
 
-          ctx.strokeStyle = rgba(CYAN, tickAlpha * reveal);
+          ctx.strokeStyle = rgba(GREEN, tickAlpha * reveal);
           ctx.lineWidth = isLong ? 1.2 : 0.7;
           ctx.beginPath();
           ctx.moveTo(cx + Math.cos(angle) * actualInnerR, cy + Math.sin(angle) * actualInnerR);
@@ -116,7 +116,7 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
             const segLen = 0.12 + Math.sin(t * 0.5 + s) * 0.03;
             const segR = rr + maxR * 0.015;
 
-            ctx.strokeStyle = rgba(CYAN_BRIGHT, 0.25 * reveal);
+            ctx.strokeStyle = rgba(GREEN_LIGHT, 0.25 * reveal);
             ctx.lineWidth = 2.5;
             ctx.beginPath();
             ctx.arc(cx, cy, segR, segAngle - segLen / 2, segAngle + segLen / 2);
@@ -137,16 +137,16 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
           const dy = cy + Math.sin(angle) * dotR;
           const sz = 2 + Math.sin(t * 2 + i * 1.3) * 0.8;
 
-          ctx.fillStyle = rgba(CYAN, 0.5 + Math.sin(t * 1.5 + i) * 0.2);
+          ctx.fillStyle = rgba(GREEN, 0.4 + Math.sin(t * 1.5 + i) * 0.12);
           ctx.fillRect(dx - sz / 2, dy - sz / 2, sz, sz);
         }
 
         const scanAngle = t * 0.6;
         const scanGrad = ctx.createConicGradient(scanAngle, cx, cy);
-        scanGrad.addColorStop(0, rgba(CYAN, 0.15));
-        scanGrad.addColorStop(0.05, rgba(CYAN, 0.0));
-        scanGrad.addColorStop(0.95, rgba(CYAN, 0.0));
-        scanGrad.addColorStop(1, rgba(CYAN, 0.15));
+        scanGrad.addColorStop(0, rgba(GREEN, 0.1));
+        scanGrad.addColorStop(0.05, rgba(GREEN, 0.0));
+        scanGrad.addColorStop(0.95, rgba(GREEN, 0.0));
+        scanGrad.addColorStop(1, rgba(GREEN, 0.1));
         ctx.fillStyle = scanGrad;
         ctx.beginPath();
         ctx.arc(cx, cy, maxR * 0.75, 0, Math.PI * 2);
@@ -158,9 +158,9 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
       const coreReveal = Math.max(0, Math.min(1, (progress - 0.1) * 2));
       const coreR = maxR * 0.15;
       const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
-      cg.addColorStop(0, rgba(WHITE, 0.7 * coreReveal));
-      cg.addColorStop(0.3, rgba(CYAN_BRIGHT, 0.4 * coreReveal));
-      cg.addColorStop(0.7, rgba(CYAN, 0.1 * coreReveal));
+      cg.addColorStop(0, rgba(PAPER, 0.65 * coreReveal));
+      cg.addColorStop(0.3, rgba(GREEN_LIGHT, 0.3 * coreReveal));
+      cg.addColorStop(0.7, rgba(GREEN, 0.08 * coreReveal));
       cg.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = cg;
       ctx.beginPath();
@@ -168,7 +168,7 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
       ctx.fill();
 
       const pulseR = maxR * 0.15 * (1 + Math.sin(t * 2) * 0.05);
-      ctx.strokeStyle = rgba(CYAN, 0.4 * coreReveal);
+      ctx.strokeStyle = rgba(GREEN, 0.35 * coreReveal);
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(cx, cy, pulseR, 0, Math.PI * 2);
@@ -182,24 +182,24 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
         ctx.textBaseline = 'middle';
         ctx.letterSpacing = `${fontSize * 0.5}px`;
 
-        ctx.shadowColor = rgba(CYAN, 0.8 * textReveal);
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = rgba(CYAN_BRIGHT, 0.9 * textReveal);
-        ctx.fillText('J . A . R . V . I . S', cx + fontSize * 0.15, cy);
+        ctx.shadowColor = rgba(GREEN, 0.18 * textReveal);
+        ctx.shadowBlur = 4;
+        ctx.fillStyle = rgba(GREEN, 0.9 * textReveal);
+        ctx.fillText('T O B I', cx, cy);
         ctx.shadowBlur = 0;
 
         const subReveal = Math.max(0, Math.min(1, (progress - 0.6) * 2.5));
         if (subReveal > 0) {
           const subSize = Math.max(8, maxR * 0.04);
           ctx.font = `300 ${subSize}px "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif`;
-          ctx.fillStyle = rgba(CYAN, 0.4 * subReveal);
-          ctx.fillText('JUST A RATHER VERY INTELLIGENT SYSTEM', cx, cy + fontSize * 1.1);
+          ctx.fillStyle = rgba(GREEN, 0.55 * subReveal);
+          ctx.fillText('YOUR PERSONAL OPERATOR', cx, cy + fontSize * 1.1);
 
           const verReveal = Math.max(0, Math.min(1, (progress - 0.7) * 3));
           if (verReveal > 0) {
             ctx.font = `300 ${subSize * 0.8}px "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif`;
-            ctx.fillStyle = rgba(CYAN, 0.25 * verReveal);
-            ctx.fillText('v0.2.0  //  SYSTEMS ONLINE', cx, cy + fontSize * 1.1 + subSize * 2);
+            ctx.fillStyle = rgba(GREEN, 0.35 * verReveal);
+            ctx.fillText('READY WHEN YOU ARE', cx, cy + fontSize * 1.1 + subSize * 2);
           }
         }
       }
@@ -207,7 +207,7 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
       const statusReveal = Math.max(0, Math.min(1, (progress - 0.6) * 2));
       if (statusReveal > 0) {
         ctx.globalAlpha = masterAlpha * statusReveal;
-        const labels = ['NEURAL NET', 'VOICE SYS', 'MEMORY', 'COMMS'];
+        const labels = ['VOICE', 'CHAT', 'MEMORY', 'REMINDERS'];
         const statY = cy + maxR * 0.65;
         const spacing = maxR * 0.35;
         const startX = cx - spacing * 1.5;
@@ -216,15 +216,15 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
           const lx = startX + spacing * i;
           const dotOn = progress > 0.7 + i * 0.08;
 
-          ctx.fillStyle = dotOn ? rgba(CYAN_BRIGHT, 0.8) : rgba(CYAN, 0.15);
+          ctx.fillStyle = dotOn ? rgba(GREEN_LIGHT, 0.7) : rgba(GREEN, 0.16);
           ctx.beginPath();
           ctx.arc(lx, statY, 2.5, 0, Math.PI * 2);
           ctx.fill();
 
           if (dotOn) {
-            ctx.shadowColor = rgba(CYAN, 0.6);
-            ctx.shadowBlur = 8;
-            ctx.fillStyle = rgba(CYAN_BRIGHT, 0.8);
+            ctx.shadowColor = rgba(GREEN, 0.2);
+            ctx.shadowBlur = 3;
+            ctx.fillStyle = rgba(GREEN_LIGHT, 0.7);
             ctx.beginPath();
             ctx.arc(lx, statY, 2.5, 0, Math.PI * 2);
             ctx.fill();
@@ -232,9 +232,9 @@ export const BootScreen: React.FC<BootScreenProps> = ({ progress, className = ''
           }
 
           const lblSize = Math.max(7, maxR * 0.028);
-          ctx.font = `400 ${lblSize}px "SF Mono", "Fira Code", monospace`;
+          ctx.font = `400 ${lblSize}px "Inter", "Segoe UI", system-ui, sans-serif`;
           ctx.textAlign = 'center';
-          ctx.fillStyle = rgba(CYAN, dotOn ? 0.5 : 0.2);
+          ctx.fillStyle = rgba(GREEN, dotOn ? 0.55 : 0.25);
           ctx.fillText(labels[i], lx, statY + lblSize * 2);
         }
 

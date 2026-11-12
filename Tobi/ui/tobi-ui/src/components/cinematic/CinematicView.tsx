@@ -24,6 +24,7 @@ interface CinematicViewProps {
   isProcessing: boolean;
   currentAmplitude?: number;
   onSendMessage?: (text: string) => void;
+  onOpenChat?: () => void;
   disabled?: boolean;
   onBrowserMicState?: (recording: boolean) => void;
   authToken?: string | null;
@@ -31,8 +32,8 @@ interface CinematicViewProps {
   voiceInputEnabled?: boolean;
 }
 
-const BOOT_DURATION_MS = 4500;
-const CROSSFADE_MS = 1500;
+const BOOT_DURATION_MS = 900;
+const CROSSFADE_MS = 500;
 const TRANSCRIPT_DISPLAY_MS = 8000;
 
 const stateLabels: Record<OrbState, string> = {
@@ -57,6 +58,7 @@ export default function CinematicView({
   isProcessing,
   currentAmplitude = 0,
   onSendMessage,
+  onOpenChat,
   disabled = false,
   onBrowserMicState,
   authToken,
@@ -163,7 +165,7 @@ export default function CinematicView({
       );
 
   return (
-    <div className="flex-1 relative overflow-hidden bg-white">
+    <div className="cinematic-stage flex-1 relative overflow-hidden">
       {showBoot && (
         <div className="absolute inset-0" style={{ zIndex: 2 }}>
           <BootScreen progress={bootProgress} />
@@ -188,33 +190,13 @@ export default function CinematicView({
         </div>
       )}
 
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          zIndex: 10,
-          opacity: 0.02,
-          backgroundImage:
-            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,190,255,0.08) 2px, rgba(0,190,255,0.08) 3px)",
-          backgroundSize: "100% 4px",
-        }}
-      />
-
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          zIndex: 10,
-          background:
-            "radial-gradient(ellipse at center, transparent 45%, rgba(15,23,42,0.08) 100%)",
-        }}
-      />
-
-      <div
-        className="absolute inset-x-0 top-0 h-24 pointer-events-none"
-        style={{
-          zIndex: 10,
-          background: "linear-gradient(to bottom, rgba(15,23,42,0.06) 0%, transparent 100%)",
-        }}
-      />
+      {!showBoot && (
+        <div className="cinematic-intro absolute left-6 top-8 sm:left-10 sm:top-10" style={{ zIndex: 20 }}>
+          <div className="cinematic-intro-kicker">A CLEARER WAY FORWARD</div>
+          <h1 className="cinematic-intro-title">Think bigger.<br />Move with clarity.</h1>
+          <p className="cinematic-intro-subtitle">Your personal operator, ready when you are.</p>
+        </div>
+      )}
 
       {!showBoot && (
         <div
@@ -249,7 +231,7 @@ export default function CinematicView({
             transition-all duration-300 border
             ${showTranscript
               ? "bg-Tobi-cyan/6 border-Tobi-cyan/12 text-Tobi-cyan/50"
-              : "bg-white border-Tobi-border text-Tobi-text-dim hover:text-Tobi-text"
+              : "bg-Tobi-surface border-Tobi-border text-Tobi-text-dim hover:text-Tobi-text"
             }
           `}
           style={{ zIndex: 20 }}
@@ -348,7 +330,7 @@ export default function CinematicView({
                 ? "bg-red-50 border-red-200 text-red-700 shadow-[0_0_24px_rgba(239,68,68,0.12)] mic-ring-pulse"
                 : isTranscribing
                   ? "bg-Tobi-cyan/8 border-Tobi-cyan/20 text-Tobi-cyan/50"
-                  : "bg-white border-Tobi-border text-Tobi-text-dim hover:text-Tobi-cyan hover:border-Tobi-cyan/30 hover:bg-Tobi-cyan/5 hover:shadow-[0_0_20px_rgba(0,190,255,0.12)]"
+                  : "bg-Tobi-surface border-Tobi-border text-Tobi-text-dim hover:text-Tobi-cyan hover:border-Tobi-cyan/30 hover:bg-Tobi-cyan/5 hover:shadow-[0_0_20px_rgba(71,217,180,0.16)]"
               }
               disabled:opacity-15 disabled:cursor-not-allowed
               active:scale-95
@@ -387,6 +369,21 @@ export default function CinematicView({
             )}
           </button>
         </div>
+      )}
+
+      {!showBoot && (!micSupported || !voiceInputEnabled) && onOpenChat && (
+        <button
+          type="button"
+          onClick={onOpenChat}
+          className="cinematic-chat-cta absolute bottom-7 left-1/2 -translate-x-1/2 flex items-center gap-2.5 rounded-full px-5 py-3"
+          style={{ zIndex: 25 }}
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span>Open chat</span>
+          <span className="cinematic-chat-cta-arrow" aria-hidden="true">↗</span>
+        </button>
       )}
     </div>
   );

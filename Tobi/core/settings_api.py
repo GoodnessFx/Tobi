@@ -11,16 +11,21 @@ import os
 import re
 import time
 from pathlib import Path
-from typing import Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from Tobi.config import settings
 
 logger = logging.getLogger("Tobi.settings_api")
 
 settings_router = APIRouter(prefix="/api/settings", tags=["settings"])
+
+
+class AnthropicApiTestRequest(BaseModel):
+    api_key: str | None = None
+
 
 # Safe configuration keys that can be updated via API
 SAFE_CONFIG_KEYS = {
@@ -82,7 +87,10 @@ async def get_settings() -> dict:
 
 
 @settings_router.post("/test-api")
-async def test_anthropic_api(api_key: Optional[str] = None) -> dict:
+async def test_anthropic_api(
+    payload: AnthropicApiTestRequest | None = None,
+    api_key: str | None = None,
+) -> dict:
     """
     Test if Anthropic API key is valid.
 
@@ -92,7 +100,7 @@ async def test_anthropic_api(api_key: Optional[str] = None) -> dict:
     Returns:
         Dict with valid (bool), model (str), error (str|null)
     """
-    key_to_test = api_key or settings.ANTHROPIC_API_KEY
+    key_to_test = (payload.api_key if payload else None) or api_key or settings.ANTHROPIC_API_KEY
 
     if not key_to_test:
         return {"valid": False, "model": None, "error": "No API key provided"}

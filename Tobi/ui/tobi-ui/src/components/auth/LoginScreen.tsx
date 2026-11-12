@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Image from "next/image";
 
 interface LoginScreenProps {
   onLogin: (pin: string) => Promise<boolean>;
@@ -98,27 +97,26 @@ export default function LoginScreen({ onLogin, error }: LoginScreenProps) {
   );
 
   return (
-    <div className="h-dvh w-screen flex flex-col items-center justify-center bg-white text-slate-900 safe-top safe-bottom">
+    <div className="h-dvh w-screen flex flex-col items-center justify-center bg-Tobi-bg text-Tobi-text safe-top safe-bottom">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 40%, rgba(14, 165, 233, 0.10) 0%, transparent 60%)",
+            "radial-gradient(ellipse at 50% 40%, rgba(71, 217, 180, 0.12) 0%, transparent 60%)",
         }}
       />
 
       <div className="relative z-10 flex flex-col items-center px-6 max-w-sm w-full">
         <div className="mb-8 text-center">
-          <Image
-            src="/icon-192.png"
-            alt=""
-            width={64}
-            height={64}
-            className="mx-auto mb-4 rounded-2xl"
-          />
+          <div className="operator-mark mx-auto mb-4 h-14 w-14 rounded-2xl" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <path d="M16 3.5 27 9.8v12.4L16 28.5 5 22.2V9.8L16 3.5Z" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M8.5 10.5h15v2.6h-6.1V22h-2.8v-8.9H8.5v-2.6Z" fill="currentColor" />
+            </svg>
+          </div>
           <h1
             className="text-3xl font-light tracking-[0.3em] mb-2"
-            style={{ color: "#0369a1" }}
+            style={{ color: "var(--color-gold-bright)" }}
           >
             TOBI
           </h1>
@@ -147,9 +145,9 @@ export default function LoginScreen({ onLogin, error }: LoginScreenProps) {
               className={`
                 w-12 h-14 text-center text-2xl font-mono rounded-lg
                 border transition-all duration-200 outline-none
-                bg-white backdrop-blur-sm
-                ${digit ? "border-blue-500/60 text-slate-900" : "border-gray-300 text-gray-500"}
-                focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30
+                bg-Tobi-surface-alt backdrop-blur-sm
+                ${digit ? "border-Tobi-cyan/60 text-Tobi-text" : "border-Tobi-border text-Tobi-text-muted"}
+                focus:border-Tobi-cyan focus:ring-1 focus:ring-Tobi-cyan/30
                 disabled:opacity-50
               `}
               style={{ caretColor: "transparent" }}
@@ -162,8 +160,8 @@ export default function LoginScreen({ onLogin, error }: LoginScreenProps) {
         )}
 
         {isSubmitting && (
-          <div className="flex items-center gap-2 text-gray-600 text-sm">
-            <div className="w-4 h-4 border-2 border-blue-400/40 border-t-blue-400 rounded-full animate-spin" />
+          <div className="flex items-center gap-2 text-Tobi-text-dim text-sm">
+            <div className="w-4 h-4 border-2 border-Tobi-cyan/40 border-t-Tobi-cyan rounded-full animate-spin" />
             Verifying...
           </div>
         )}

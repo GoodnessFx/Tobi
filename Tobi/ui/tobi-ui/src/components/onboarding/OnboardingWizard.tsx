@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   GoogleWorkspaceStatus,
-  OnboardingProfile,
   onboardingApi,
 } from "@/hooks/useTobiApi";
 import { CharacterStyle } from "@/lib/types";
@@ -12,6 +11,7 @@ interface OnboardingPreferences {
   nickname: string;
   character: CharacterStyle;
   voiceInputEnabled: boolean;
+  serverProfileSaved: boolean;
 }
 
 interface OnboardingWizardProps {
@@ -45,39 +45,62 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
   const [currentTtsVoice, setCurrentTtsVoice] = useState("");
   const [googleStatus, setGoogleStatus] = useState<GoogleWorkspaceStatus | null>(null);
   const [googleError, setGoogleError] = useState("");
+  const [setupWarning, setSetupWarning] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [canContinueLocally, setCanContinueLocally] = useState(false);
   const [connectingGoogle, setConnectingGoogle] = useState(false);
 
   const loadInitialData = useCallback(async () => {
     setLoading(true);
     setError("");
-    try {
-      const [profile, settings] = await Promise.all([
-        onboardingApi.getProfile(),
-        onboardingApi.getSettings(),
-      ]);
+    setSetupWarning("");
+    const [profileResult, settingsResult] = await Promise.allSettled([
+      onboardingApi.getProfile(),
+      onboardingApi.getSettings(),
+    ]);
+    const warnings: string[] = [];
+
+    if (profileResult.status === "fulfilled") {
+      const profile = profileResult.value;
       setNickname(profile.nickname || profile.name || "");
-      setVoice(profile.voice || settings.voice.tts_voice || "bf_emma");
-      setCurrentTtsVoice(settings.voice.tts_voice);
       setCharacter(profile.character === "face" || profile.character === "mark" ? profile.character : "orb");
       setVoiceInputEnabled(profile.voice_input_enabled !== "false");
+    } else {
+      warnings.push("Saved profile settings could not be loaded.");
+    }
+
+    if (settingsResult.status === "fulfilled") {
+      const settings = settingsResult.value;
+      setVoice(
+        profileResult.status === "fulfilled"
+          ? profileResult.value.voice || settings.voice.tts_voice || "bf_emma"
+          : settings.voice.tts_voice || "bf_emma"
+      );
+      setCurrentTtsVoice(settings.voice.tts_voice);
       setTtsEngine(settings.voice.tts_engine.toLowerCase());
-      try {
-        setGoogleStatus(await onboardingApi.googleWorkspaceStatus());
+    } else {
+      warnings.push("Server settings are unavailable; you can still finish setup on this device.");
+      setVoice("bf_emma");
+      setCurrentTtsVoice("");
+      setTtsEngine("");
+    }
+
+    setSetupWarning(warnings.join(" "));
+    setLoading(false);
+
+    void onboardingApi.googleWorkspaceStatus()
+      .then((google) => {
+        setGoogleStatus(google);
         setGoogleError("");
-      } catch (statusError) {
+      })
+      .catch((statusError: unknown) => {
         setGoogleStatus(null);
         setGoogleError(
           statusError instanceof Error ? statusError.message : "Could not load Google status."
         );
-      }
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Could not load your setup.");
-    } finally {
-      setLoading(false);
-    }
+      });
   }, []);
 
   useEffect(() => {
@@ -122,29 +145,37 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
 
   const finish = async () => {
     const cleanNickname = nickname.trim();
-    if (!cleanNickname || cleanNickname.length > 30) {
-      setError("Enter a nickname between 1 and 30 characters.");
+    if (cleanNickname.length > 30) {
+      setError("Keep your name to 30 characters or fewer.");
       setStep(0);
       return;
     }
     setSaving(true);
     setError("");
+    setCanContinueLocally(false);
     try {
-      const values: Record<(typeof PROFILE_KEYS)[number], string> = {
-        nickname: cleanNickname,
-        voice,
-        character,
-        voice_input_enabled: String(voiceInputEnabled),
-      };
+      const values = PROFILE_KEYS
+        .filter((key) => key !== "nickname" || cleanNickname.length > 0)
+        .map((key) => ({
+          key,
+          value: key === "nickname"
+            ? cleanNickname
+            : key === "voice"
+              ? voice
+              : key === "character"
+                ? character
+                : String(voiceInputEnabled),
+        }));
       await Promise.all(
-        PROFILE_KEYS.map((key) => onboardingApi.updateProfile(key, values[key]))
+        values.map(({ key, value }) => onboardingApi.updateProfile(key, value))
       );
       if (voice !== currentTtsVoice && ttsEngine === "kokoro") {
         await onboardingApi.updateSettings({ TTS_VOICE: voice });
       }
-      onComplete({ nickname: cleanNickname, character, voiceInputEnabled });
+      onComplete({ nickname: cleanNickname, character, voiceInputEnabled, serverProfileSaved: true });
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Could not save your setup.");
+      setCanContinueLocally(true);
     } finally {
       setSaving(false);
     }
@@ -153,26 +184,12 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
   if (loading) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50">
-        <p className="text-sm text-slate-500">Preparing your TOBI setup…</p>
+        <p className="text-sm text-slate-500">Getting your setup ready…</p>
       </div>
     );
   }
 
-  if (error && !nickname && !ttsEngine) {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-50 p-6">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 shadow-xl">
-          <h1 className="text-xl font-semibold text-slate-900">Could not load setup</h1>
-          <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>
-          <button onClick={() => void loadInitialData()} className="mt-6 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white">
-            Try again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const stepTitles = ["A little about you", "Make TOBI yours", "Your permissions", "Connect accounts"];
+  const stepTitles = ["About you", "Make TOBI yours", "Optional connections"];
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-50 p-4 sm:p-8">
@@ -182,7 +199,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
       >
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-600">TOBI · First-run setup</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-blue-600">TOBI · First-run setup</p>
             <h1 id="onboarding-title" className="mt-2 text-2xl font-semibold text-slate-900">
               {stepTitles[step]}
             </h1>
@@ -193,10 +210,16 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
           <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${((step + 1) / stepTitles.length) * 100}%` }} />
         </div>
 
+        {setupWarning && (
+          <p className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {setupWarning}
+          </p>
+        )}
+
         {step === 0 && (
           <div>
             <label htmlFor="onboarding-nickname" className="block text-sm font-medium text-slate-800">
-              What should TOBI call you?
+              What should TOBI call you? <span className="font-normal text-slate-500">Optional</span>
             </label>
             <input
               id="onboarding-nickname"
@@ -207,7 +230,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
               placeholder="Your name or nickname"
               className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
-            <p className="mt-2 text-xs text-slate-500">This is saved to your local TOBI profile.</p>
+            <p className="mt-2 text-xs text-slate-500">You can leave this blank and add a name later.</p>
           </div>
         )}
 
@@ -253,14 +276,16 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
                 </div>
               ) : (
                 <p className="mt-2 text-sm text-slate-600">
-                  Your current speech engine ({ttsEngine || "not reported"}) controls voice selection. Configure Kokoro in Settings to choose a voice here.
+                  {ttsEngine
+                    ? `Your current speech engine (${ttsEngine}) controls voice selection. Configure Kokoro in Settings to choose a voice here.`
+                    : "Voice selection is available in Settings when the server is connected."}
                 </p>
               )}
             </fieldset>
           </div>
         )}
 
-        {step === 2 && (
+        {step === 1 && (
           <div className="space-y-5">
             <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4">
               <input
@@ -271,33 +296,35 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
               />
               <span>
                 <span className="block text-sm font-medium text-slate-900">Enable voice input</span>
-                <span className="mt-1 block text-xs leading-relaxed text-slate-600">Allows microphone recording only when you start it in TOBI. Your browser may ask for access the first time you use it.</span>
+                <span className="mt-1 block text-xs leading-relaxed text-slate-600">TOBI only uses your microphone when you start recording. Your browser may ask for permission the first time.</span>
               </span>
             </label>
-            <div className="rounded-xl border border-slate-200 p-4">
-              <p className="text-sm font-medium text-slate-900">Browser notifications</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-600">Optional. Lets TOBI show its own browser notifications; it does not let TOBI read notifications from other phone apps.</p>
-              {notificationPermission === "unsupported" ? (
-                <p className="mt-3 text-xs text-slate-500">Notifications are not supported in this browser.</p>
-              ) : notificationPermission === "granted" ? (
-                <p className="mt-3 text-xs font-medium text-green-700">Browser permission granted</p>
-              ) : notificationPermission === "denied" ? (
-                <p className="mt-3 text-xs text-amber-700">Notifications are blocked in browser settings.</p>
-              ) : (
-                <button type="button" onClick={() => void requestNotifications()} className="mt-3 rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">
-                  Allow notifications
-                </button>
-              )}
+            <div className="flex items-start gap-3 rounded-xl border border-slate-200 p-4">
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-medium text-slate-900">Browser notifications</span>
+                <span className="mt-1 block text-xs leading-relaxed text-slate-600">Optional. This only allows TOBI’s own reminders; it cannot read notifications from other apps.</span>
+                {notificationPermission === "unsupported" ? (
+                  <span className="mt-3 block text-xs text-slate-500">Not supported in this browser.</span>
+                ) : notificationPermission === "granted" ? (
+                  <span className="mt-3 block text-xs font-medium text-green-700">Permission granted</span>
+                ) : notificationPermission === "denied" ? (
+                  <span className="mt-3 block text-xs text-amber-700">Blocked in browser settings.</span>
+                ) : (
+                  <button type="button" onClick={() => void requestNotifications()} className="mt-3 rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">
+                    Allow notifications
+                  </button>
+                )}
+              </span>
             </div>
           </div>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <div className="rounded-xl border border-slate-200 p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-sm font-medium text-slate-900">Google Workspace</h2>
-                <p className="mt-1 text-xs leading-relaxed text-slate-600">Optional connection for Gmail and Google Calendar read access. Sign-in starts only when you choose to connect.</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">Connect Gmail and Google Calendar if you want to. You can do this later in settings.</p>
               </div>
               {googleStatus?.connected ? (
                 <span className="shrink-0 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">Connected</span>
@@ -331,6 +358,20 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
         )}
 
         {error && <p role="alert" className="mt-5 text-sm text-red-700">{error}</p>}
+        {canContinueLocally && (
+          <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm text-amber-900">
+              Your server did not save these preferences. You can still try the app on this device; chat and server features need TOBI running.
+            </p>
+            <button
+              type="button"
+              onClick={() => onComplete({ nickname: nickname.trim(), character, voiceInputEnabled, serverProfileSaved: false })}
+              className="mt-3 rounded-lg border border-amber-800/20 px-4 py-2 text-sm font-medium text-amber-950 hover:bg-amber-100"
+            >
+              Continue on this device
+            </button>
+          </div>
+        )}
 
         <div className="mt-9 flex items-center justify-between border-t border-slate-100 pt-5">
           <button
@@ -346,15 +387,15 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
               type="button"
               onClick={() => {
                 setError("");
-                if (step === 0 && !nickname.trim()) {
-                  setError("Enter a nickname to continue.");
+                if (step === 0 && nickname.trim().length > 30) {
+                  setError("Keep your name to 30 characters or fewer.");
                   return;
                 }
                 setStep((current) => current + 1);
               }}
               className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
             >
-              Continue
+              Next
             </button>
           ) : (
             <button

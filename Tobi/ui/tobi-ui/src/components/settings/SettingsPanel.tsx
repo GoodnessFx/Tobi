@@ -2,47 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import PwaInstallCard from "@/components/settings/PwaInstallCard";
-
-interface Settings {
-  models: {
-    fast: string;
-    brain: string;
-    deep: string;
-    default: string;
-  };
-  costs: {
-    daily_alert_usd: number;
-    monthly_alert_usd: number;
-  };
-  voice: {
-    tts_engine: string;
-    tts_voice: string;
-    tts_speed: number;
-    stt_engine: string;
-  };
-  integrations: {
-    prefer_claude: boolean;
-    ollama_url: string;
-    ollama_model: string;
-  };
-}
-
-interface SystemStatus {
-  anthropic: boolean;
-  ollama: boolean;
-  tts: string;
-  stt: string;
-  memory_count: number;
-  uptime_seconds: number;
-}
+import { settingsApi, TobiSettings, TobiSystemStatus } from "@/hooks/useTobiApi";
 
 type Step = "api_keys" | "models" | "voice" | "costs";
 
 export function SettingsPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>("api_keys");
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [settings, setSettings] = useState<TobiSettings | null>(null);
+  const [status, setStatus] = useState<TobiSystemStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState("");
@@ -60,21 +28,19 @@ export function SettingsPanel() {
 
   async function loadSettings() {
     try {
-      const response = await fetch("/api/settings");
-      const data = await response.json();
-      setSettings(data);
+      const currentSettings = await settingsApi.get();
+      setSettings(currentSettings);
+      setOllamaUrl(currentSettings.integrations.ollama_url);
       setError(null);
     } catch (err) {
-      setError("Failed to load settings");
+      setError(err instanceof Error ? err.message : "Failed to load settings");
       console.error(err);
     }
   }
 
   async function loadStatus() {
     try {
-      const response = await fetch("/api/settings/status");
-      const data = await response.json();
-      setStatus(data);
+      setStatus(await settingsApi.status());
     } catch (err) {
       console.error("Failed to load status:", err);
     }
@@ -88,12 +54,7 @@ export function SettingsPanel() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/settings/test-api", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ api_key: apiKey }),
-      });
-      const result = await response.json();
+      const result = await settingsApi.testAnthropic(apiKey);
 
       if (result.valid) {
         setApiKeyValid(true);
@@ -119,11 +80,7 @@ export function SettingsPanel() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/settings/test-ollama", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      const result = await response.json();
+      const result = await settingsApi.testOllama();
 
       if (result.valid) {
         setOllamaValid(true);
@@ -141,20 +98,10 @@ export function SettingsPanel() {
     }
   }
 
-  async function saveSettings(updates: Record<string, any>) {
+  async function saveSettings(updates: Record<string, string | number>) {
     setLoading(true);
     try {
-      const response = await fetch("/api/settings/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save settings");
-      }
-
-      const result = await response.json();
+      const result = await settingsApi.update(updates);
       if (result.success) {
         setError(null);
         await loadSettings();
@@ -162,7 +109,7 @@ export function SettingsPanel() {
         setError(result.error || "Failed to save settings");
       }
     } catch (err) {
-      setError("Failed to save settings");
+      setError(err instanceof Error ? err.message : "Failed to save settings");
       console.error(err);
     } finally {
       setLoading(false);
@@ -176,8 +123,9 @@ export function SettingsPanel() {
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-40 backdrop-blur-sm"
+        className="operator-settings-button fixed bottom-5 right-5 sm:bottom-7 sm:right-7 w-12 h-12 rounded-2xl transition-all duration-200 flex items-center justify-center z-40 backdrop-blur-sm"
         title="Settings"
+        aria-label={isOpen ? "Close settings" : "Settings"}
       >
         <svg
           className="w-6 h-6"
@@ -210,12 +158,12 @@ export function SettingsPanel() {
 
       {/* Sliding Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full md:w-96 bg-white border-l border-Tobi-border shadow-2xl z-50 transform transition-transform duration-300 ease-out overflow-y-auto ${
+        className={`fixed top-0 right-0 h-full w-full md:w-96 bg-Tobi-surface border-l border-Tobi-border shadow-2xl z-50 transform transition-transform duration-300 ease-out overflow-y-auto ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Panel Header */}
-        <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-Tobi-border p-4 flex justify-between items-center">
+        <div className="sticky top-0 bg-Tobi-surface/95 backdrop-blur-md border-b border-Tobi-border p-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-Tobi-text">Tobi Settings</h2>
           <button
             onClick={() => setIsOpen(false)}
@@ -297,15 +245,19 @@ export function SettingsPanel() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-800 mb-2">
-                  Anthropic API Key
+                  Anthropic API key
                 </label>
                 <input
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="sk-..."
+                  autoComplete="off"
                   className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                 />
+                <p className="mt-2 text-xs text-slate-500">
+                  Test only; this key is not saved. Configure it on the TOBI server to use Claude.
+                </p>
                 <button
                   onClick={testApiKey}
                   disabled={loading}
@@ -323,15 +275,18 @@ export function SettingsPanel() {
 
               <div>
                 <label className="block text-sm font-semibold text-slate-800 mb-2">
-                  Ollama URL
+                  Configured Ollama URL
                 </label>
                 <input
                   type="text"
                   value={ollamaUrl}
-                  onChange={(e) => setOllamaUrl(e.target.value)}
+                  readOnly
                   placeholder="http://localhost:11434"
                   className="w-full px-3 py-2 bg-white border border-slate-300 rounded text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition"
                 />
+                <p className="mt-2 text-xs text-slate-500">
+                  To test a different server, update OLLAMA_BASE_URL in the TOBI server configuration.
+                </p>
                 <button
                   onClick={testOllama}
                   disabled={loading}

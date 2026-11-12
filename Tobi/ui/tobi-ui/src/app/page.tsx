@@ -23,6 +23,7 @@ export default function Page() {
   const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
   const [characterStyle, setCharacterStyle] = useState<CharacterStyle>("orb");
   const [voiceInputEnabled, setVoiceInputEnabled] = useState(true);
+  const [setupSavedLocally, setSetupSavedLocally] = useState(false);
   const [speakingLinger, setSpeakingLinger] = useState(false);
   const [isBrowserMicRecording, setIsBrowserMicRecording] = useState(false);
   const lingerTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -30,6 +31,7 @@ export default function Page() {
   useEffect(() => {
     try {
       setOnboardingComplete(localStorage.getItem("tobi_onboarding_complete") === "true");
+      setSetupSavedLocally(localStorage.getItem("tobi_setup_local_only") === "true");
       const savedCharacter = localStorage.getItem("tobi_character");
       setCharacterStyle(savedCharacter === "face" || savedCharacter === "mark" ? savedCharacter : "orb");
       setVoiceInputEnabled(localStorage.getItem("tobi_voice_input_enabled") !== "false");
@@ -103,18 +105,29 @@ export default function Page() {
   const handleModeChange = useCallback((mode: ViewMode) => setViewMode(mode), []);
 
   const handleOnboardingComplete = useCallback(
-    (preferences: { nickname: string; character: CharacterStyle; voiceInputEnabled: boolean }) => {
+    (preferences: {
+      nickname: string;
+      character: CharacterStyle;
+      voiceInputEnabled: boolean;
+      serverProfileSaved: boolean;
+    }) => {
       try {
         localStorage.setItem("tobi_onboarding_complete", "true");
-        localStorage.setItem("tobi_user_name", preferences.nickname);
+        if (preferences.nickname) {
+          localStorage.setItem("tobi_user_name", preferences.nickname);
+        } else {
+          localStorage.removeItem("tobi_user_name");
+        }
         localStorage.setItem("tobi_character", preferences.character);
         localStorage.setItem("tobi_voice_input_enabled", String(preferences.voiceInputEnabled));
+        localStorage.setItem("tobi_setup_local_only", String(!preferences.serverProfileSaved));
         sessionStorage.removeItem("tobi_greeted_session");
       } catch {
-        // Server-side profile persistence remains available if browser storage is disabled.
+        // The app can still be used for this session if browser storage is unavailable.
       }
       setCharacterStyle(preferences.character);
       setVoiceInputEnabled(preferences.voiceInputEnabled);
+      setSetupSavedLocally(!preferences.serverProfileSaved);
       setOnboardingComplete(true);
     },
     []
@@ -150,6 +163,12 @@ export default function Page() {
         sessionCost={sessionCost}
       />
 
+      {setupSavedLocally && (
+        <div className="mx-3 mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 sm:mx-7">
+          Setup is saved in this browser only. Start the TOBI server to test chat and sync your profile.
+        </div>
+      )}
+
       {/* Cinematic orb view — always mounted, hidden when inactive */}
       <div
         className="flex-1 flex flex-col"
@@ -161,6 +180,7 @@ export default function Page() {
           isProcessing={isActive}
           currentAmplitude={currentAmplitude}
           onSendMessage={handleChatSubmit}
+          onOpenChat={() => setViewMode("chat")}
           disabled={connectionStatus !== "connected"}
           onBrowserMicState={handleBrowserMicState}
           authToken={null}

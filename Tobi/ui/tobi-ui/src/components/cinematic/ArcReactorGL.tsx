@@ -30,18 +30,18 @@ interface StateConfig {
 }
 
 const C = {
-  cyan:      [0.000, 0.832, 1.000] as [number, number, number],
-  cyanBrite: [0.549, 0.882, 1.000] as [number, number, number],
-  cyanDeep:  [0.000, 0.549, 0.863] as [number, number, number],
-  cyanPale:  [0.314, 0.784, 1.000] as [number, number, number],
-  speakCore: [1.000, 0.920, 0.780] as [number, number, number],
-  speakPart: [0.200, 0.780, 0.920] as [number, number, number],
-  speakGlow: [0.100, 0.620, 0.820] as [number, number, number],
-  white:     [1.000, 1.000, 1.000] as [number, number, number],
-  errRed:    [1.000, 0.314, 0.157] as [number, number, number],
-  errPale:   [1.000, 0.627, 0.549] as [number, number, number],
-  thinkA:    [0.350, 0.720, 0.950] as [number, number, number],
-  thinkB:    [0.200, 0.580, 0.880] as [number, number, number],
+  cyan:      [0.25, 0.38, 0.27] as [number, number, number],
+  cyanBrite: [0.56, 0.65, 0.47] as [number, number, number],
+  cyanDeep:  [0.13, 0.23, 0.16] as [number, number, number],
+  cyanPale:  [0.69, 0.73, 0.58] as [number, number, number],
+  speakCore: [0.88, 0.78, 0.58] as [number, number, number],
+  speakPart: [0.43, 0.48, 0.31] as [number, number, number],
+  speakGlow: [0.29, 0.36, 0.23] as [number, number, number],
+  white:     [0.97, 0.95, 0.88] as [number, number, number],
+  errRed:    [0.63, 0.28, 0.22] as [number, number, number],
+  errPale:   [0.78, 0.51, 0.39] as [number, number, number],
+  thinkA:    [0.48, 0.56, 0.42] as [number, number, number],
+  thinkB:    [0.32, 0.40, 0.29] as [number, number, number],
 };
 
 const STATES: Record<OrbState, StateConfig> = {

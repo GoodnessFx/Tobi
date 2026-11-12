@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { ViewMode, ConnectionStatus } from "@/lib/types";
 
 interface StatusBarProps {
@@ -68,93 +67,68 @@ export default function StatusBar({
   sessionCost = 0.0,
 }: StatusBarProps) {
   return (
-    <div className="w-full backdrop-blur-xl border-b px-3 sm:px-6 py-2 sm:py-2.5 flex-shrink-0"
-         style={{ background: 'var(--tobi-surface)', borderColor: 'var(--tobi-border)' }}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Image
-            src="/icon-192.png"
-            alt=""
-            width={32}
-            height={32}
-            className="rounded-lg"
-          />
-          <span className="text-sm sm:text-base font-semibold tracking-[0.18em] sm:tracking-[0.22em]"
-                style={{ color: 'var(--tobi-text)', fontWeight: 700 }}>
-            TOBI
-          </span>
-          <span className="text-3xs text-Tobi-text-muted/60 font-mono hidden sm:inline">
-            v0.3.0
-          </span>
+    <header className="operator-header w-full flex-shrink-0">
+      <div className="operator-header-inner flex items-center justify-between gap-2 px-3 sm:px-7 py-2.5 sm:py-3">
+        <div className="operator-brand flex items-center gap-2.5 sm:gap-3">
+          <div className="operator-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <path d="M16 3.5 27 9.8v12.4L16 28.5 5 22.2V9.8L16 3.5Z" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M8.5 10.5h15v2.6h-6.1V22h-2.8v-8.9H8.5v-2.6Z" fill="currentColor" />
+            </svg>
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="operator-wordmark">TOBI</span>
+            <span className="operator-tagline hidden sm:block">PERSONAL OPERATOR</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className={`status-dot ${connectionStatus}`} />
-            <span className="text-3xs sm:text-2xs text-Tobi-text-dim/60 font-mono hidden sm:inline">
-              {statusLabels[connectionStatus]}
-            </span>
-          </div>
-
-          <div className="flex items-center p-0.5 gap-0.5 rounded-lg border"
-               style={{ background: 'var(--color-parchment)', borderColor: 'var(--tobi-border)' }}>
+        <nav className="operator-nav flex min-w-0 items-center p-1 gap-0.5 rounded-2xl" aria-label="Main navigation">
             {tabs.map(({ mode, label, iconPaths }) => {
               const isActive = viewMode === mode;
               return (
                 <button
                   key={mode}
                   onClick={() => onModeChange(mode)}
-                  className={`
-                    relative flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg
-                    transition-all duration-200 ease-out
-                    text-2xs font-medium uppercase tracking-[0.08em]
-                    ${isActive
-                      ? "bg-Tobi-gold/10 text-Tobi-gold border border-Tobi-gold/20"
-                      : "text-Tobi-text-dim/50 hover:text-Tobi-text-sub hover:bg-black/[0.03] border border-transparent"
-                    }
-                  `}
+                  className={`operator-nav-item relative flex flex-shrink-0 items-center justify-center gap-1.5 rounded-xl transition-all duration-200 ${isActive ? "is-active" : ""}`}
                   aria-label={label}
+                  aria-current={isActive ? "page" : undefined}
                   >
                   <svg
-                    width="12"
-                    height="12"
+                    width="15"
+                    height="15"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1.5"
+                    strokeWidth="1.7"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className={`transition-opacity duration-200 ${isActive ? 'opacity-100' : 'opacity-60'}`}
                   >
                     {iconPaths.map((d, i) => (
                       <path key={i} d={d} />
                     ))}
                   </svg>
-                  <span className="hidden sm:inline">{label}</span>
-                  {isActive && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-3 h-[2px] rounded-full bg-Tobi-gold/60" />
-                  )}
+                  <span className="operator-nav-label">{label}</span>
                 </button>
               );
             })}
-          </div>
-        </div>
+        </nav>
 
-        <div className="text-right hidden sm:flex flex-col items-end">
-          <div className="text-3xs uppercase tracking-[0.12em]" style={{ color: 'var(--tobi-text-muted)' }}>
-            Session
+        <div className="operator-meta flex items-center gap-2 sm:gap-4">
+          <div className="operator-connection flex items-center gap-2" title={statusLabels[connectionStatus]}>
+            <div className={`status-dot ${connectionStatus}`} />
+            <span className="operator-connection-label">
+              {statusLabels[connectionStatus]}
+            </span>
           </div>
-          <div className="text-sm font-mono tabular-nums" style={{ color: 'var(--color-gold)' }}>
-            ${sessionCost.toFixed(4)}
+          <div className="operator-cost hidden sm:flex">
+            <span>SESSION</span>
+            <strong>${sessionCost.toFixed(4)}</strong>
           </div>
-        </div>
-
-        <div className="sm:hidden">
-          <div className="text-2xs font-mono tabular-nums" style={{ color: 'var(--color-gold)' }}>
-            ${sessionCost.toFixed(2)}
+          <div className="operator-cost operator-cost-mobile sm:hidden">
+            <strong>${sessionCost.toFixed(2)}</strong>
           </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 }

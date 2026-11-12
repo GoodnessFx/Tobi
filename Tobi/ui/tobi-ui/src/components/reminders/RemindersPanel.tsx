@@ -202,7 +202,7 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
         placeholder="What should I remind you about?"
         rows={2}
-        className="w-full bg-white border border-Tobi-border rounded-lg px-3 py-2.5 text-sm text-Tobi-text placeholder-Tobi-text-muted resize-none focus:outline-none focus:border-Tobi-cyan/50 focus:bg-Tobi-surface transition-all"
+        className="w-full bg-Tobi-surface-alt border border-Tobi-border rounded-lg px-3 py-2.5 text-sm text-Tobi-text placeholder-Tobi-text-muted resize-none focus:outline-none focus:border-Tobi-cyan/50 focus:bg-Tobi-surface transition-all"
       />
 
       {/* Date/time */}
@@ -210,7 +210,7 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         type="datetime-local"
         value={dueLocal}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setDueLocal(e.target.value)}
-        className="w-full bg-white border border-Tobi-border rounded-lg px-3 py-2.5 text-sm text-Tobi-text focus:outline-none focus:border-Tobi-cyan/50 transition-all [color-scheme:light]"
+        className="w-full bg-Tobi-surface-alt border border-Tobi-border rounded-lg px-3 py-2.5 text-sm text-Tobi-text focus:outline-none focus:border-Tobi-cyan/50 transition-all [color-scheme:dark]"
       />
 
       {/* Recurrence + Alarm row */}
@@ -218,7 +218,7 @@ function CreateForm({ onCreated, onCancel }: CreateFormProps) {
         <select
           value={recurrence}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => setRecurrence(e.target.value)}
-          className="bg-white border border-Tobi-border rounded-lg px-2.5 py-1.5 text-xs text-Tobi-text focus:outline-none focus:border-Tobi-cyan/50 transition-all [color-scheme:light]"
+          className="bg-Tobi-surface-alt border border-Tobi-border rounded-lg px-2.5 py-1.5 text-xs text-Tobi-text focus:outline-none focus:border-Tobi-cyan/50 transition-all [color-scheme:dark]"
         >
           <option value="none">Once</option>
           <option value="daily">Daily</option>
@@ -461,7 +461,7 @@ export default function RemindersPanel() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-Tobi-border bg-white/90 backdrop-blur-lg flex-shrink-0">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-Tobi-border bg-Tobi-surface/90 backdrop-blur-lg flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-700">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -527,7 +527,22 @@ export default function RemindersPanel() {
         )}
 
         {!loading && error && (
-          <div className="text-xs text-red-700 text-center py-6">{error}</div>
+          <div role="alert" className="mx-auto mt-8 max-w-md rounded-2xl border border-Tobi-border bg-Tobi-surface p-6 text-center shadow-lg">
+            <div className="mx-auto mb-4 grid h-11 w-11 place-items-center rounded-2xl border border-Tobi-warning/20 bg-Tobi-warning/10 text-Tobi-warning">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 9v4" />
+                <path d="M12 17h.01" />
+                <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+              </svg>
+            </div>
+            <h3 className="text-sm font-semibold text-Tobi-text">Reminders are temporarily unavailable</h3>
+            <p className="mt-2 text-xs leading-relaxed text-Tobi-text-dim">
+              TOBI&apos;s service isn&apos;t responding. Your reminders will appear when the connection is restored.
+            </p>
+            <button type="button" onClick={() => void load()} className="Tobi-btn Tobi-btn-primary mt-5">
+              Try again
+            </button>
+          </div>
         )}
 
         {!loading && !error && reminders.length === 0 && (

@@ -6,6 +6,7 @@ interface StatusBarProps {
   viewMode: ViewMode;
   onModeChange: (mode: ViewMode) => void;
   connectionStatus: ConnectionStatus;
+  aiBackendUnavailable?: boolean;
   sessionCost?: number;
 }
 
@@ -64,8 +65,16 @@ export default function StatusBar({
   viewMode,
   onModeChange,
   connectionStatus,
+  aiBackendUnavailable = false,
   sessionCost = 0.0,
 }: StatusBarProps) {
+  const statusLabel = aiBackendUnavailable && connectionStatus === "connected"
+    ? "AI unavailable"
+    : statusLabels[connectionStatus];
+  const statusTitle = aiBackendUnavailable && connectionStatus === "connected"
+    ? "Server connected, but no AI backend is ready"
+    : statusLabel;
+
   return (
     <header className="operator-header w-full flex-shrink-0">
       <div className="operator-header-inner flex items-center justify-between gap-2 px-3 sm:px-7 py-2.5 sm:py-3">
@@ -114,10 +123,10 @@ export default function StatusBar({
         </nav>
 
         <div className="operator-meta flex items-center gap-2 sm:gap-4">
-          <div className="operator-connection flex items-center gap-2" title={statusLabels[connectionStatus]}>
-            <div className={`status-dot ${connectionStatus}`} />
+          <div className="operator-connection flex items-center gap-2" title={statusTitle}>
+            <div className={`status-dot ${aiBackendUnavailable && connectionStatus === "connected" ? "error" : connectionStatus}`} />
             <span className="operator-connection-label">
-              {statusLabels[connectionStatus]}
+              {statusLabel}
             </span>
           </div>
           <div className="operator-cost hidden sm:flex">

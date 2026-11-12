@@ -145,6 +145,8 @@ export default function Page() {
 
   const sessionCost = costSummary?.sessionCostUsd ?? 0;
   const isActive = isProcessing || isStreaming;
+  const aiBackendUnavailable = serverStatus?.activeBackend === "none";
+  const chatDisabled = connectionStatus !== "connected" || aiBackendUnavailable;
 
   // ── Render ────────────────────────────────────────────────────────────
   if (onboardingComplete === null) {
@@ -160,12 +162,18 @@ export default function Page() {
         viewMode={viewMode}
         onModeChange={handleModeChange}
         connectionStatus={connectionStatus}
+        aiBackendUnavailable={aiBackendUnavailable}
         sessionCost={sessionCost}
       />
 
       {setupSavedLocally && (
         <div className="mx-3 mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 sm:mx-7">
           Setup is saved in this browser only. Start the TOBI server to test chat and sync your profile.
+        </div>
+      )}
+      {aiBackendUnavailable && (
+        <div className="mx-3 mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 sm:mx-7" role="status">
+          The server is connected, but no AI provider passed its startup check. Use Settings to test an Anthropic key, then configure it in the server&apos;s .env and restart, or start Ollama with the configured model.
         </div>
       )}
 
@@ -181,7 +189,7 @@ export default function Page() {
           currentAmplitude={currentAmplitude}
           onSendMessage={handleChatSubmit}
           onOpenChat={() => setViewMode("chat")}
-          disabled={connectionStatus !== "connected"}
+          disabled={chatDisabled}
           onBrowserMicState={handleBrowserMicState}
           authToken={null}
           characterStyle={characterStyle}
@@ -195,7 +203,7 @@ export default function Page() {
           isProcessing={isActive}
           onSendMessage={handleChatSubmit}
           onClearConversation={clearMessages}
-          disabled={connectionStatus !== "connected"}
+          disabled={chatDisabled}
           onBrowserMicState={handleBrowserMicState}
           authToken={null}
           voiceInputEnabled={voiceInputEnabled}

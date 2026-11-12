@@ -2,7 +2,7 @@
  * TOBI Service Worker  (Phase 0 PWA)
  *
  * Strategy:
- *  - App shell (HTML, JS, CSS): Cache-first with background revalidation
+ *  - App shell (HTML, JS, CSS): Network-first with cached offline fallback
  *  - API calls (/Tobi-api/**, /Tobi-ws): Network-only (never cache live data)
  *  - Icons / static assets: Cache-first (long TTL)
  *  - Reminders: Listen for push events and show native notifications
@@ -12,8 +12,8 @@
  *     audio_url?: string, playback_mode?: "own_voice"|"tobi_voice" }
  */
 
-const CACHE_NAME = "tobi-shell-v1";
-const STATIC_CACHE = "tobi-static-v1";
+const CACHE_NAME = "tobi-shell-v2";
+const STATIC_CACHE = "tobi-static-v2";
 
 // App-shell files to pre-cache on install
 const APP_SHELL = [
@@ -83,17 +83,18 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // App shell (HTML / Next.js pages): stale-while-revalidate
+  // App shell (HTML / Next.js pages): prefer fresh deployments, fall back offline
   if (request.mode === "navigate" || request.headers.get("accept")?.includes("text/html")) {
     event.respondWith(
       caches.open(CACHE_NAME).then((cache) =>
-        cache.match(request).then((hit) => {
-          const networkFetch = fetch(request).then((res) => {
-            cache.put(request, res.clone());
-            return res;
-          });
-          return hit || networkFetch;
-        })
+        fetch(request)
+          .then((response) => {
+            if (response.ok) {
+              cache.put(request, response.clone());
+            }
+            return response;
+          })
+          .catch(() => cache.match(request))
       )
     );
     return;

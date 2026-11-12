@@ -11,16 +11,28 @@ not marked `WORKING` merely because a module or endpoint exists.
 - Frontend production dependency audit: 0 vulnerabilities. The full development
   dependency audit still reports 6 moderate findings in the ESLint TypeScript
   dependency tree.
-- Frontend `/` route: returned HTTP 200 from the production server; the browser
-  shell rendered, but the backend API was not running.
-- PWA installation assets: manifest, home-screen icons, and service-worker
-  registration are present. Phone installation was not tested; reachable HTTPS
-  hosting with secure API and WebSocket routing is still required.
+- Local production preview `/`: returned HTTP 200 with the real local backend
+  running. Read-only profile, settings, Google status, reminders, CRM, and
+  liveness endpoints returned HTTP 200.
+- Backend tests: 278 passed. One initially failed because the declared Google
+  OAuth test dependency was missing from the environment; after installing the
+  declared dependency, the complete suite passed.
+- Reminder API: temporary create/read/update/delete smoke test passed, and the
+  test reminder was confirmed absent afterward.
+- AI runtime: the WebSocket/API server is online, but reports no healthy
+  provider. Ollama is unreachable, so real assistant responses were not tested
+  and chat remains disabled. No API key was entered or sent during this check.
+- Browser check at a 390px viewport: onboarding displayed all three steps,
+  face selection worked, the note-sharing dialog accepted text, and the page
+  had no horizontal overflow. The note was not sent; chat readiness was mocked
+  only to inspect the dialog.
+- PWA installation assets: manifest and service worker were served, and the
+  service worker was updated to prefer fresh app-shell content with an offline
+  fallback. Install guidance and unsupported contact-picker fallback rendered.
+  A real phone install was not tested; reachable HTTPS hosting is still needed.
 - Phase 1 UI: locally bundled Inter and JetBrains Mono fonts and TOBI icon are
-  present. Full visual and accessibility review remains outstanding.
-- Backend tests: 270 passed in a previous recorded run. In this environment,
-  6 Google Workspace tests passed; the new settings API tests cannot be
-  collected because FastAPI is not installed.
+  present. The mobile-width smoke check passed; full accessibility review
+  remains outstanding.
 - Python dependency audit: `pip-audit -r requirements.txt` reports 32 findings
   across `chromadb`, `cryptography`, and `filelock`. The current Python 3.10
   package index has no `filelock` 4.2.1+ release (those releases require Python
@@ -30,12 +42,6 @@ not marked `WORKING` merely because a module or endpoint exists.
   missing upstream type-stub metadata for the Google API client libraries.
   Full-repository mypy remains blocked by pre-existing errors and missing
   dependencies.
-- Backend runtime/API checks: not run. The available Python is 3.10.11 (the
-  project requires 3.11+) and FastAPI is not installed in the current
-  environment.
-- Browser smoke check: the frontend returned HTTP 200, but onboarding could
-  not be completed because the API was unavailable. Full login/onboarding/PWA
-  validation remains outstanding.
 - The passing unit tests cover coordinator, cost tracking, hardening, learning,
   memory, and planning. They do not prove the individual integrations listed
   below.

@@ -438,7 +438,6 @@ export const ArcReactorGL: React.FC<ArcReactorGLProps> = ({
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number>(0);
-  const clockRef = useRef(new THREE.Clock());
 
   // Live config (smoothly interpolated each frame)
   const curRef = useRef<StateConfig>({ ...STATES[state] });
@@ -709,12 +708,16 @@ export const ArcReactorGL: React.FC<ArcReactorGLProps> = ({
     onResize();
     window.addEventListener("resize", onResize);
 
-    clockRef.current.start();
+    let previousFrameTime = performance.now();
+    let elapsedTime = 0;
 
     const animate = () => {
       frameRef.current = requestAnimationFrame(animate);
-      const dt = Math.min(clockRef.current.getDelta(), 0.05); // cap dt
-      const t = clockRef.current.elapsedTime;
+      const currentFrameTime = performance.now();
+      const frameDelta = Math.max(0, (currentFrameTime - previousFrameTime) / 1000);
+      previousFrameTime = currentFrameTime;
+      const dt = Math.min(frameDelta, 0.05);
+      const t = (elapsedTime += frameDelta);
 
       // ---- Smooth state interpolation ----
       const c = curRef.current;

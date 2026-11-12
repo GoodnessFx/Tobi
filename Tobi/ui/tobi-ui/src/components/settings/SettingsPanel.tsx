@@ -312,7 +312,7 @@ export function SettingsPanel() {
                       }`}
                     />
                     <span className="text-sm text-slate-700">
-                      Anthropic: {status.anthropic ? "Connected" : "Disconnected"}
+                      Anthropic key: {status.anthropic ? "Configured" : "Not configured"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -322,7 +322,7 @@ export function SettingsPanel() {
                       }`}
                     />
                     <span className="text-sm text-slate-700">
-                      Ollama: {status.ollama ? "Connected" : "Disconnected"}
+                      Ollama: {status.ollama ? "Reachable" : "Not reachable"}
                     </span>
                   </div>
                 </div>

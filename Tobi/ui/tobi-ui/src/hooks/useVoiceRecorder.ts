@@ -102,8 +102,15 @@ export function useVoiceRecorder(options?: UseVoiceRecorderOptions): UseVoiceRec
           formData.append("audio", blob, `recording.${ext}`);
 
           const headers: Record<string, string> = {};
-          if (options?.authToken) {
-            headers["Authorization"] = `Bearer ${options.authToken}`;
+          let storedToken: string | null = null;
+          try {
+            storedToken = sessionStorage.getItem("Tobi_auth_token");
+          } catch {
+            storedToken = null;
+          }
+          const token = options?.authToken ?? storedToken;
+          if (token && token !== "local") {
+            headers["Authorization"] = `Bearer ${token}`;
           }
 
           const response = await fetch(`${Tobi_API_URL}/voice/transcribe`, {
@@ -137,7 +144,7 @@ export function useVoiceRecorder(options?: UseVoiceRecorderOptions): UseVoiceRec
 
       recorder.stop();
     });
-  }, [cleanupSilenceDetection]);
+  }, [cleanupSilenceDetection, options?.authToken]);
 
   stopRecordingRef.current = stopRecording;
 
@@ -276,4 +283,3 @@ export function useVoiceRecorder(options?: UseVoiceRecorderOptions): UseVoiceRec
     onAutoStopRef,
   };
 }
-

@@ -153,8 +153,25 @@ export default function ChatView({
                 Start a conversation with Tobi
               </p>
               <p className="text-2xs text-Tobi-text-muted mt-1.5">
-                Type below or switch to Voice mode
+                Ask for a full capability tour, or start with one of these
               </p>
+              <div className="mt-5 flex max-w-lg flex-wrap justify-center gap-2">
+                {[
+                  "Show me everything you can do",
+                  "What do you remember about me?",
+                  "Help me connect my tools",
+                ].map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => onSendMessage(prompt)}
+                    disabled={disabled || isProcessing}
+                    className="rounded-full border border-Tobi-border bg-Tobi-surface px-3 py-2 text-xs text-Tobi-text-sub shadow-sm transition hover:border-Tobi-cyan/40 hover:text-Tobi-text disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         ) : (

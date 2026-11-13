@@ -204,6 +204,20 @@ class TestFactStore:
         if name_facts:
             assert name_facts[0].confidence >= 0.90
 
+    def test_extract_from_text_does_not_store_secrets(self):
+        """Explicit memory notes containing credentials should be rejected."""
+        store = FactStore()
+        facts = store.extract_from_text("remember that my password is hunter2")
+        assert facts == []
+        assert store.get_all() == []
+
+    def test_extract_from_text_does_not_store_home_address(self):
+        """A home address should not be automatically saved as a fact."""
+        store = FactStore()
+        facts = store.extract_from_text("my home address is 123 Example Street")
+        assert facts == []
+        assert store.get_all() == []
+
     def test_search_facts_by_keyword(self):
         """Should search facts by keyword."""
         store = FactStore()
@@ -479,4 +493,3 @@ class TestMemoryPersistence:
         tracker2 = PreferenceTracker()
         tracker2.load()
         assert len(tracker2._patterns) > 0
-

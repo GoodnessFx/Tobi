@@ -1122,8 +1122,6 @@ async def transcribe_audio(audio: UploadFile = File(...)):
     Returns the transcribed text.
     """
     import tempfile
-    import subprocess
-    import numpy as np
 
     model = await _get_whisper_model()
     if model is None:
@@ -1142,38 +1140,32 @@ async def transcribe_audio(audio: UploadFile = File(...)):
         )
 
     MAX_AUDIO_SIZE = 25 * 1024 * 1024  # 25 MB
-    suffix = ".webm" if "webm" in (audio.content_type or "") else ".wav"
+    suffixes = {
+        "audio/webm": ".webm",
+        "audio/wav": ".wav",
+        "audio/x-wav": ".wav",
+        "audio/ogg": ".ogg",
+        "audio/mpeg": ".mp3",
+        "audio/mp4": ".mp4",
+    }
+    suffix = suffixes.get(base_content_type, ".audio")
+    content = await audio.read(MAX_AUDIO_SIZE + 1)
+    if len(content) > MAX_AUDIO_SIZE:
+        return JSONResponse(
+            status_code=413,
+            content={"error": f"Audio file too large (max {MAX_AUDIO_SIZE // 1024 // 1024} MB)."},
+        )
+
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        content = await audio.read()
-        if len(content) > MAX_AUDIO_SIZE:
-            return JSONResponse(
-                status_code=413,
-                content={"error": f"Audio file too large (max {MAX_AUDIO_SIZE // 1024 // 1024} MB)."},
-            )
         tmp.write(content)
         tmp_path = tmp.name
 
     try:
-        wav_path = tmp_path + ".wav"
-        proc = await asyncio.create_subprocess_exec(
-            "ffmpeg", "-y", "-i", tmp_path,
-            "-ar", "16000", "-ac", "1", "-f", "wav", wav_path,
-            stdout=asyncio.subprocess.DEVNULL,
-            stderr=asyncio.subprocess.DEVNULL,
-        )
-        await proc.wait()
-
-        if proc.returncode != 0:
-            return JSONResponse(
-                status_code=400,
-                content={"error": "Failed to process audio file"},
-            )
-
         loop = asyncio.get_event_loop()
 
         def run_transcribe():
             segments, info = model.transcribe(
-                wav_path,
+                tmp_path,
                 language=settings.WHISPER_LANGUAGE,
                 beam_size=3,
                 vad_filter=False,
@@ -1197,11 +1189,10 @@ async def transcribe_audio(audio: UploadFile = File(...)):
         )
     finally:
         import os
-        for p in [tmp_path, tmp_path + ".wav"]:
-            try:
-                os.unlink(p)
-            except OSError:
-                pass
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            logger.warning("Could not remove temporary voice upload: %s", tmp_path)
 
 
 @app.websocket("/ws")
@@ -1227,6 +1218,9 @@ async def websocket_chat(websocket: WebSocket):
                 await websocket.send_json({
                     "client_registered": True,
                     "connected_devices": ws_manager.get_connected_devices(),
+                    "voice_output_available": bool(
+                        _speaker and getattr(_speaker, "_backend", None)
+                    ),
                 })
                 continue
 

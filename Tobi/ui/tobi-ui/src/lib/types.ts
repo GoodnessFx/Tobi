@@ -2,7 +2,7 @@ export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "er
 
 export type ViewMode = "cinematic" | "chat" | "dashboard" | "reminders" | "memory";
 
-export type CharacterStyle = "orb" | "face" | "mark";
+export type CharacterStyle = "hooded" | "orb" | "face" | "mark";
 
 export interface ChatMessage {
   id: string;
@@ -124,6 +124,7 @@ export interface WSMessage {
     active_backend: string;
   };
   client_registered?: boolean;
+  voice_output_available?: boolean;
   connected_devices?: ConnectedDevice[];
   audio_preference_updated?: boolean;
   wants_audio?: boolean;

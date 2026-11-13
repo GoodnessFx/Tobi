@@ -27,9 +27,9 @@ data/
 *.sqlite3
 
 # --- Node.js / Next.js ---
-Tobi/ui/Tobi-ui/node_modules/
-Tobi/ui/Tobi-ui/.next/
-Tobi/ui/Tobi-ui/out/
+Tobi/ui/tobi-ui/node_modules/
+Tobi/ui/tobi-ui/.next/
+Tobi/ui/tobi-ui/out/
 
 # --- macOS ---
 .DS_Store
@@ -77,4 +77,3 @@ Tobi/browser_extension/*.zip
 HANDOFF.md
 RESEARCH_Tobi_INSPIRATION.md
 *.docx
-

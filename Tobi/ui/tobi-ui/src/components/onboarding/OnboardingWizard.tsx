@@ -37,7 +37,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
   const [step, setStep] = useState(0);
   const [nickname, setNickname] = useState("");
   const [voice, setVoice] = useState("bf_emma");
-  const [character, setCharacter] = useState<CharacterStyle>("orb");
+  const [character, setCharacter] = useState<CharacterStyle>("hooded");
   const [voiceInputEnabled, setVoiceInputEnabled] = useState(true);
   const [notificationPermission, setNotificationPermission] =
     useState<NotificationPermission | "unsupported">("default");
@@ -65,7 +65,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
     if (profileResult.status === "fulfilled") {
       const profile = profileResult.value;
       setNickname(profile.nickname || profile.name || "");
-      setCharacter(profile.character === "face" || profile.character === "mark" ? profile.character : "orb");
+      setCharacter(profile.character === "face" || profile.character === "mark" ? profile.character : "hooded");
       setVoiceInputEnabled(profile.voice_input_enabled !== "false");
     } else {
       warnings.push("Saved profile settings could not be loaded.");
@@ -240,6 +240,7 @@ export default function OnboardingWizard({ onComplete }: OnboardingWizardProps) 
               <legend className="text-sm font-medium text-slate-800">Choose TOBI’s look</legend>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 {([
+                  ["hooded", "Hooded companion", "A soft, animated robot inspired by the TOBI look"],
                   ["orb", "Animated orb", "The responsive cinematic orb"],
                   ["face", "Friendly face", "A simple face that reacts while TOBI listens and speaks"],
                   ["mark", "TOBI mark", "A calm, minimal logo"],

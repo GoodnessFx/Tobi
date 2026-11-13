@@ -7,6 +7,7 @@ import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
 import { unlockAudio } from "@/hooks/useTobiWebSocket";
 import Image from "next/image";
 import FaceAvatar from "@/components/cinematic/FaceAvatar";
+import HoodedAvatar from "@/components/cinematic/HoodedAvatar";
 
 const ArcReactorGL = dynamic(
   () => import("./ArcReactorGL").then((mod) => mod.ArcReactorGL),
@@ -165,7 +166,7 @@ export default function CinematicView({
       );
 
   return (
-    <div className="cinematic-stage flex-1 relative overflow-hidden">
+    <div className={`cinematic-stage flex-1 relative overflow-hidden ${characterStyle === "hooded" ? "hooded-stage" : ""}`}>
       {showBoot && (
         <div className="absolute inset-0" style={{ zIndex: 2 }}>
           <BootScreen progress={bootProgress} />
@@ -177,7 +178,9 @@ export default function CinematicView({
           className="absolute inset-0"
           style={{ zIndex: 1, opacity: activeTransition }}
         >
-          {characterStyle === "orb" ? (
+          {characterStyle === "hooded" ? (
+            <HoodedAvatar state={orbState} />
+          ) : characterStyle === "orb" ? (
             <ArcReactorGL state={orbState} transitionIn={activeTransition} audioAmplitude={currentAmplitude} />
           ) : characterStyle === "face" ? (
             <FaceAvatar state={orbState} />
@@ -195,6 +198,16 @@ export default function CinematicView({
           <div className="cinematic-intro-kicker">A CLEARER WAY FORWARD</div>
           <h1 className="cinematic-intro-title">Think bigger.<br />Move with clarity.</h1>
           <p className="cinematic-intro-subtitle">Your personal operator, ready when you are.</p>
+          {messages.length === 0 && onSendMessage && (
+            <button
+              type="button"
+              onClick={() => onSendMessage("Show me everything you can do in this TOBI setup, and tell me which integrations need connecting.")}
+              disabled={disabled}
+              className="hooded-explore-button mt-4 rounded-full px-4 py-2 text-xs font-medium transition disabled:opacity-50"
+            >
+              Explore what I can do
+            </button>
+          )}
         </div>
       )}
 

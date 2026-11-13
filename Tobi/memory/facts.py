@@ -104,13 +104,10 @@ def _add_pattern(pattern: str, category: str, subject: str, confidence: float = 
 # Personal identity
 _add_pattern(r"my name is (?P<value>\w+(?:\s\w+)?)(?:\s+and\b|\s*[.,!?;]|\s*$)", "personal", "name", 0.95)
 _add_pattern(r"(?:call me|i go by) (?P<value>\w[\w\s]{1,20})(?:\s+and\b|\s*[.,!?;]|\s*$)", "personal", "nickname", 0.92)
-_add_pattern(r"i(?:'m| am) (?P<value>\d{1,3}) years old", "personal", "age", 0.93)
-_add_pattern(r"my birthday is (?P<value>[\w\s,]+\d{1,2})", "personal", "birthday", 0.93)
 
 # Location
 _add_pattern(r"i live in (?P<value>[\w\s,]+?)(?:\.|,|$)", "location", "city", 0.88)
 _add_pattern(r"i(?:'m| am) (?:from|based in|located in) (?P<value>[\w\s,]+?)(?:\.|,|$)", "location", "city", 0.88)
-_add_pattern(r"my (?:home )?address is (?P<value>.+?)(?:\.|$)", "location", "address", 0.90)
 _add_pattern(r"my timezone is (?P<value>[\w/+\-]+)", "location", "timezone", 0.93)
 
 # Work and career
@@ -139,6 +136,13 @@ _add_pattern(r"my (?:dog|cat|pet)(?:'s)? (?:name is|is called|is) (?P<value>\w[\
 # Habits and routines
 _add_pattern(r"i (?:usually|always|typically) (?P<value>.+?) (?:in the morning|at night|every day|daily)", "habit", "routine", 0.75)
 _add_pattern(r"i wake up (?:at|around) (?P<value>\d{1,2}(?::\d{2})?\s*(?:am|pm)?)", "habit", "wake_time", 0.88)
+
+_SECRET_VALUE_PATTERN = re.compile(
+    r"\b(?:password|passcode|api[\s_-]?key|access token|private key|secret key|"
+    r"seed phrase|recovery phrase|social security number|credit card number|cvv|"
+    r"bank account(?: number)?|pin)\s*(?:is|=|:)\s*\S+",
+    re.IGNORECASE,
+)
 
 
 def _is_valid_fact_value(value: str, subject: str, category: str) -> bool:
@@ -237,6 +241,9 @@ class FactStore:
             for match in pattern.finditer(text):
                 value = match.group("value").strip()
                 if not value or len(value) < 2:
+                    continue
+                if _SECRET_VALUE_PATTERN.search(value):
+                    logger.info("Skipped saving a memory note that appears to contain a secret.")
                     continue
 
                 actual_subject = subject
@@ -408,4 +415,3 @@ class FactStore:
                 )
             ),
         }
-

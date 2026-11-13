@@ -21,7 +21,7 @@ const SPEAKING_LINGER_MS = 1800;
 export default function Page() {
   const [viewMode, setViewMode] = useState<ViewMode>("cinematic");
   const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
-  const [characterStyle, setCharacterStyle] = useState<CharacterStyle>("orb");
+  const [characterStyle, setCharacterStyle] = useState<CharacterStyle>("hooded");
   const [voiceInputEnabled, setVoiceInputEnabled] = useState(true);
   const [setupSavedLocally, setSetupSavedLocally] = useState(false);
   const [speakingLinger, setSpeakingLinger] = useState(false);
@@ -33,7 +33,15 @@ export default function Page() {
       setOnboardingComplete(localStorage.getItem("tobi_onboarding_complete") === "true");
       setSetupSavedLocally(localStorage.getItem("tobi_setup_local_only") === "true");
       const savedCharacter = localStorage.getItem("tobi_character");
-      setCharacterStyle(savedCharacter === "face" || savedCharacter === "mark" ? savedCharacter : "orb");
+      const characterVersion = localStorage.getItem("tobi_character_version");
+      const character =
+        savedCharacter === "face" || savedCharacter === "mark" ||
+        (savedCharacter === "orb" && characterVersion === "2")
+          ? savedCharacter
+          : "hooded";
+      setCharacterStyle(character);
+      localStorage.setItem("tobi_character", character);
+      localStorage.setItem("tobi_character_version", "2");
       setVoiceInputEnabled(localStorage.getItem("tobi_voice_input_enabled") !== "false");
     } catch {
       setOnboardingComplete(false);
@@ -119,6 +127,7 @@ export default function Page() {
           localStorage.removeItem("tobi_user_name");
         }
         localStorage.setItem("tobi_character", preferences.character);
+        localStorage.setItem("tobi_character_version", "2");
         localStorage.setItem("tobi_voice_input_enabled", String(preferences.voiceInputEnabled));
         localStorage.setItem("tobi_setup_local_only", String(!preferences.serverProfileSaved));
         sessionStorage.removeItem("tobi_greeted_session");

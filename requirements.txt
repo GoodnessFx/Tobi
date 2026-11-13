@@ -24,8 +24,10 @@ soundfile>=0.13.0
 # Voice: Wake Word
 # openwakeword>=0.6.0 (Optional: requires Python <=3.11, see requirements-wakeword.txt)
 
-# Voice: Audio I/O
-pyaudio>=0.2.14
+# Native microphone I/O is only needed by the local desktop listener. The web
+# app captures audio in the browser; Linux desktop users can install PyAudio
+# separately after installing their distribution's PortAudio development files.
+pyaudio>=0.2.14; sys_platform == "win32" or sys_platform == "darwin"
 numpy>=1.26.0
 
 # Memory

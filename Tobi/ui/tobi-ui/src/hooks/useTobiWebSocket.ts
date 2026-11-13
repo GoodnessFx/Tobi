@@ -32,6 +32,14 @@ function getApiBaseUrl(): string {
   return `${window.location.protocol}//${window.location.hostname}:8741`;
 }
 
+function getStoredAuthToken(): string | null {
+  try {
+    return sessionStorage.getItem("Tobi_auth_token");
+  } catch {
+    return null;
+  }
+}
+
 const Tobi_WS_URL = getWsUrl();
 const RECONNECT_DELAY_MS = 3000;
 const MAX_RECONNECT_ATTEMPTS = 10;
@@ -229,6 +237,7 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
   const reconnectAttempts = useRef(0);
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
   const currentStreamRef = useRef<string>("");
+  const voiceOutputAvailableRef = useRef(false);
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
@@ -238,9 +247,10 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
     try {
       // Add auth token for remote connections
       let wsUrl = Tobi_WS_URL;
-      if (authToken) {
+      const token = authToken ?? getStoredAuthToken();
+      if (token && token !== "local") {
         const sep = wsUrl.includes("?") ? "&" : "?";
-        wsUrl = `${wsUrl}${sep}token=${encodeURIComponent(authToken)}`;
+        wsUrl = `${wsUrl}${sep}token=${encodeURIComponent(token)}`;
       }
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
@@ -275,6 +285,7 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
           // Client registration acknowledgment
           if (data.client_registered) {
             console.log("[Tobi WS] Client registered. Connected devices:", data.connected_devices?.length);
+            voiceOutputAvailableRef.current = data.voice_output_available === true;
             if (data.connected_devices) {
               setConnectedDevices(data.connected_devices);
             }
@@ -290,6 +301,7 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
           // Audio interruption signal from server (or another client)
           if (data.voice_stop) {
             console.log("[Tobi WS] Audio stop signal received, interrupting playback");
+            if ("speechSynthesis" in window) window.speechSynthesis.cancel();
             // Stop the <audio> element
             const el = getAudioElement();
             el.pause();
@@ -703,6 +715,18 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
             currentStreamRef.current = "";
             setIsProcessing(false);
             setIsStreaming(false);
+            if (
+              !voiceOutputAvailableRef.current &&
+              finalContent.trim() &&
+              "speechSynthesis" in window
+            ) {
+              const utterance = new SpeechSynthesisUtterance(finalContent);
+              utterance.onstart = () => setIsVoiceSpeaking(true);
+              utterance.onend = () => setIsVoiceSpeaking(false);
+              utterance.onerror = () => setIsVoiceSpeaking(false);
+              window.speechSynthesis.cancel();
+              window.speechSynthesis.speak(utterance);
+            }
 
             // Update cost summary if provided
             if (data.session_cost) {
@@ -758,6 +782,7 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
       if (wsRef.current) {
         wsRef.current.close();
       }
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     };
   }, [connect]);
 
@@ -766,6 +791,7 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
       console.error("[Tobi WS] Cannot send: not connected");
       return;
     }
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
 
     // Add user message
     const userMsg: ChatMessage = {
@@ -796,8 +822,9 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
     setMessages([]);
     const clearUrl = `${getApiBaseUrl()}/clear`;
     const headers: Record<string, string> = {};
-    if (authToken) {
-      headers["Authorization"] = `Bearer ${authToken}`;
+    const token = authToken ?? getStoredAuthToken();
+    if (token && token !== "local") {
+      headers["Authorization"] = `Bearer ${token}`;
     }
     fetch(clearUrl, { method: "POST", headers }).catch(() => {});
   }, [authToken]);
@@ -808,6 +835,7 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
   }, []);
 
   const stopAudio = useCallback(() => {
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
     wsRef.current.send(JSON.stringify({ stop_audio: true }));
     // Also stop local playback immediately (don't wait for server round-trip)
@@ -852,4 +880,3 @@ export function useTobiWebSocket(authToken?: string | null): UseTobiWebSocketRet
     activePlan,
   };
 }
-

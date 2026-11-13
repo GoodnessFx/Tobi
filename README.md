@@ -286,7 +286,8 @@ TOBI's web-supported phone access is deliberately user-driven:
 - Python 3.11 or higher
 - Node.js 18 or higher
 - An Anthropic API key — get one at [console.anthropic.com](https://console.anthropic.com)
-- `ffmpeg` on your PATH (used for audio format conversion)
+- For browser voice transcription, TOBI uses the audio decoder bundled with
+  `faster-whisper`; no separate `ffmpeg` executable is needed.
 
 ### 1. Clone and configure
 
@@ -307,6 +308,10 @@ pip install -r requirements.txt
 # Optional: install dev tools (pytest, ruff, etc.)
 pip install -r requirements-dev.txt
 ```
+
+For deployment systems that install the repository as a Python project, use
+`pip install -e .`; the project metadata explicitly packages `Tobi` and reads
+runtime dependencies from `requirements.txt`.
 
 ### 3. Install and build the frontend
 
@@ -495,6 +500,12 @@ TOBI maintains memory across four layers that compound over time:
 | Fast keyword lookup | SQLite FTS5 | Tasks, notes, and memories indexed for instant text search |
 
 Facts are extracted automatically from every conversation using pattern matching (high confidence) and Haiku-assisted extraction (lower confidence). They decay slowly when not reinforced, so stale facts fade out naturally. Concept checkpoint answers from Dev mode are stored as `type=skill_gap` facts and feed directly into goal-drift nudges.
+
+Runtime memory is kept in the server's `data/` directory, which is excluded from
+Git. Tobi does not encrypt conversation or memory databases at rest; use
+encrypted storage for the host and never enter passwords, API keys, or other
+credentials in chat. Secret-like values and home addresses are excluded from
+automatic fact extraction.
 
 ---
 
